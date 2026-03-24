@@ -1,0 +1,13 @@
+/* opção simples via Google Fonts (sem Next) */
+@import url("https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;600;700;800&family=Montserrat:wght@400;500;600;700&display=swap");
+
+:root {
+  --font-montserrat: "Montserrat", system-ui, -apple-system, sans-serif;
+  --font-league-spartan: "League Spartan", "Montserrat", system-ui, sans-serif;
+
+  /* Geist equivalente/fallback se você não instalar a fonte */
+  --font-geist-sans: "Montserrat", system-ui, sans-serif;
+  --font-geist-mono:
+    "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo,
+    monospace;
+}
