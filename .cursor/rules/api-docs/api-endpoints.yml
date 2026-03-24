@@ -1,0 +1,575 @@
+---
+openapi: 3.1.0
+tags:
+- name: Admin - Benefícios
+- name: Admin - Usuários
+- name: Auth
+  description: Autenticação e dados do usuário logado
+components:
+  schemas:
+    AuthCreateDTO:
+      type: object
+      required:
+      - email
+      - password
+      properties:
+        email:
+          type: string
+          pattern: \S
+        password:
+          type: string
+          pattern: \S
+    BenefitCreateDTO:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          pattern: \S
+        description:
+          type: string
+        address:
+          type: string
+        sponsorId:
+          type: integer
+          format: int64
+    BenefitUpdateDTO:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        address:
+          type: string
+        sponsorId:
+          type: integer
+          format: int64
+    SponsorDataCreateDTO:
+      type: object
+      required:
+      - publicName
+      - tier
+      - entityType
+      properties:
+        publicName:
+          type: string
+          pattern: \S
+        tier:
+          type: string
+          pattern: \S
+        entityType:
+          type: string
+          pattern: \S
+        persona:
+          type: string
+        logoUrl:
+          type: string
+        site:
+          type: string
+        instagram:
+          type: string
+        whatsapp:
+          type: string
+    SponsorDataUpdateDTO:
+      type: object
+      properties:
+        publicName:
+          type: string
+        tier:
+          type: string
+        entityType:
+          type: string
+        persona:
+          type: string
+        logoUrl:
+          type: string
+        site:
+          type: string
+        instagram:
+          type: string
+        whatsapp:
+          type: string
+        isActive:
+          type: boolean
+    SponsorTierEnum:
+      type: string
+      enum:
+      - BRONZE
+      - SILVER
+      - GOLD
+    UserCreateDTO:
+      type: object
+      required:
+      - email
+      - name
+      - document
+      - code
+      properties:
+        email:
+          type: string
+          pattern: \S
+        password:
+          type: string
+        avatarUrl:
+          type: string
+        type:
+          type: string
+        name:
+          type: string
+          pattern: \S
+        document:
+          type: string
+          pattern: \S
+        code:
+          type: string
+          pattern: \S
+    UserTypeEnum:
+      type: string
+      enum:
+      - ADM
+      - SPONSOR
+      - MEMBER
+      - SPONSOR_MEMBER
+    UserWithSponsorCreateDTO:
+      type: object
+      required:
+      - user
+      properties:
+        user:
+          $ref: "#/components/schemas/UserCreateDTO"
+        sponsor:
+          $ref: "#/components/schemas/SponsorDataCreateDTO"
+    UserWithSponsorUpdateDTO:
+      type: object
+      properties:
+        email:
+          type: string
+        name:
+          type: string
+        document:
+          type: string
+        avatarUrl:
+          type: string
+        sponsor:
+          $ref: "#/components/schemas/SponsorDataUpdateDTO"
+  securitySchemes:
+    bearerAuth:
+      description: JWT Bearer Token
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+paths:
+  /v1/admin/benefit:
+    get:
+      summary: Listar benefícios
+      description: Listagem paginada com filtros por patrocinador e status de ativação.
+      tags:
+      - Admin - Benefícios
+      parameters:
+      - description: Filtrar por benefício ativo/inativo
+        name: isActive
+        in: query
+        schema:
+          type: boolean
+      - description: Número da página (0-based)
+        name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - description: Itens por página
+        name: size
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - description: ID do patrocinador
+        name: sponsorId
+        in: query
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: {}
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - bearerAuth:
+        - ADM
+    post:
+      summary: Criar benefício
+      description: "Cria um benefício geral ou vinculado a um patrocinador. Se sponsorId\
+        \ informado, valida existência."
+      tags:
+      - Admin - Benefícios
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BenefitCreateDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: {}
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+        "400":
+          description: Bad Request
+      security:
+      - bearerAuth:
+        - ADM
+  /v1/admin/benefit/{id}:
+    put:
+      summary: Atualizar benefício
+      description: Atualização parcial. Permite vincular/desvincular patrocinador
+        via sponsorId.
+      tags:
+      - Admin - Benefícios
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BenefitUpdateDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: {}
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+        "400":
+          description: Bad Request
+      security:
+      - bearerAuth:
+        - ADM
+    get:
+      summary: Buscar benefício por ID
+      description: Retorna o benefício com dados mínimos do patrocinador quando vinculado.
+      tags:
+      - Admin - Benefícios
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: {}
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - bearerAuth:
+        - ADM
+    delete:
+      summary: Excluir benefício
+      description: Exclusão física e irreversível do benefício.
+      tags:
+      - Admin - Benefícios
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: {}
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - bearerAuth:
+        - ADM
+  /v1/admin/benefit/{id}/deactivate:
+    patch:
+      summary: Desativar benefício
+      description: Desativação lógica (soft delete). Define isActive como false.
+      tags:
+      - Admin - Benefícios
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: {}
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - bearerAuth:
+        - ADM
+  /v1/admin/user:
+    get:
+      summary: Listar usuários
+      description: "Listagem paginada com filtros por tipo, tier e status de ativaç\
+        ão."
+      tags:
+      - Admin - Usuários
+      parameters:
+      - description: Filtrar por conta ativa/inativa
+        name: isActive
+        in: query
+        schema:
+          type: boolean
+      - description: Número da página (0-based)
+        name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - description: Itens por página
+        name: size
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - description: Tier do patrocinador
+        name: tier
+        in: query
+        schema:
+          $ref: "#/components/schemas/SponsorTierEnum"
+      - description: Tipo do usuário
+        name: type
+        in: query
+        schema:
+          $ref: "#/components/schemas/UserTypeEnum"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: {}
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - bearerAuth:
+        - ADM
+    post:
+      summary: Criar usuário
+      description: Cria um novo usuário com dados opcionais de patrocinador. Tipo
+        MEMBER e SPONSOR_MEMBER ainda não implementados.
+      tags:
+      - Admin - Usuários
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserWithSponsorCreateDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: {}
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+        "400":
+          description: Bad Request
+      security:
+      - bearerAuth:
+        - ADM
+  /v1/admin/user/{id}:
+    put:
+      summary: Atualizar usuário
+      description: "Atualização parcial do usuário e do patrocinador vinculado, quando\
+        \ aplicável."
+      tags:
+      - Admin - Usuários
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserWithSponsorUpdateDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: {}
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+        "400":
+          description: Bad Request
+      security:
+      - bearerAuth:
+        - ADM
+    get:
+      summary: Buscar usuário por ID
+      description: Retorna o usuário com dados de patrocinador embutidos quando aplicável.
+      tags:
+      - Admin - Usuários
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: {}
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - bearerAuth:
+        - ADM
+    delete:
+      summary: Excluir usuário
+      description: Exclusão física e irreversível. Remove em cascata sponsor e benefícios
+        vinculados.
+      tags:
+      - Admin - Usuários
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: {}
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - bearerAuth:
+        - ADM
+  /v1/admin/user/{id}/deactivate:
+    patch:
+      summary: Desativar usuário
+      description: "Desativação lógica. Se SPONSOR, desativa também o patrocinador\
+        \ e seus benefícios."
+      tags:
+      - Admin - Usuários
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: {}
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - bearerAuth:
+        - ADM
+  /v1/auth:
+    post:
+      summary: Login
+      description: Autentica o usuário e retorna um token JWT
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthCreateDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: {}
+        "400":
+          description: Bad Request
+  /v1/auth/me:
+    get:
+      summary: Dados do usuário logado
+      description: Retorna os dados do usuário autenticado via token JWT
+      tags:
+      - Auth
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: {}
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - bearerAuth: []
+info:
+  title: Jet Backoffice API
+  version: 1.1.0
+  description: API do backoffice da Associação Desportiva Artística e Cultural Joyce
+    e Teatino
