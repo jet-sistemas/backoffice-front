@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import Image from "next/image";
 import {
   MessageCircle,
   Mail,
@@ -34,12 +33,14 @@ export function Footer() {
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand column */}
           <div className="lg:col-span-2">
-            <Link href="/" className="inline-flex items-center gap-3">
-              <Image
+            <Link to="/" className="inline-flex items-center gap-3">
+              <img
                 src="/logo.svg"
                 alt="J&T Associação"
                 width={48}
                 height={48}
+                loading="lazy"
+                decoding="async"
                 className="size-12"
               />
               <div>
@@ -116,7 +117,7 @@ export function Footer() {
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
-                  href={link.href}
+                  to={link.href}
                   className="group inline-flex items-center gap-1 text-primary-foreground/70 transition-colors hover:text-primary-foreground"
                 >
                   {link.label}
@@ -124,7 +125,8 @@ export function Footer() {
                 </Link>
               ))}
               <Link
-                href="#pre-cadastro"
+                to="/"
+                hash="pre-cadastro"
                 className="group inline-flex items-center gap-1 font-medium text-secondary transition-colors hover:text-secondary/80"
               >
                 Torne-se um Parceiro
