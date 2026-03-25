@@ -5,7 +5,7 @@ export const Route = createFileRoute('/login')({
   beforeLoad: () => {
     const token = localStorage.getItem('@jet:token')
     if (token) {
-      throw redirect({ to: '/admin' })
+      throw redirect({ to: '/admin/patrocinadores' })
     }
   },
   component: LoginPage,

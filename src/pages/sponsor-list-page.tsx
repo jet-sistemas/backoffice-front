@@ -1,11 +1,5 @@
 import { useState } from "react";
-import {
-  AlertCircle,
-  Building2,
-  Plus,
-  RefreshCw,
-  Search,
-} from "lucide-react";
+import { AlertCircle, Building2, Plus, RefreshCw, Search } from "lucide-react";
 import { toast } from "sonner";
 
 import { useUserListQuery } from "@/hooks/use-user-list-query";

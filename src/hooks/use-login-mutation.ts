@@ -21,7 +21,7 @@ export function useLoginMutation() {
       }
       signIn(accessToken)
       toast.success('Login realizado com sucesso.')
-      navigate({ to: '/admin' })
+      navigate({ to: '/admin/patrocinadores' })
     },
     onError: (error) => {
       const fallback =

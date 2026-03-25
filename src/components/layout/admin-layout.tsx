@@ -1,13 +1,7 @@
-import { Outlet, Link, useRouterState } from '@tanstack/react-router'
-import {
-  Building2,
-  ChevronUp,
-  Gift,
-  LogOut,
-  Users,
-} from 'lucide-react'
+import { Outlet, Link, useRouterState } from "@tanstack/react-router";
+import { Building2, ChevronUp, Gift, LogOut, Users } from "lucide-react";
 
-import { useAuth } from '@/contexts/auth-context'
+import { useAuth } from "@/contexts/auth-context";
 import {
   Sidebar,
   SidebarContent,
@@ -22,39 +16,39 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
-} from '@/components/ui/sidebar'
-import { Separator } from '@/components/ui/separator'
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from "@/components/ui/dropdown-menu";
 
 const navItems = [
   {
-    label: 'Patrocinadores',
-    href: '/admin',
+    label: "Patrocinadores",
+    href: "/admin/patrocinadores",
     icon: Building2,
   },
   {
-    label: 'Associados',
-    href: '/admin/members',
+    label: "Associados",
+    href: "/admin/associados",
     icon: Users,
     disabled: true,
   },
   {
-    label: 'Benefícios',
-    href: '/admin/benefits',
+    label: "Benefícios",
+    href: "/admin/beneficios",
     icon: Gift,
     disabled: true,
   },
-]
+];
 
 export function AdminLayout() {
-  const { user, signOut } = useAuth()
-  const routerState = useRouterState()
-  const currentPath = routerState.location.pathname
+  const { user, signOut } = useAuth();
+  const routerState = useRouterState();
+  const currentPath = routerState.location.pathname;
 
   return (
     <SidebarProvider>
@@ -63,13 +57,9 @@ export function AdminLayout() {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton size="lg" asChild>
-                <Link to="/admin">
+                <Link to="/admin/patrocinadores">
                   <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary">
-                    <img
-                      src="/logo.svg"
-                      alt="J&T"
-                      className="size-5 invert"
-                    />
+                    <img src="/logo.svg" alt="J&T" className="size-5 invert" />
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-serif font-semibold">
@@ -94,9 +84,8 @@ export function AdminLayout() {
               <SidebarMenu>
                 {navItems.map((item) => {
                   const isActive =
-                    item.href === '/admin'
-                      ? currentPath === '/admin' || currentPath === '/admin/'
-                      : currentPath.startsWith(item.href)
+                    currentPath === item.href ||
+                    currentPath.startsWith(`${item.href}/`);
 
                   return (
                     <SidebarMenuItem key={item.href}>
@@ -119,7 +108,7 @@ export function AdminLayout() {
                         )}
                       </SidebarMenuButton>
                     </SidebarMenuItem>
-                  )
+                  );
                 })}
               </SidebarMenu>
             </SidebarGroupContent>
@@ -134,15 +123,15 @@ export function AdminLayout() {
                   <SidebarMenuButton size="lg">
                     <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-accent text-sidebar-accent-foreground">
                       <span className="text-sm font-medium">
-                        {user?.name?.charAt(0).toUpperCase() ?? 'U'}
+                        {user?.name?.charAt(0).toUpperCase() ?? "U"}
                       </span>
                     </div>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-semibold">
-                        {user?.name ?? 'Usuário'}
+                        {user?.name ?? "Usuário"}
                       </span>
                       <span className="truncate text-xs text-muted-foreground">
-                        {user?.email ?? ''}
+                        {user?.email ?? ""}
                       </span>
                     </div>
                     <ChevronUp className="ml-auto" />
@@ -177,5 +166,5 @@ export function AdminLayout() {
         </main>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }

@@ -1,6 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { SponsorListPage } from '@/pages/sponsor-list-page'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/admin/')({
-  component: SponsorListPage,
+  beforeLoad: () => {
+    throw redirect({ to: '/admin/patrocinadores' })
+  },
 })

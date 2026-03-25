@@ -172,6 +172,7 @@ This is a **modern React application** with the following characteristics:
 ## TanStack Router Guidelines
 
 - Use **TanStack Router** for all routing and URL state
+- **URLs do app (paths)** expostas ao utilizador devem estar em **português** (sem tradução para inglês nos segmentos), por exemplo `/admin/patrocinadores`, `/admin/associados`, `/admin/beneficios`. Isto não se aplica a paths da **API** backend (que seguem o contrato do servidor).
 - Prefer **file-based routes** when possible
 - Keep **route loaders** focused on data fetching and validation
 - Co-locate **route components, loaders, and actions** by feature
