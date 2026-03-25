@@ -1,6 +1,8 @@
 import type { ApiEnvelopeBase, UserTypeEnum } from './auth'
 
-export type SponsorTierEnum = 'BRONZE' | 'PRATA' | 'OURO'
+export type SponsorTierEnum = 'OURO' | 'PRATA' | 'BRONZE'
+
+export type SponsorTierApiEnum = 'GOLD' | 'SILVER' | 'BRONZE'
 
 export type EntityTypeEnum = 'PERSON' | 'COMPANY'
 

@@ -208,6 +208,12 @@ Each feature follows a clear separation of concerns:
 
 UI components must **never** import Axios or API modules directly.
 
+### UI Decoupling
+
+- Repeatable UI blocks (pagination, sortable table headers, filter bars) must be extracted into **reusable components** in `src/components/` with controlled props — never inlined in page files
+- Presentational components must **not** call `useQuery`, `useMutation`, or import API modules; pages and custom hooks own data
+- In paginated lists with TanStack Query + `keepPreviousData`, the displayed page index must track the **client-side state** (or URL param) passed to the query — never rely on `currentPage` from the API response for UI rendering, as `placeholderData` may serve stale metadata during refetches
+
 ### Naming Conventions (Hooks & API)
 
 - Query hooks: `use<Entity><Action>Query` (e.g. `useUserListQuery`, `useOrderDetailsQuery`)

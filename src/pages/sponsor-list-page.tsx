@@ -2,8 +2,6 @@ import { useState } from "react";
 import {
   AlertCircle,
   Building2,
-  ChevronLeft,
-  ChevronRight,
   Plus,
   RefreshCw,
   Search,
@@ -11,7 +9,8 @@ import {
 import { toast } from "sonner";
 
 import { useUserListQuery } from "@/hooks/use-user-list-query";
-import { formatDocument } from "@/lib/utils";
+import { formatDocument, uniqueById } from "@/lib/utils";
+import { ListPaginationBar } from "@/components/list-pagination-bar";
 import type { SponsorTierEnum } from "@/types/user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,7 +50,7 @@ const TIER_BADGE_VARIANT: Record<
 const PAGE_SIZE = 10;
 
 export function SponsorListPage() {
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [tierFilter, setTierFilter] = useState<string>("ALL");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [searchTerm, setSearchTerm] = useState("");
@@ -64,9 +63,8 @@ export function SponsorListPage() {
     size: PAGE_SIZE,
   });
 
-  const sponsors = data?.data ?? [];
+  const sponsors = uniqueById(data?.data ?? []);
   const totalPages = data?.totalPages ?? 0;
-  const currentPage = data?.currentPage ?? 0;
   const totalElements = data?.totalElements ?? 0;
 
   const filteredSponsors = searchTerm
@@ -112,7 +110,7 @@ export function SponsorListPage() {
           value={tierFilter}
           onValueChange={(v) => {
             setTierFilter(v);
-            setPage(0);
+            setPage(1);
           }}
         >
           <SelectTrigger
@@ -133,7 +131,7 @@ export function SponsorListPage() {
           value={statusFilter}
           onValueChange={(v) => {
             setStatusFilter(v);
-            setPage(0);
+            setPage(1);
           }}
         >
           <SelectTrigger
@@ -266,37 +264,14 @@ export function SponsorListPage() {
             </Table>
           </div>
 
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              {totalElements} patrocinador{totalElements !== 1 ? "es" : ""}{" "}
-              encontrado{totalElements !== 1 ? "s" : ""}
-            </p>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={currentPage === 0}
-                onClick={() => setPage((p) => Math.max(0, p - 1))}
-                aria-label="Página anterior"
-              >
-                <ChevronLeft />
-                Anterior
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                Página {currentPage + 1} de {Math.max(totalPages, 1)}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={currentPage + 1 >= totalPages}
-                onClick={() => setPage((p) => p + 1)}
-                aria-label="Próxima página"
-              >
-                Próximo
-                <ChevronRight />
-              </Button>
-            </div>
-          </div>
+          <ListPaginationBar
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          >
+            {totalElements} patrocinador{totalElements !== 1 ? "es" : ""}{" "}
+            encontrado{totalElements !== 1 ? "s" : ""}
+          </ListPaginationBar>
         </>
       )}
     </div>
