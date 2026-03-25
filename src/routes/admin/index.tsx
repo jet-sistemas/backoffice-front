@@ -1,12 +1,6 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
-import { AdminHomePage } from '@/pages/admin-home-page'
+import { createFileRoute } from '@tanstack/react-router'
+import { SponsorListPage } from '@/pages/sponsor-list-page'
 
 export const Route = createFileRoute('/admin/')({
-  beforeLoad: () => {
-    const token = localStorage.getItem('@jet:token')
-    if (!token) {
-      throw redirect({ to: '/login' })
-    }
-  },
-  component: AdminHomePage,
+  component: SponsorListPage,
 })

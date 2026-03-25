@@ -26,6 +26,13 @@ export function formatCNPJ(value: string) {
     .replace(/(\d{4})(\d{1,2})/, "$1-$2");
 }
 
+export function formatDocument(value: string) {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length === 11) return formatCPF(value);
+  if (digits.length === 14) return formatCNPJ(value);
+  return value;
+}
+
 export function formatPhone(value: string) {
   const numbers = value.replace(/\D/g, "").slice(0, 11);
   if (numbers.length <= 10) {

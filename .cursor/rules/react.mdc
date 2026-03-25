@@ -144,6 +144,7 @@ This is a **modern React application** with the following characteristics:
 - Configure the **QueryClient** globally (retries, staleTime, gcTime, etc.)
 - Use **query invalidation** for cache consistency after mutations
 - Use **infinite queries** for cursor/offset-based pagination
+- For **paginated list queries** where `queryKey` includes page/offset/sort params, set `placeholderData: keepPreviousData` (import `keepPreviousData` from `@tanstack/react-query`) so the previous page stays visible while the next fetch runs (`isLoading` stays false; use `isFetching` for subtle in-list loading if needed). Revisited pages are served from cache per query key when still fresh.
 - **Prefetch** data for routes and views the user is likely to navigate to
 
 ### Hooks Architecture
