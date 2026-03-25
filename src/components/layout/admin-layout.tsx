@@ -96,13 +96,13 @@ export function AdminLayout() {
                         disabled={item.disabled}
                       >
                         {item.disabled ? (
-                          <span className="opacity-50">
-                            <item.icon />
+                          <>
+                            <item.icon className="size-4 shrink-0" />
                             <span>{item.label}</span>
-                          </span>
+                          </>
                         ) : (
                           <Link to={item.href}>
-                            <item.icon />
+                            <item.icon className="size-4 shrink-0" />
                             <span>{item.label}</span>
                           </Link>
                         )}
@@ -120,7 +120,11 @@ export function AdminLayout() {
             <SidebarMenuItem>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton size="lg">
+                  <SidebarMenuButton
+                    type="button"
+                    size="lg"
+                    aria-label="Menu da conta"
+                  >
                     <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-accent text-sidebar-accent-foreground">
                       <span className="text-sm font-medium">
                         {user?.name?.charAt(0).toUpperCase() ?? "U"}
@@ -139,9 +143,17 @@ export function AdminLayout() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   side="top"
-                  className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+                  align="start"
+                  sideOffset={8}
+                  className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-56 rounded-lg"
                 >
-                  <DropdownMenuItem onClick={signOut}>
+                  <DropdownMenuItem
+                    variant="destructive"
+                    className="cursor-pointer"
+                    onSelect={() => {
+                      void signOut()
+                    }}
+                  >
                     <LogOut />
                     <span>Sair</span>
                   </DropdownMenuItem>
