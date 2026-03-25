@@ -8,5 +8,9 @@ export const contactInfo = {
   instagramLink: "https://instagram.com/associacaojet",
 };
 
-// Links de navegação
-export const navLinks = [];
+export type NavLinkItem = {
+  href: string;
+  label: string;
+};
+
+export const navLinks: NavLinkItem[] = [];
