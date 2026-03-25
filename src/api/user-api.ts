@@ -1,16 +1,49 @@
 import { api } from '@/lib/axios'
+import { sponsorTierFromApi, sponsorTierToApi } from '@/lib/sponsor-tier'
 import type {
   PaginatedUsersResponse,
   UserListParams,
   UserWithSponsorCreateDTO,
+  UserWithSponsorDTO,
 } from '@/types/user'
+
+function mapUserWithSponsorFromApi(
+  user: UserWithSponsorDTO,
+): UserWithSponsorDTO {
+  if (!user.sponsor) return user
+  const tier = sponsorTierFromApi(user.sponsor.tier as unknown as string)
+  if (tier == null) return user
+  return { ...user, sponsor: { ...user.sponsor, tier } }
+}
 
 export const userApi = {
   getUsers(params: UserListParams) {
-    return api.get<PaginatedUsersResponse>('/v1/admin/user', { params })
+    const apiParams = {
+      ...params,
+      tier:
+        params.tier != null ? sponsorTierToApi(params.tier) : undefined,
+    }
+    return api
+      .get<PaginatedUsersResponse>('/v1/admin/user', { params: apiParams })
+      .then((res) => {
+        const envelope = res.data
+        const data =
+          envelope.data?.map((u) => mapUserWithSponsorFromApi(u)) ?? []
+        return { ...res, data: { ...envelope, data } }
+      })
   },
 
   createUser(data: UserWithSponsorCreateDTO) {
-    return api.post('/v1/admin/user', data)
+    const payload =
+      data.sponsor == null
+        ? data
+        : {
+            ...data,
+            sponsor: {
+              ...data.sponsor,
+              tier: sponsorTierToApi(data.sponsor.tier),
+            },
+          }
+    return api.post('/v1/admin/user', payload)
   },
 }
