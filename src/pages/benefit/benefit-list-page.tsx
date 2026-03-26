@@ -12,6 +12,15 @@ import {
 
 import { SponsorSearchCombobox } from '@/components/sponsor-search-combobox'
 import { ListPaginationBar } from '@/components/list-pagination-bar'
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -91,6 +100,9 @@ export function BenefitListPage() {
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [editOpen, setEditOpen] = useState(false)
   const [editing, setEditing] = useState<BenefitDTO | null>(null)
+  const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false)
+  const [benefitToDeactivate, setBenefitToDeactivate] =
+    useState<BenefitDTO | null>(null)
 
   const isActiveParam = mapStatusFilter(statusFilter)
 
@@ -186,11 +198,21 @@ export function BenefitListPage() {
     )
   })
 
+  const closeDeactivateDialog = () => {
+    setDeactivateDialogOpen(false)
+    setBenefitToDeactivate(null)
+  }
+
   const handleDeactivate = (b: BenefitDTO) => {
-    const ok = window.confirm(
-      `Desativar o benefício "${b.name}"? Ele deixará de aparecer como ativo.`,
-    )
-    if (ok) deactivateMutation.mutate(b.id)
+    setBenefitToDeactivate(b)
+    setDeactivateDialogOpen(true)
+  }
+
+  const confirmDeactivate = () => {
+    if (benefitToDeactivate == null) return
+    deactivateMutation.mutate(benefitToDeactivate.id, {
+      onSuccess: () => closeDeactivateDialog(),
+    })
   }
 
   return (
@@ -480,6 +502,43 @@ export function BenefitListPage() {
           )}
         </div>
       </div>
+
+      <AlertDialog
+        open={deactivateDialogOpen}
+        onOpenChange={(open) => {
+          if (open) return
+          if (deactivateMutation.isPending) return
+          closeDeactivateDialog()
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif">
+              Desativar benefício?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              O benefício{' '}
+              <span className="font-medium text-foreground">
+                &quot;{benefitToDeactivate?.name ?? ''}&quot;
+              </span>{' '}
+              deixará de aparecer como ativo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel disabled={deactivateMutation.isPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={deactivateMutation.isPending}
+              onClick={confirmDeactivate}
+            >
+              {deactivateMutation.isPending ? 'Desativando…' : 'Desativar'}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Dialog
         open={editOpen}
