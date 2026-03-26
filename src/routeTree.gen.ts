@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminPatrocinadoresIndexRouteImport } from './routes/admin/patrocinadores/index'
 import { Route as AdminPatrocinadoresNovoRouteImport } from './routes/admin/patrocinadores/novo'
+import { Route as AdminPatrocinadoresUserIdEditarRouteImport } from './routes/admin/patrocinadores/$userId/editar'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -47,6 +48,12 @@ const AdminPatrocinadoresNovoRoute = AdminPatrocinadoresNovoRouteImport.update({
   path: '/patrocinadores/novo',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminPatrocinadoresUserIdEditarRoute =
+  AdminPatrocinadoresUserIdEditarRouteImport.update({
+    id: '/patrocinadores/$userId/editar',
+    path: '/patrocinadores/$userId/editar',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -55,6 +62,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/admin/patrocinadores/novo': typeof AdminPatrocinadoresNovoRoute
   '/admin/patrocinadores/': typeof AdminPatrocinadoresIndexRoute
+  '/admin/patrocinadores/$userId/editar': typeof AdminPatrocinadoresUserIdEditarRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +70,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/admin/patrocinadores/novo': typeof AdminPatrocinadoresNovoRoute
   '/admin/patrocinadores': typeof AdminPatrocinadoresIndexRoute
+  '/admin/patrocinadores/$userId/editar': typeof AdminPatrocinadoresUserIdEditarRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,6 +80,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/admin/patrocinadores/novo': typeof AdminPatrocinadoresNovoRoute
   '/admin/patrocinadores/': typeof AdminPatrocinadoresIndexRoute
+  '/admin/patrocinadores/$userId/editar': typeof AdminPatrocinadoresUserIdEditarRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,6 +91,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/patrocinadores/novo'
     | '/admin/patrocinadores/'
+    | '/admin/patrocinadores/$userId/editar'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -88,6 +99,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/patrocinadores/novo'
     | '/admin/patrocinadores'
+    | '/admin/patrocinadores/$userId/editar'
   id:
     | '__root__'
     | '/'
@@ -96,6 +108,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/patrocinadores/novo'
     | '/admin/patrocinadores/'
+    | '/admin/patrocinadores/$userId/editar'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPatrocinadoresNovoRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/patrocinadores/$userId/editar': {
+      id: '/admin/patrocinadores/$userId/editar'
+      path: '/patrocinadores/$userId/editar'
+      fullPath: '/admin/patrocinadores/$userId/editar'
+      preLoaderRoute: typeof AdminPatrocinadoresUserIdEditarRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
   }
 }
 
@@ -155,12 +175,14 @@ interface AdminRouteRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   AdminPatrocinadoresNovoRoute: typeof AdminPatrocinadoresNovoRoute
   AdminPatrocinadoresIndexRoute: typeof AdminPatrocinadoresIndexRoute
+  AdminPatrocinadoresUserIdEditarRoute: typeof AdminPatrocinadoresUserIdEditarRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   AdminPatrocinadoresNovoRoute: AdminPatrocinadoresNovoRoute,
   AdminPatrocinadoresIndexRoute: AdminPatrocinadoresIndexRoute,
+  AdminPatrocinadoresUserIdEditarRoute: AdminPatrocinadoresUserIdEditarRoute,
 }
 
 const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(

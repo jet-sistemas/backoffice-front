@@ -6,6 +6,7 @@ import type {
   UserListParams,
   UserWithSponsorCreateDTO,
   UserWithSponsorDTO,
+  UserWithSponsorUpdateDTO,
 } from '@/types/user'
 
 function mapUserWithSponsorFromApi(
@@ -47,6 +48,62 @@ export const userApi = {
           }
     return api
       .post<EnvelopeUserWithSponsorDTO>('/v1/admin/user', payload)
+      .then((res) => {
+        const envelope = res.data
+        const u = envelope.data
+        if (!u) return res
+        return {
+          ...res,
+          data: {
+            ...envelope,
+            data: mapUserWithSponsorFromApi(u),
+          },
+        }
+      })
+  },
+
+  getUserById(id: number) {
+    return api
+      .get<EnvelopeUserWithSponsorDTO>(`/v1/admin/user/${id}`)
+      .then((res) => {
+        const envelope = res.data
+        const u = envelope.data
+        if (!u) return res
+        return {
+          ...res,
+          data: {
+            ...envelope,
+            data: mapUserWithSponsorFromApi(u),
+          },
+        }
+      })
+  },
+
+  updateUser(id: number, data: UserWithSponsorUpdateDTO) {
+    const s = data.sponsor
+    const sponsorBody =
+      s == null
+        ? undefined
+        : {
+            publicName: s.publicName,
+            entityType: s.entityType,
+            persona: s.persona,
+            logoUrl: s.logoUrl,
+            site: s.site,
+            instagram: s.instagram,
+            whatsapp: s.whatsapp,
+            isActive: s.isActive,
+            ...(s.tier != null ? { tier: sponsorTierToApi(s.tier) } : {}),
+          }
+    const payload = {
+      email: data.email,
+      name: data.name,
+      document: data.document,
+      avatarUrl: data.avatarUrl,
+      sponsor: sponsorBody,
+    }
+    return api
+      .put<EnvelopeUserWithSponsorDTO>(`/v1/admin/user/${id}`, payload)
       .then((res) => {
         const envelope = res.data
         const u = envelope.data

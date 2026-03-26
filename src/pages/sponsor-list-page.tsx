@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { AlertCircle, Building2, Plus, RefreshCw, Search } from "lucide-react";
+import {
+  AlertCircle,
+  Building2,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Search,
+} from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 import { useUserListQuery } from "@/hooks/use-user-list-query";
@@ -199,6 +206,9 @@ export function SponsorListPage() {
                   <TableHead>Tier</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="hidden md:table-cell">Código</TableHead>
+                  <TableHead className="w-[52px] text-right">
+                    <span className="sr-only">Ações</span>
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -261,6 +271,17 @@ export function SponsorListPage() {
                         {user.code}
                       </code>
                     </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" className="size-9" asChild>
+                        <Link
+                          to="/admin/patrocinadores/$userId/editar"
+                          params={{ userId: String(user.id) }}
+                          aria-label={`Editar patrocinador ${user.sponsor?.publicName ?? user.name}`}
+                        >
+                          <Pencil className="size-4" aria-hidden />
+                        </Link>
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -293,6 +314,7 @@ function SponsorTableSkeleton() {
               <TableHead>Tier</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="hidden md:table-cell">Código</TableHead>
+              <TableHead className="w-[52px]" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -318,6 +340,9 @@ function SponsorTableSkeleton() {
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
                   <Skeleton className="h-4 w-14" />
+                </TableCell>
+                <TableCell className="text-right">
+                  <Skeleton className="ml-auto size-9 rounded-md" />
                 </TableCell>
               </TableRow>
             ))}

@@ -25,6 +25,9 @@ export interface SponsorDTO {
   isActive: boolean
   lastActiveSponsorship?: string
   logoUrl?: string
+  site?: string
+  instagram?: string
+  whatsapp?: string
 }
 
 export interface UserWithSponsorDTO {
@@ -74,4 +77,24 @@ export interface UserWithSponsorCreateDTO {
 
 export interface EnvelopeUserWithSponsorDTO extends ApiEnvelopeBase {
   data?: UserWithSponsorDTO | null
+}
+
+export interface SponsorDataUpdateDTO {
+  publicName?: string
+  tier?: SponsorTierEnum
+  entityType?: EntityTypeEnum
+  persona?: SponsorPersonaEnum
+  logoUrl?: string
+  site?: string
+  instagram?: string
+  whatsapp?: string
+  isActive?: boolean
+}
+
+export interface UserWithSponsorUpdateDTO {
+  email?: string
+  name?: string
+  document?: string
+  avatarUrl?: string
+  sponsor?: SponsorDataUpdateDTO
 }
