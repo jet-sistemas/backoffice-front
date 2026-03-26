@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft, Loader2 } from 'lucide-react'
@@ -10,6 +10,12 @@ import {
   type SponsorCreateFormData,
 } from '@/schemas/sponsor-create-schema'
 import type { EntityTypeEnum, SponsorPersonaEnum, SponsorTierEnum } from '@/types/user'
+import {
+  clearSponsorCreateFormDraft,
+  getSponsorCreateFormEmptyValues,
+  loadSponsorCreateFormDraft,
+  saveSponsorCreateFormDraft,
+} from '@/lib/sponsor-create-form-draft'
 import { formatCpfCnpjInput } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -53,30 +59,20 @@ const PERSONA_LABELS: Record<SponsorPersonaEnum, string> = {
 export function SponsorCreatePage() {
   const { mutate, isPending } = useCreateUserWithSponsorMutation()
 
+  const draftDefaultValues = useMemo(() => loadSponsorCreateFormDraft(), [])
+
   const {
     register,
     handleSubmit,
     control,
     watch,
     setValue,
+    reset,
     clearErrors,
     formState: { errors },
   } = useForm<SponsorCreateFormData>({
     resolver: zodResolver(sponsorCreateFormSchema),
-    defaultValues: {
-      email: '',
-      name: '',
-      document: '',
-      code: '',
-      publicName: '',
-      tier: 'BRONZE',
-      entityType: 'COMPANY',
-      persona: undefined,
-      logoUrl: '',
-      site: '',
-      instagram: '',
-      whatsapp: '',
-    },
+    defaultValues: draftDefaultValues,
   })
 
   const entityType = watch('entityType')
@@ -88,8 +84,24 @@ export function SponsorCreatePage() {
     }
   }, [entityType, setValue, clearErrors])
 
+  useEffect(() => {
+    const subscription = watch((values) => {
+      saveSponsorCreateFormDraft(values as SponsorCreateFormData)
+    })
+    return () => subscription.unsubscribe()
+  }, [watch])
+
   function onSubmit(data: SponsorCreateFormData) {
-    mutate(data)
+    mutate(data, {
+      onSuccess: () => {
+        clearSponsorCreateFormDraft()
+      },
+    })
+  }
+
+  function handleClearForm() {
+    reset(getSponsorCreateFormEmptyValues())
+    clearErrors()
   }
 
   return (
@@ -344,20 +356,30 @@ export function SponsorCreatePage() {
               <Input id="whatsapp" placeholder="Telefone ou link" {...register('whatsapp')} />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-3 border-t pt-6 sm:flex-row sm:justify-end">
-            <Button type="button" variant="outline" className="w-full sm:w-auto" asChild>
-              <Link to="/admin/patrocinadores">Cancelar</Link>
+          <CardFooter className="flex flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full sm:w-auto"
+              onClick={handleClearForm}
+            >
+              Limpar formulário
             </Button>
-            <Button type="submit" className="w-full sm:w-auto" disabled={isPending}>
-              {isPending ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" aria-hidden />
-                  Salvando…
-                </>
-              ) : (
-                'Criar patrocinador'
-              )}
-            </Button>
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:justify-end">
+              <Button type="button" variant="outline" className="w-full sm:w-auto" asChild>
+                <Link to="/admin/patrocinadores">Cancelar</Link>
+              </Button>
+              <Button type="submit" className="w-full sm:w-auto" disabled={isPending}>
+                {isPending ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" aria-hidden />
+                    Salvando…
+                  </>
+                ) : (
+                  'Criar patrocinador'
+                )}
+              </Button>
+            </div>
           </CardFooter>
         </Card>
       </form>
