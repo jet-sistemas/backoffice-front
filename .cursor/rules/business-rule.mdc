@@ -67,7 +67,7 @@ São os administradores da plataforma. Eles terão acesso ao backoffice e gerenc
 
 ## Requisitos
 
-### ADM - Caso de Uso 
+### ADM - Caso de Uso
 
 - Deve ser capaz de logar na plataforma
   - Ao fazer login deve visualizar os patrocinadores ativos na plataforma
@@ -243,8 +243,8 @@ São os administradores da plataforma. Eles terão acesso ao backoffice e gerenc
     - A dinâmica entre `sponsored_member.is_active` e `subscriber_member.status` deve suprir todos os casos
     - Não é possível ser um `member` assinante e patrocinado ao mesmo tempo
 
-
 #### Módulo Extra - Ideias
+
 - Ao fazer login:
   - Se for ADM, deve visualizar um dashboard contendo:
     - Quantidade de _sponsors_ ativos
