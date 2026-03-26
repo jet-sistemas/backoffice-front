@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { AlertCircle, Building2, Plus, RefreshCw, Search } from "lucide-react";
-import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
 
 import { useUserListQuery } from "@/hooks/use-user-list-query";
 import { formatDocument, uniqueById } from "@/lib/utils";
 import { ListPaginationBar } from "@/components/list-pagination-bar";
-import type { SponsorTierEnum } from "@/types/user";
+import type { EntityTypeEnum, SponsorTierEnum } from "@/types/user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +39,13 @@ const TIER_BADGE_VARIANT: Record<
   OURO: "gold",
   PRATA: "silver",
   BRONZE: "bronze",
+};
+
+const ENTITY_LABELS: Record<EntityTypeEnum, string> = {
+  PERSON: "Pessoa física",
+  COMPANY: "Pessoa jurídica",
+  GOVERNMENT: "Órgão público",
+  NGO: "ONG",
 };
 
 const PAGE_SIZE = 10;
@@ -82,9 +89,11 @@ export function SponsorListPage() {
             Gerencie os patrocinadores da associação
           </p>
         </div>
-        <Button onClick={() => toast.info("Funcionalidade em breve")}>
-          <Plus />
-          Novo patrocinador
+        <Button asChild>
+          <Link to="/admin/patrocinadores/novo">
+            <Plus />
+            Novo patrocinador
+          </Link>
         </Button>
       </div>
 
@@ -223,9 +232,9 @@ export function SponsorListPage() {
                     </TableCell>
                     <TableCell className="hidden sm:table-cell">
                       <span className="text-sm text-muted-foreground">
-                        {user.sponsor?.entityType === "PERSON"
-                          ? "Pessoa Física"
-                          : "Pessoa Jurídica"}
+                        {user.sponsor?.entityType != null
+                          ? ENTITY_LABELS[user.sponsor.entityType]
+                          : "—"}
                       </span>
                     </TableCell>
                     <TableCell>

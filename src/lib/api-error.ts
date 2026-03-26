@@ -17,6 +17,12 @@ export function getApiErrorMessage(
       if (typeof record.detail === 'string' && record.detail.trim()) {
         return record.detail
       }
+      if (Array.isArray(record.messages) && record.messages.length > 0) {
+        const firstMsg = record.messages.find(
+          (m): m is string => typeof m === 'string' && m.trim().length > 0,
+        )
+        if (firstMsg) return firstMsg
+      }
       if (Array.isArray(record.errors) && record.errors.length > 0) {
         const first = record.errors[0]
         if (typeof first === 'string') return first

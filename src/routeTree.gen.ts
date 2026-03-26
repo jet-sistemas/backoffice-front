@@ -13,7 +13,8 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as AdminPatrocinadoresRouteImport } from './routes/admin/patrocinadores'
+import { Route as AdminPatrocinadoresIndexRouteImport } from './routes/admin/patrocinadores/index'
+import { Route as AdminPatrocinadoresNovoRouteImport } from './routes/admin/patrocinadores/novo'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -35,9 +36,15 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
-const AdminPatrocinadoresRoute = AdminPatrocinadoresRouteImport.update({
-  id: '/patrocinadores',
-  path: '/patrocinadores',
+const AdminPatrocinadoresIndexRoute =
+  AdminPatrocinadoresIndexRouteImport.update({
+    id: '/patrocinadores/',
+    path: '/patrocinadores/',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
+const AdminPatrocinadoresNovoRoute = AdminPatrocinadoresNovoRouteImport.update({
+  id: '/patrocinadores/novo',
+  path: '/patrocinadores/novo',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 
@@ -45,35 +52,50 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/login': typeof LoginRoute
-  '/admin/patrocinadores': typeof AdminPatrocinadoresRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/patrocinadores/novo': typeof AdminPatrocinadoresNovoRoute
+  '/admin/patrocinadores/': typeof AdminPatrocinadoresIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/admin/patrocinadores': typeof AdminPatrocinadoresRoute
   '/admin': typeof AdminIndexRoute
+  '/admin/patrocinadores/novo': typeof AdminPatrocinadoresNovoRoute
+  '/admin/patrocinadores': typeof AdminPatrocinadoresIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/login': typeof LoginRoute
-  '/admin/patrocinadores': typeof AdminPatrocinadoresRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/patrocinadores/novo': typeof AdminPatrocinadoresNovoRoute
+  '/admin/patrocinadores/': typeof AdminPatrocinadoresIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/login' | '/admin/patrocinadores' | '/admin/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/login'
+    | '/admin/'
+    | '/admin/patrocinadores/novo'
+    | '/admin/patrocinadores/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/admin/patrocinadores' | '/admin'
+  to:
+    | '/'
+    | '/login'
+    | '/admin'
+    | '/admin/patrocinadores/novo'
+    | '/admin/patrocinadores'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/login'
-    | '/admin/patrocinadores'
     | '/admin/'
+    | '/admin/patrocinadores/novo'
+    | '/admin/patrocinadores/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -112,24 +134,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/admin/patrocinadores': {
-      id: '/admin/patrocinadores'
+    '/admin/patrocinadores/': {
+      id: '/admin/patrocinadores/'
       path: '/patrocinadores'
-      fullPath: '/admin/patrocinadores'
-      preLoaderRoute: typeof AdminPatrocinadoresRouteImport
+      fullPath: '/admin/patrocinadores/'
+      preLoaderRoute: typeof AdminPatrocinadoresIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/patrocinadores/novo': {
+      id: '/admin/patrocinadores/novo'
+      path: '/patrocinadores/novo'
+      fullPath: '/admin/patrocinadores/novo'
+      preLoaderRoute: typeof AdminPatrocinadoresNovoRouteImport
       parentRoute: typeof AdminRouteRoute
     }
   }
 }
 
 interface AdminRouteRouteChildren {
-  AdminPatrocinadoresRoute: typeof AdminPatrocinadoresRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminPatrocinadoresNovoRoute: typeof AdminPatrocinadoresNovoRoute
+  AdminPatrocinadoresIndexRoute: typeof AdminPatrocinadoresIndexRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
-  AdminPatrocinadoresRoute: AdminPatrocinadoresRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminPatrocinadoresNovoRoute: AdminPatrocinadoresNovoRoute,
+  AdminPatrocinadoresIndexRoute: AdminPatrocinadoresIndexRoute,
 }
 
 const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(

@@ -35,6 +35,14 @@ export function formatCNPJ(value: string) {
     .replace(/(\d{4})(\d{1,2})/, "$1-$2");
 }
 
+export function formatCpfCnpjInput(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 14);
+  if (digits.length <= 11) {
+    return formatCPF(digits);
+  }
+  return formatCNPJ(digits);
+}
+
 export function formatDocument(value: string) {
   const digits = value.replace(/\D/g, "");
   if (digits.length === 11) return formatCPF(value);

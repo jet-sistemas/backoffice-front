@@ -4,7 +4,17 @@ export type SponsorTierEnum = 'OURO' | 'PRATA' | 'BRONZE'
 
 export type SponsorTierApiEnum = 'GOLD' | 'SILVER' | 'BRONZE'
 
-export type EntityTypeEnum = 'PERSON' | 'COMPANY'
+export type EntityTypeEnum =
+  | 'PERSON'
+  | 'COMPANY'
+  | 'GOVERNMENT'
+  | 'NGO'
+
+export type SponsorPersonaEnum =
+  | 'POLITICIAN'
+  | 'INFLUENCER'
+  | 'ATHLETE'
+  | 'OTHER'
 
 export interface SponsorDTO {
   id: number
@@ -54,6 +64,14 @@ export interface UserWithSponsorCreateDTO {
     publicName: string
     tier: SponsorTierEnum
     entityType: EntityTypeEnum
-    persona?: string
+    persona?: SponsorPersonaEnum
+    logoUrl?: string
+    site?: string
+    instagram?: string
+    whatsapp?: string
   }
+}
+
+export interface EnvelopeUserWithSponsorDTO extends ApiEnvelopeBase {
+  data?: UserWithSponsorDTO | null
 }

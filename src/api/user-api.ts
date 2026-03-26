@@ -1,6 +1,7 @@
 import { api } from '@/lib/axios'
 import { sponsorTierFromApi, sponsorTierToApi } from '@/lib/sponsor-tier'
 import type {
+  EnvelopeUserWithSponsorDTO,
   PaginatedUsersResponse,
   UserListParams,
   UserWithSponsorCreateDTO,
@@ -44,6 +45,19 @@ export const userApi = {
               tier: sponsorTierToApi(data.sponsor.tier),
             },
           }
-    return api.post('/v1/admin/user', payload)
+    return api
+      .post<EnvelopeUserWithSponsorDTO>('/v1/admin/user', payload)
+      .then((res) => {
+        const envelope = res.data
+        const u = envelope.data
+        if (!u) return res
+        return {
+          ...res,
+          data: {
+            ...envelope,
+            data: mapUserWithSponsorFromApi(u),
+          },
+        }
+      })
   },
 }
