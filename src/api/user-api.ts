@@ -9,13 +9,28 @@ import type {
   UserWithSponsorUpdateDTO,
 } from '@/types/user'
 
+interface UserWithSponsorDTOFromApi extends Omit<UserWithSponsorDTO, 'sponsor'> {
+  sponsor?: UserWithSponsorDTO['sponsor'] & {
+    active?: boolean
+    isActive?: boolean
+  }
+}
+
 function mapUserWithSponsorFromApi(
-  user: UserWithSponsorDTO,
+  user: UserWithSponsorDTOFromApi,
 ): UserWithSponsorDTO {
   if (!user.sponsor) return user
   const tier = sponsorTierFromApi(user.sponsor.tier as unknown as string)
-  if (tier == null) return user
-  return { ...user, sponsor: { ...user.sponsor, tier } }
+  const isActive = user.sponsor.isActive ?? user.sponsor.active ?? true
+
+  return {
+    ...user,
+    sponsor: {
+      ...user.sponsor,
+      ...(tier != null ? { tier } : {}),
+      isActive,
+    },
+  }
 }
 
 export const userApi = {
@@ -30,7 +45,9 @@ export const userApi = {
       .then((res) => {
         const envelope = res.data
         const data =
-          envelope.data?.map((u) => mapUserWithSponsorFromApi(u)) ?? []
+          envelope.data?.map((u) =>
+            mapUserWithSponsorFromApi(u as UserWithSponsorDTOFromApi),
+          ) ?? []
         return { ...res, data: { ...envelope, data } }
       })
   },
@@ -56,7 +73,7 @@ export const userApi = {
           ...res,
           data: {
             ...envelope,
-            data: mapUserWithSponsorFromApi(u),
+            data: mapUserWithSponsorFromApi(u as UserWithSponsorDTOFromApi),
           },
         }
       })
@@ -73,7 +90,7 @@ export const userApi = {
           ...res,
           data: {
             ...envelope,
-            data: mapUserWithSponsorFromApi(u),
+            data: mapUserWithSponsorFromApi(u as UserWithSponsorDTOFromApi),
           },
         }
       })
@@ -112,7 +129,7 @@ export const userApi = {
           ...res,
           data: {
             ...envelope,
-            data: mapUserWithSponsorFromApi(u),
+            data: mapUserWithSponsorFromApi(u as UserWithSponsorDTOFromApi),
           },
         }
       })

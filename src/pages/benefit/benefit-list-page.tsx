@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
+import { useEffect, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
 import {
   AlertCircle,
   Ban,
@@ -8,10 +8,10 @@ import {
   Gift,
   Pencil,
   RefreshCw,
-} from 'lucide-react'
+} from "lucide-react";
 
-import { SponsorSearchCombobox } from '@/components/sponsor-search-combobox'
-import { ListPaginationBar } from '@/components/list-pagination-bar'
+import { ActiveSponsorSelect } from "@/components/active-sponsor-select";
+import { ListPaginationBar } from "@/components/list-pagination-bar";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -20,16 +20,16 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -37,17 +37,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Skeleton } from '@/components/ui/skeleton'
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -55,106 +55,97 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { useBenefitListQuery } from '@/hooks/use-benefit-list-query'
-import { useCreateBenefitMutation } from '@/hooks/use-create-benefit-mutation'
-import { useDeactivateBenefitMutation } from '@/hooks/use-deactivate-benefit-mutation'
-import { useSponsorOptionsQuery } from '@/hooks/use-sponsor-options-query'
-import { useUpdateBenefitMutation } from '@/hooks/use-update-benefit-mutation'
-import { uniqueById } from '@/lib/utils'
+} from "@/components/ui/table";
+import { useBenefitListQuery } from "@/hooks/use-benefit-list-query";
+import { useCreateBenefitMutation } from "@/hooks/use-create-benefit-mutation";
+import { useDeactivateBenefitMutation } from "@/hooks/use-deactivate-benefit-mutation";
+import { useUpdateBenefitMutation } from "@/hooks/use-update-benefit-mutation";
+import { uniqueById } from "@/lib/utils";
 import {
   benefitFormSchema,
   BENEFIT_DESCRIPTION_MAX_LENGTH,
   type BenefitFormData,
-} from '@/schemas/benefit-form-schema'
-import type { BenefitDTO } from '@/types/benefit'
-import type { SponsorTierEnum } from '@/types/user'
+} from "@/schemas/benefit-form-schema";
+import type { BenefitDTO } from "@/types/benefit";
+import type { SponsorTierEnum } from "@/types/user";
 
-const PAGE_SIZE = 10
+const PAGE_SIZE = 10;
 
 const TIER_LABELS: Record<SponsorTierEnum, string> = {
-  OURO: 'Ouro',
-  PRATA: 'Prata',
-  BRONZE: 'Bronze',
-}
+  OURO: "Ouro",
+  PRATA: "Prata",
+  BRONZE: "Bronze",
+};
 
 const TIER_BADGE_VARIANT: Record<
   SponsorTierEnum,
-  'gold' | 'silver' | 'bronze'
+  "gold" | "silver" | "bronze"
 > = {
-  OURO: 'gold',
-  PRATA: 'silver',
-  BRONZE: 'bronze',
-}
+  OURO: "gold",
+  PRATA: "silver",
+  BRONZE: "bronze",
+};
 
-function mapStatusFilter(
-  v: string,
-): boolean | undefined {
-  if (v === 'ALL') return undefined
-  if (v === 'ACTIVE') return true
-  return false
+function mapStatusFilter(v: string): boolean | undefined {
+  if (v === "ALL") return undefined;
+  if (v === "ACTIVE") return true;
+  return false;
 }
 
 export function BenefitListPage() {
-  const [page, setPage] = useState(1)
-  const [statusFilter, setStatusFilter] = useState('ALL')
-  const [editOpen, setEditOpen] = useState(false)
-  const [editing, setEditing] = useState<BenefitDTO | null>(null)
-  const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false)
+  const [page, setPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [editOpen, setEditOpen] = useState(false);
+  const [editing, setEditing] = useState<BenefitDTO | null>(null);
+  const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const [benefitToDeactivate, setBenefitToDeactivate] =
-    useState<BenefitDTO | null>(null)
+    useState<BenefitDTO | null>(null);
 
-  const isActiveParam = mapStatusFilter(statusFilter)
+  const isActiveParam = mapStatusFilter(statusFilter);
 
   const { data, isLoading, isError, error, refetch } = useBenefitListQuery({
     page,
     size: PAGE_SIZE,
     ...(isActiveParam !== undefined ? { isActive: isActiveParam } : {}),
-  })
+  });
 
-  const {
-    data: sponsorUsers = [],
-    isLoading: sponsorsLoading,
-    isError: sponsorsError,
-  } = useSponsorOptionsQuery()
+  const createMutation = useCreateBenefitMutation();
+  const updateMutation = useUpdateBenefitMutation();
+  const deactivateMutation = useDeactivateBenefitMutation();
 
-  const createMutation = useCreateBenefitMutation()
-  const updateMutation = useUpdateBenefitMutation()
-  const deactivateMutation = useDeactivateBenefitMutation()
-
-  const benefits = uniqueById(data?.data ?? [])
-  const totalPages = data?.totalPages ?? 0
-  const totalElements = data?.totalElements ?? 0
+  const benefits = uniqueById(data?.data ?? []);
+  const totalPages = data?.totalPages ?? 0;
+  const totalElements = data?.totalElements ?? 0;
 
   const createForm = useForm<BenefitFormData>({
     resolver: zodResolver(benefitFormSchema),
     defaultValues: {
-      name: '',
+      name: "",
       description: undefined,
       address: undefined,
       sponsorId: null,
     },
-  })
+  });
 
   const editForm = useForm<BenefitFormData>({
     resolver: zodResolver(benefitFormSchema),
     defaultValues: {
-      name: '',
+      name: "",
       description: undefined,
       address: undefined,
       sponsorId: null,
     },
-  })
+  });
 
   useEffect(() => {
-    if (editing == null) return
+    if (editing == null) return;
     editForm.reset({
       name: editing.name,
       description: editing.description,
       address: editing.address,
       sponsorId: editing.sponsor?.id ?? null,
-    })
-  }, [editing, editForm])
+    });
+  }, [editing, editForm]);
 
   const onCreateSubmit = createForm.handleSubmit((values) => {
     createMutation.mutate(
@@ -167,18 +158,18 @@ export function BenefitListPage() {
       {
         onSuccess: () => {
           createForm.reset({
-            name: '',
+            name: "",
             description: undefined,
             address: undefined,
             sponsorId: null,
-          })
+          });
         },
       },
-    )
-  })
+    );
+  });
 
   const onEditSubmit = editForm.handleSubmit((values) => {
-    if (editing == null) return
+    if (editing == null) return;
     updateMutation.mutate(
       {
         id: editing.id,
@@ -191,29 +182,29 @@ export function BenefitListPage() {
       },
       {
         onSuccess: () => {
-          setEditOpen(false)
-          setEditing(null)
+          setEditOpen(false);
+          setEditing(null);
         },
       },
-    )
-  })
+    );
+  });
 
   const closeDeactivateDialog = () => {
-    setDeactivateDialogOpen(false)
-    setBenefitToDeactivate(null)
-  }
+    setDeactivateDialogOpen(false);
+    setBenefitToDeactivate(null);
+  };
 
   const handleDeactivate = (b: BenefitDTO) => {
-    setBenefitToDeactivate(b)
-    setDeactivateDialogOpen(true)
-  }
+    setBenefitToDeactivate(b);
+    setDeactivateDialogOpen(true);
+  };
 
   const confirmDeactivate = () => {
-    if (benefitToDeactivate == null) return
+    if (benefitToDeactivate == null) return;
     deactivateMutation.mutate(benefitToDeactivate.id, {
       onSuccess: () => closeDeactivateDialog(),
-    })
-  }
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -242,7 +233,7 @@ export function BenefitListPage() {
                 <Label htmlFor="benefit-name">Nome</Label>
                 <Input
                   id="benefit-name"
-                  {...createForm.register('name')}
+                  {...createForm.register("name")}
                   aria-invalid={createForm.formState.errors.name != null}
                   placeholder="Ex.: Desconto na loja parceira"
                 />
@@ -259,7 +250,7 @@ export function BenefitListPage() {
                     className="text-xs text-muted-foreground tabular-nums"
                     aria-live="polite"
                   >
-                    {(createForm.watch('description') ?? '').length} /{' '}
+                    {(createForm.watch("description") ?? "").length} /{" "}
                     {BENEFIT_DESCRIPTION_MAX_LENGTH}
                   </span>
                 </div>
@@ -267,10 +258,8 @@ export function BenefitListPage() {
                   id="benefit-description"
                   maxLength={BENEFIT_DESCRIPTION_MAX_LENGTH}
                   className="border-input bg-background ring-ring/50 flex min-h-[80px] w-full rounded-md border px-3 py-2 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
-                  {...createForm.register('description')}
-                  aria-invalid={
-                    createForm.formState.errors.description != null
-                  }
+                  {...createForm.register("description")}
+                  aria-invalid={createForm.formState.errors.description != null}
                   placeholder="Detalhes do benefício"
                 />
                 {createForm.formState.errors.description != null ? (
@@ -283,23 +272,30 @@ export function BenefitListPage() {
                 <Label htmlFor="benefit-address">Endereço</Label>
                 <Input
                   id="benefit-address"
-                  {...createForm.register('address')}
+                  {...createForm.register("address")}
                   placeholder="Onde utilizar (se aplicável)"
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="benefit-sponsor">Patrocinador</Label>
-                <SponsorSearchCombobox
-                  id="benefit-sponsor"
-                  value={createForm.watch('sponsorId')}
-                  onChange={(id) => createForm.setValue('sponsorId', id)}
-                  sponsors={sponsorUsers}
-                  isLoading={sponsorsLoading}
-                  disabled={sponsorsError}
+                <Controller
+                  control={createForm.control}
+                  name="sponsorId"
+                  render={({ field }) => (
+                    <ActiveSponsorSelect
+                      id="benefit-sponsor"
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={createMutation.isPending}
+                      aria-invalid={
+                        createForm.formState.errors.sponsorId != null
+                      }
+                    />
+                  )}
                 />
-                {sponsorsError ? (
+                {createForm.formState.errors.sponsorId != null ? (
                   <p className="text-sm text-destructive">
-                    Não foi possível carregar patrocinadores.
+                    {createForm.formState.errors.sponsorId.message}
                   </p>
                 ) : null}
               </div>
@@ -308,7 +304,7 @@ export function BenefitListPage() {
                 className="w-full"
                 disabled={createMutation.isPending}
               >
-                {createMutation.isPending ? 'Salvando…' : 'Criar benefício'}
+                {createMutation.isPending ? "Salvando…" : "Criar benefício"}
               </Button>
             </form>
           </CardContent>
@@ -319,8 +315,8 @@ export function BenefitListPage() {
             <Select
               value={statusFilter}
               onValueChange={(v) => {
-                setStatusFilter(v)
-                setPage(1)
+                setStatusFilter(v);
+                setPage(1);
               }}
             >
               <SelectTrigger
@@ -345,7 +341,7 @@ export function BenefitListPage() {
               <div className="text-center">
                 <p className="font-medium">Erro ao carregar benefícios</p>
                 <p className="text-sm text-muted-foreground">
-                  {error?.message ?? 'Tente novamente mais tarde.'}
+                  {error?.message ?? "Tente novamente mais tarde."}
                 </p>
               </div>
               <Button variant="outline" onClick={() => refetch()}>
@@ -363,9 +359,9 @@ export function BenefitListPage() {
               <div>
                 <p className="font-medium">Nenhum benefício encontrado</p>
                 <p className="text-sm text-muted-foreground">
-                  {statusFilter !== 'ALL'
-                    ? 'Tente ajustar o filtro de estado.'
-                    : 'Crie o primeiro benefício ao lado.'}
+                  {statusFilter !== "ALL"
+                    ? "Tente ajustar o filtro de estado."
+                    : "Crie o primeiro benefício ao lado."}
                 </p>
               </div>
             </div>
@@ -385,7 +381,9 @@ export function BenefitListPage() {
                         Endereço
                       </TableHead>
                       <TableHead>Estado</TableHead>
-                      <TableHead className="min-w-[140px]">Patrocinador</TableHead>
+                      <TableHead className="min-w-[140px]">
+                        Patrocinador
+                      </TableHead>
                       <TableHead className="w-[100px] text-right">
                         <span className="sr-only">Ações</span>
                       </TableHead>
@@ -400,7 +398,7 @@ export function BenefitListPage() {
                           title={b.description}
                         >
                           <span className="line-clamp-2 text-sm text-muted-foreground">
-                            {b.description ?? '—'}
+                            {b.description ?? "—"}
                           </span>
                         </TableCell>
                         <TableCell
@@ -408,19 +406,19 @@ export function BenefitListPage() {
                           title={b.address}
                         >
                           <span className="line-clamp-2 text-sm text-muted-foreground">
-                            {b.address ?? '—'}
+                            {b.address ?? "—"}
                           </span>
                         </TableCell>
                         <TableCell>
                           <Badge
-                            variant={b.isActive ? 'default' : 'outline'}
+                            variant={b.isActive ? "default" : "outline"}
                             className={
                               b.isActive
-                                ? 'bg-emerald-600 text-white hover:bg-emerald-600/90'
-                                : ''
+                                ? "bg-emerald-600 text-white hover:bg-emerald-600/90"
+                                : ""
                             }
                           >
-                            {b.isActive ? 'Ativo' : 'Inativo'}
+                            {b.isActive ? "Ativo" : "Inativo"}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -463,8 +461,8 @@ export function BenefitListPage() {
                               className="size-9"
                               aria-label={`Editar benefício ${b.name}`}
                               onClick={() => {
-                                setEditing(b)
-                                setEditOpen(true)
+                                setEditing(b);
+                                setEditOpen(true);
                               }}
                             >
                               <Pencil className="size-4" aria-hidden />
@@ -495,8 +493,8 @@ export function BenefitListPage() {
                 totalPages={totalPages}
                 onPageChange={setPage}
               >
-                {totalElements} benefício{totalElements !== 1 ? 's' : ''}{' '}
-                encontrado{totalElements !== 1 ? 's' : ''}
+                {totalElements} benefício{totalElements !== 1 ? "s" : ""}{" "}
+                encontrado{totalElements !== 1 ? "s" : ""}
               </ListPaginationBar>
             </>
           )}
@@ -506,9 +504,9 @@ export function BenefitListPage() {
       <AlertDialog
         open={deactivateDialogOpen}
         onOpenChange={(open) => {
-          if (open) return
-          if (deactivateMutation.isPending) return
-          closeDeactivateDialog()
+          if (open) return;
+          if (deactivateMutation.isPending) return;
+          closeDeactivateDialog();
         }}
       >
         <AlertDialogContent>
@@ -517,10 +515,10 @@ export function BenefitListPage() {
               Desativar benefício?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              O benefício{' '}
+              O benefício{" "}
               <span className="font-medium text-foreground">
-                &quot;{benefitToDeactivate?.name ?? ''}&quot;
-              </span>{' '}
+                &quot;{benefitToDeactivate?.name ?? ""}&quot;
+              </span>{" "}
               deixará de aparecer como ativo.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -534,7 +532,7 @@ export function BenefitListPage() {
               disabled={deactivateMutation.isPending}
               onClick={confirmDeactivate}
             >
-              {deactivateMutation.isPending ? 'Desativando…' : 'Desativar'}
+              {deactivateMutation.isPending ? "Desativando…" : "Desativar"}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -543,8 +541,8 @@ export function BenefitListPage() {
       <Dialog
         open={editOpen}
         onOpenChange={(open) => {
-          setEditOpen(open)
-          if (!open) setEditing(null)
+          setEditOpen(open);
+          if (!open) setEditing(null);
         }}
       >
         <DialogContent className="sm:max-w-md">
@@ -560,7 +558,7 @@ export function BenefitListPage() {
                 <Label htmlFor="edit-benefit-name">Nome</Label>
                 <Input
                   id="edit-benefit-name"
-                  {...editForm.register('name')}
+                  {...editForm.register("name")}
                   aria-invalid={editForm.formState.errors.name != null}
                 />
                 {editForm.formState.errors.name != null ? (
@@ -576,7 +574,7 @@ export function BenefitListPage() {
                     className="text-xs text-muted-foreground tabular-nums"
                     aria-live="polite"
                   >
-                    {(editForm.watch('description') ?? '').length} /{' '}
+                    {(editForm.watch("description") ?? "").length} /{" "}
                     {BENEFIT_DESCRIPTION_MAX_LENGTH}
                   </span>
                 </div>
@@ -584,7 +582,7 @@ export function BenefitListPage() {
                   id="edit-benefit-description"
                   maxLength={BENEFIT_DESCRIPTION_MAX_LENGTH}
                   className="border-input bg-background ring-ring/50 flex min-h-[80px] w-full rounded-md border px-3 py-2 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px]"
-                  {...editForm.register('description')}
+                  {...editForm.register("description")}
                   aria-invalid={editForm.formState.errors.description != null}
                 />
                 {editForm.formState.errors.description != null ? (
@@ -597,37 +595,58 @@ export function BenefitListPage() {
                 <Label htmlFor="edit-benefit-address">Endereço</Label>
                 <Input
                   id="edit-benefit-address"
-                  {...editForm.register('address')}
+                  {...editForm.register("address")}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-benefit-sponsor">Patrocinador</Label>
-                <SponsorSearchCombobox
-                  id="edit-benefit-sponsor"
-                  value={editForm.watch('sponsorId')}
-                  onChange={(id) => editForm.setValue('sponsorId', id)}
-                  sponsors={sponsorUsers}
-                  isLoading={sponsorsLoading}
-                  disabled={sponsorsError}
-                />
                 <p className="text-xs text-muted-foreground">
                   Escolha &quot;Benefício geral&quot; para remover o vínculo com
                   patrocinador.
                 </p>
+                <Controller
+                  control={editForm.control}
+                  name="sponsorId"
+                  render={({ field }) => (
+                    <ActiveSponsorSelect
+                      key={editing.id}
+                      id="edit-benefit-sponsor"
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={updateMutation.isPending}
+                      fallbackOption={
+                        editing.sponsor
+                          ? {
+                              id: editing.sponsor.id,
+                              publicName: editing.sponsor.publicName,
+                            }
+                          : null
+                      }
+                      aria-invalid={
+                        editForm.formState.errors.sponsorId != null
+                      }
+                    />
+                  )}
+                />
+                {editForm.formState.errors.sponsorId != null ? (
+                  <p className="text-sm text-destructive">
+                    {editForm.formState.errors.sponsorId.message}
+                  </p>
+                ) : null}
               </div>
               <DialogFooter className="gap-2 sm:gap-0">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => {
-                    setEditOpen(false)
-                    setEditing(null)
+                    setEditOpen(false);
+                    setEditing(null);
                   }}
                 >
                   Cancelar
                 </Button>
                 <Button type="submit" disabled={updateMutation.isPending}>
-                  {updateMutation.isPending ? 'Salvando…' : 'Salvar'}
+                  {updateMutation.isPending ? "Salvando…" : "Salvar"}
                 </Button>
               </DialogFooter>
             </form>
@@ -635,7 +654,7 @@ export function BenefitListPage() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
 
 function BenefitTableSkeleton() {
@@ -672,5 +691,5 @@ function BenefitTableSkeleton() {
         </Table>
       </div>
     </div>
-  )
+  );
 }
