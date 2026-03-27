@@ -13,7 +13,16 @@ export interface BenefitListUiParams {
 
 export function useBenefitListQuery(uiParams: BenefitListUiParams) {
   const apiParams: BenefitListParams = {
-    page: Math.max(0, uiParams.page - 1),
+    page: uiParams.page,
+    size: uiParams.size,
+    ...(uiParams.isActive !== undefined
+      ? { isActive: uiParams.isActive }
+      : {}),
+    ...(uiParams.sponsorId != null ? { sponsorId: uiParams.sponsorId } : {}),
+  }
+
+  const listQueryKey = {
+    page: uiParams.page,
     size: uiParams.size,
     ...(uiParams.isActive !== undefined
       ? { isActive: uiParams.isActive }
@@ -22,7 +31,7 @@ export function useBenefitListQuery(uiParams: BenefitListUiParams) {
   }
 
   return useQuery({
-    queryKey: ['benefits', apiParams],
+    queryKey: ['benefits', listQueryKey],
     placeholderData: keepPreviousData,
     queryFn: async () => {
       try {
