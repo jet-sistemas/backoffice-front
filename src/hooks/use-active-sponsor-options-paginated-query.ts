@@ -2,24 +2,31 @@ import { useQuery } from "@tanstack/react-query";
 
 import { userApi } from "@/api/user-api";
 import { getApiErrorMessage } from "@/lib/api-error";
-import type { UserWithSponsorDTO } from "@/types/user";
+import type { SponsorTierEnum, UserWithSponsorDTO } from "@/types/user";
 
 export const ACTIVE_SPONSOR_OPTIONS_PAGE_SIZE = 30;
 
 export interface ActiveSponsorOption {
   id: number;
   publicName: string;
+  tier: SponsorTierEnum;
+  isActive: boolean;
 }
 
-function mapPageToActiveSponsors(
+function mapPageToSponsorOptions(
   users: UserWithSponsorDTO[],
 ): ActiveSponsorOption[] {
   const bySponsorId = new Map<number, ActiveSponsorOption>();
   for (const u of users) {
     const s = u.sponsor;
-    if (s == null || !s.isActive) continue;
+    if (s == null) continue;
     if (!bySponsorId.has(s.id)) {
-      bySponsorId.set(s.id, { id: s.id, publicName: s.publicName });
+      bySponsorId.set(s.id, {
+        id: s.id,
+        publicName: s.publicName,
+        tier: s.tier,
+        isActive: s.isActive,
+      });
     }
   }
   return Array.from(bySponsorId.values());
@@ -29,7 +36,7 @@ export function useActiveSponsorOptionsPaginatedQuery(page: number) {
   return useQuery({
     queryKey: [
       "sponsor-options",
-      "active-paginated",
+      "paginated",
       page,
       ACTIVE_SPONSOR_OPTIONS_PAGE_SIZE,
     ],
@@ -42,7 +49,7 @@ export function useActiveSponsorOptionsPaginatedQuery(page: number) {
           size: ACTIVE_SPONSOR_OPTIONS_PAGE_SIZE,
         });
         const envelope = response.data;
-        const sponsors = mapPageToActiveSponsors(envelope.data ?? []);
+        const sponsors = mapPageToSponsorOptions(envelope.data ?? []);
         return {
           sponsors,
           totalPages: envelope.totalPages ?? 0,

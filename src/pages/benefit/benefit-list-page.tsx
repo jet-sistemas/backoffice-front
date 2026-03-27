@@ -614,14 +614,7 @@ export function BenefitListPage() {
                       value={field.value}
                       onChange={field.onChange}
                       disabled={updateMutation.isPending}
-                      fallbackOption={
-                        editing.sponsor
-                          ? {
-                              id: editing.sponsor.id,
-                              publicName: editing.sponsor.publicName,
-                            }
-                          : null
-                      }
+                      fallbackOption={editing.sponsor ?? null}
                       aria-invalid={
                         editForm.formState.errors.sponsorId != null
                       }
