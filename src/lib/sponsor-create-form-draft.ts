@@ -13,7 +13,6 @@ export function getSponsorCreateFormEmptyValues(): SponsorCreateFormData {
     tier: 'BRONZE',
     entityType: 'COMPANY',
     persona: undefined,
-    logoUrl: '',
     site: '',
     instagram: '',
     whatsapp: '',
@@ -27,13 +26,15 @@ export function loadSponsorCreateFormDraft(): SponsorCreateFormData {
   try {
     const raw = sessionStorage.getItem(SPONSOR_CREATE_FORM_DRAFT_STORAGE_KEY)
     if (!raw) return getSponsorCreateFormEmptyValues()
-    const parsed = JSON.parse(raw) as Partial<SponsorCreateFormData>
+    const parsed = JSON.parse(raw) as Partial<SponsorCreateFormData> & {
+      logoUrl?: string
+    }
+    const { logoUrl: _legacyLogo, ...restParsed } = parsed
     const base = getSponsorCreateFormEmptyValues()
     return {
       ...base,
-      ...parsed,
+      ...restParsed,
       persona: parsed.persona ?? undefined,
-      logoUrl: parsed.logoUrl ?? '',
       site: parsed.site ?? '',
       instagram: parsed.instagram ?? '',
       whatsapp: parsed.whatsapp ?? '',
@@ -54,7 +55,6 @@ function isBlankSponsorDraft(values: SponsorCreateFormData) {
     values.tier === empty.tier &&
     values.entityType === empty.entityType &&
     values.persona === empty.persona &&
-    (values.logoUrl ?? '') === empty.logoUrl &&
     (values.site ?? '') === empty.site &&
     (values.instagram ?? '') === empty.instagram &&
     (values.whatsapp ?? '') === empty.whatsapp

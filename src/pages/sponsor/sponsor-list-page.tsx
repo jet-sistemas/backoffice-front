@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useDeactivateUserMutation } from "@/hooks/use-deactivate-user-mutation";
 import { useUserListQuery } from "@/hooks/use-user-list-query";
+import { resolveR2PublicUrl } from "@/lib/r2-public-url";
 import { formatDocument, uniqueById } from "@/lib/utils";
 import type {
   EntityTypeEnum,
@@ -253,14 +254,16 @@ export function SponsorListPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredSponsors.map((user) => (
+                {filteredSponsors.map((user) => {
+                  const logoSrc = resolveR2PublicUrl(user.sponsor?.logoUrl);
+                  return (
                   <TableRow key={user.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        {user.sponsor?.logoUrl ? (
+                        {logoSrc ? (
                           <img
-                            src={user.sponsor.logoUrl}
-                            alt={user.sponsor.publicName}
+                            src={logoSrc}
+                            alt={user.sponsor?.publicName ?? user.name}
                             className="size-8 rounded-md object-cover"
                           />
                         ) : (
@@ -357,7 +360,8 @@ export function SponsorListPage() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </div>

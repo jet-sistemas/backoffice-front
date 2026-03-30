@@ -34,6 +34,7 @@ export const sponsorEditFormSchema = z
     entityType: z.enum(entityTypeValues),
     persona: z.enum(sponsorPersonaValues).optional(),
     logoUrl: optionalTrimmed,
+    avatarUrl: optionalTrimmed,
     site: optionalTrimmed,
     instagram: optionalTrimmed,
     whatsapp: optionalTrimmed,

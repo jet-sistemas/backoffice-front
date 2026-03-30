@@ -37,7 +37,6 @@ export const sponsorCreateFormSchema = z
     tier: z.enum(['OURO', 'PRATA', 'BRONZE']),
     entityType: z.enum(entityTypeValues),
     persona: z.enum(sponsorPersonaValues).optional(),
-    logoUrl: optionalTrimmed,
     site: optionalTrimmed,
     instagram: optionalTrimmed,
     whatsapp: optionalTrimmed,

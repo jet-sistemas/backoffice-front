@@ -17,7 +17,6 @@ function buildCreatePayload(values: SponsorCreateFormData): UserWithSponsorCreat
     ...(values.entityType === 'PERSON' && values.persona != null
       ? { persona: values.persona }
       : {}),
-    ...(values.logoUrl != null ? { logoUrl: values.logoUrl } : {}),
     ...(values.site != null ? { site: values.site } : {}),
     ...(values.instagram != null ? { instagram: values.instagram } : {}),
     ...(values.whatsapp != null ? { whatsapp: values.whatsapp } : {}),
@@ -42,10 +41,20 @@ export function useCreateUserWithSponsorMutation() {
   return useMutation({
     mutationFn: (values: SponsorCreateFormData) =>
       userApi.createUser(buildCreatePayload(values)),
-    onSuccess: () => {
+    onSuccess: (response) => {
       void queryClient.invalidateQueries({ queryKey: ['users'] })
-      toast.success('Patrocinador criado com sucesso.')
-      void navigate({ to: '/admin/patrocinadores' })
+      const id = response.data?.data?.id
+      toast.success(
+        'Patrocinador criado. Você pode enviar a logo e o avatar na tela de edição.',
+      )
+      if (id != null) {
+        void navigate({
+          to: '/admin/patrocinadores/$userId/editar',
+          params: { userId: String(id) },
+        })
+      } else {
+        void navigate({ to: '/admin/patrocinadores' })
+      }
     },
     onError: (error) => {
       const fallback =

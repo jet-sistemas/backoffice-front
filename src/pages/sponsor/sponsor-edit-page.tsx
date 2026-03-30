@@ -13,6 +13,7 @@ import {
 } from '@/schemas/sponsor-edit-schema'
 import type { EntityTypeEnum, SponsorPersonaEnum, SponsorTierEnum } from '@/types/user'
 import { formatCpfCnpjInput } from '@/lib/utils'
+import { ImageUploadField } from '@/components/image-upload-field'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -61,6 +62,7 @@ const EDIT_FORM_DEFAULTS: SponsorEditFormData = {
   entityType: 'COMPANY',
   persona: undefined,
   logoUrl: undefined,
+  avatarUrl: undefined,
   site: undefined,
   instagram: undefined,
   whatsapp: undefined,
@@ -168,8 +170,7 @@ export function SponsorEditPage({ userId }: SponsorEditPageProps) {
           </h1>
           <p className="text-sm text-muted-foreground">
             Atualize os dados da conta e do patrocínio. O código único não pode ser
-            alterado por esta tela. Upload de logo e foto de perfil (R2) não está
-            disponível nesta versão.
+            alterado por esta tela. Logo e avatar são enviados de forma segura (R2).
           </p>
         </div>
       </div>
@@ -301,6 +302,22 @@ export function SponsorEditPage({ userId }: SponsorEditPageProps) {
                 O código de 5 caracteres não pode ser alterado nesta tela.
               </p>
             </div>
+            {validId != null && (
+              <div className="space-y-2 sm:col-span-2">
+                <ImageUploadField
+                  entity="user"
+                  entityId={validId}
+                  userIdForInvalidation={validId}
+                  value={watch('avatarUrl')}
+                  onValueChange={(v) =>
+                    setValue('avatarUrl', v, { shouldDirty: true, shouldValidate: true })
+                  }
+                  label="Foto de perfil (avatar)"
+                  description="Imagem do usuário na plataforma."
+                  disabled={formDisabled}
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -432,21 +449,27 @@ export function SponsorEditPage({ userId }: SponsorEditPageProps) {
                 )}
               </div>
             )}
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="edit-logoUrl">URL da logo (opcional)</Label>
-              <Input
-                id="edit-logoUrl"
-                placeholder="https://..."
-                disabled={formDisabled}
-                aria-invalid={Boolean(errors.logoUrl)}
-                {...register('logoUrl')}
-              />
-              {errors.logoUrl && (
-                <p className="text-sm text-destructive" role="alert">
-                  {errors.logoUrl.message}
-                </p>
-              )}
-            </div>
+            {data?.sponsor != null && validId != null && (
+              <div className="space-y-2 sm:col-span-2">
+                <ImageUploadField
+                  entity="sponsor"
+                  entityId={data.sponsor.id}
+                  userIdForInvalidation={validId}
+                  value={watch('logoUrl')}
+                  onValueChange={(v) =>
+                    setValue('logoUrl', v, { shouldDirty: true, shouldValidate: true })
+                  }
+                  label="Logo do patrocinador"
+                  description="Substitui o envio por URL manual; o ficheiro é guardado no armazenamento (R2)."
+                  disabled={formDisabled}
+                />
+                {errors.logoUrl && (
+                  <p className="text-sm text-destructive" role="alert">
+                    {errors.logoUrl.message}
+                  </p>
+                )}
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="edit-site">Site (opcional)</Label>
               <Input

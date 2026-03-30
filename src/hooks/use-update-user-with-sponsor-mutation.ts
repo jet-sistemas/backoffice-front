@@ -27,6 +27,7 @@ function buildUpdatePayload(values: SponsorEditFormData): UserWithSponsorUpdateD
     email: values.email.trim(),
     name: values.name.trim(),
     document: documentDigits.length > 0 ? documentDigits : values.document.trim(),
+    ...(values.avatarUrl != null ? { avatarUrl: values.avatarUrl } : {}),
     sponsor,
   }
 }

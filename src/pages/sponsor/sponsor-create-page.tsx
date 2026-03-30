@@ -118,9 +118,9 @@ export function SponsorCreatePage() {
             Novo patrocinador
           </h1>
           <p className="text-sm text-muted-foreground">
-            Cadastro vinculado a um usuário do tipo patrocinador. A senha temporária
-            padrão é definida pelo sistema (ex.: temp@1234); o patrocinador deve
-            alterá-la no primeiro acesso.
+            Cadastro vinculado a um usuário do tipo patrocinador. Após criar, você será
+            direcionado à edição para enviar logo e avatar (R2). A senha temporária
+            padrão é definida pelo sistema (ex.: temp@1234).
           </p>
         </div>
       </div>
@@ -329,20 +329,6 @@ export function SponsorCreatePage() {
                 )}
               </div>
             )}
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="logoUrl">URL da logo (opcional)</Label>
-              <Input
-                id="logoUrl"
-                placeholder="https://..."
-                aria-invalid={Boolean(errors.logoUrl)}
-                {...register('logoUrl')}
-              />
-              {errors.logoUrl && (
-                <p className="text-sm text-destructive" role="alert">
-                  {errors.logoUrl.message}
-                </p>
-              )}
-            </div>
             <div className="space-y-2">
               <Label htmlFor="site">Site (opcional)</Label>
               <Input id="site" placeholder="https://..." {...register('site')} />

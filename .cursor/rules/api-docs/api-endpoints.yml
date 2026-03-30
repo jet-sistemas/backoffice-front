@@ -5,8 +5,8 @@ components:
     AuthCreateDTO:
       type: object
       required:
-        - email
-        - password
+      - email
+      - password
       properties:
         email:
           type: string
@@ -40,7 +40,7 @@ components:
     BenefitCreateDTO:
       type: object
       required:
-        - name
+      - name
       properties:
         name:
           type: string
@@ -91,8 +91,8 @@ components:
         status:
           type: string
           enum:
-            - OK
-            - ERROR
+          - OK
+          - ERROR
           description: OK em sucesso ou ERROR em falha
         statusCode:
           type: integer
@@ -138,8 +138,8 @@ components:
         status:
           type: string
           enum:
-            - OK
-            - ERROR
+          - OK
+          - ERROR
           description: OK em sucesso ou ERROR em falha
         statusCode:
           type: integer
@@ -185,8 +185,8 @@ components:
         status:
           type: string
           enum:
-            - OK
-            - ERROR
+          - OK
+          - ERROR
           description: OK em sucesso ou ERROR em falha
         statusCode:
           type: integer
@@ -227,15 +227,14 @@ components:
           description: Stack trace em ambiente de desenvolvimento (erros)
     EnvelopeBenefitListDTO:
       type: object
-      description:
-        "Resposta paginada: data é a lista de benefícios; totalElements,\
+      description: "Resposta paginada: data é a lista de benefícios; totalElements,\
         \ totalPages, pageSize e currentPage quando aplicável"
       properties:
         status:
           type: string
           enum:
-            - OK
-            - ERROR
+          - OK
+          - ERROR
           description: OK em sucesso ou ERROR em falha
         statusCode:
           type: integer
@@ -277,17 +276,17 @@ components:
           description: Stack trace em ambiente de desenvolvimento (erros)
     EnvelopeErrorDTO:
       type: object
-      description:
-        "Envelope de erro retornado pelo GlobalExceptionMapper. `status`\
-        \ = ERROR e `statusCode` espelha o HTTP. Em 400 por Bean Validation, prefira\
-        \ `messages`; nos demais casos, `message`. Em 500, `stackTrace` pode aparecer\
-        \ em desenvolvimento."
+      description: "Envelope de erro padronizado (`ResponseModel`). `status` = ERROR\
+        \ e `statusCode` espelha o HTTP. Em 400 por Bean Validation na borda REST,\
+        \ `RestValidationExceptionMapper` preenche `messages`; demais erros passam\
+        \ pelo `GlobalExceptionMapper` (prefira `message` ou `messages` conforme o\
+        \ caso). Em 500, `stackTrace` pode aparecer em desenvolvimento."
       properties:
         status:
           type: string
           enum:
-            - OK
-            - ERROR
+          - OK
+          - ERROR
           description: OK em sucesso ou ERROR em falha
         statusCode:
           type: integer
@@ -324,6 +323,147 @@ components:
           items:
             type: string
           description: Stack trace em ambiente de desenvolvimento (erros)
+    EnvelopeUploadConfirmDTO:
+      type: object
+      description: Resposta da confirmação de upload (vínculo persistido)
+      properties:
+        status:
+          type: string
+          enum:
+          - OK
+          - ERROR
+          description: OK em sucesso ou ERROR em falha
+        statusCode:
+          type: integer
+          format: int32
+          description: Código HTTP da operação
+        message:
+          type: string
+          description: Mensagem única de erro (quando aplicável)
+        messages:
+          type: array
+          items:
+            type: string
+          description: Lista de mensagens de erro ou validação (quando aplicável)
+        data:
+          $ref: "#/components/schemas/UploadConfirmResponseDTO"
+          type: object
+          description: Payload em sucesso; em erro costuma ser omitido ou null
+        totalElements:
+          type: integer
+          format: int64
+          description: Total de elementos (listagens paginadas)
+        totalPages:
+          type: integer
+          format: int32
+          description: Total de páginas (listagens paginadas)
+        pageSize:
+          type: integer
+          format: int32
+          description: Tamanho da página (listagens paginadas)
+        currentPage:
+          type: integer
+          format: int32
+          description: "Página atual, 1-based (listagens paginadas)"
+        stackTrace:
+          type: array
+          items:
+            type: string
+          description: Stack trace em ambiente de desenvolvimento (erros)
+    EnvelopeUploadDeleteDTO:
+      type: object
+      description: Resposta da exclusão de imagem no armazenamento
+      properties:
+        status:
+          type: string
+          enum:
+          - OK
+          - ERROR
+          description: OK em sucesso ou ERROR em falha
+        statusCode:
+          type: integer
+          format: int32
+          description: Código HTTP da operação
+        message:
+          type: string
+          description: Mensagem única de erro (quando aplicável)
+        messages:
+          type: array
+          items:
+            type: string
+          description: Lista de mensagens de erro ou validação (quando aplicável)
+        data:
+          $ref: "#/components/schemas/UploadDeleteResponseDTO"
+          type: object
+          description: Payload em sucesso; em erro costuma ser omitido ou null
+        totalElements:
+          type: integer
+          format: int64
+          description: Total de elementos (listagens paginadas)
+        totalPages:
+          type: integer
+          format: int32
+          description: Total de páginas (listagens paginadas)
+        pageSize:
+          type: integer
+          format: int32
+          description: Tamanho da página (listagens paginadas)
+        currentPage:
+          type: integer
+          format: int32
+          description: "Página atual, 1-based (listagens paginadas)"
+        stackTrace:
+          type: array
+          items:
+            type: string
+          description: Stack trace em ambiente de desenvolvimento (erros)
+    EnvelopeUploadInitDTO:
+      type: object
+      description: Resposta do início de upload (URL assinada e chave do objeto)
+      properties:
+        status:
+          type: string
+          enum:
+          - OK
+          - ERROR
+          description: OK em sucesso ou ERROR em falha
+        statusCode:
+          type: integer
+          format: int32
+          description: Código HTTP da operação
+        message:
+          type: string
+          description: Mensagem única de erro (quando aplicável)
+        messages:
+          type: array
+          items:
+            type: string
+          description: Lista de mensagens de erro ou validação (quando aplicável)
+        data:
+          $ref: "#/components/schemas/UploadInitResponseDTO"
+          type: object
+          description: Payload em sucesso; em erro costuma ser omitido ou null
+        totalElements:
+          type: integer
+          format: int64
+          description: Total de elementos (listagens paginadas)
+        totalPages:
+          type: integer
+          format: int32
+          description: Total de páginas (listagens paginadas)
+        pageSize:
+          type: integer
+          format: int32
+          description: Tamanho da página (listagens paginadas)
+        currentPage:
+          type: integer
+          format: int32
+          description: "Página atual, 1-based (listagens paginadas)"
+        stackTrace:
+          type: array
+          items:
+            type: string
+          description: Stack trace em ambiente de desenvolvimento (erros)
     EnvelopeUserWithSponsorDTO:
       type: object
       description: Resposta padrão da API com um usuário (e patrocinador quando aplicável)
@@ -331,8 +471,8 @@ components:
         status:
           type: string
           enum:
-            - OK
-            - ERROR
+          - OK
+          - ERROR
           description: OK em sucesso ou ERROR em falha
         statusCode:
           type: integer
@@ -373,15 +513,14 @@ components:
           description: Stack trace em ambiente de desenvolvimento (erros)
     EnvelopeUserWithSponsorListDTO:
       type: object
-      description:
-        "Resposta paginada: data é a lista de usuários; totalElements,\
+      description: "Resposta paginada: data é a lista de usuários; totalElements,\
         \ totalPages, pageSize e currentPage quando aplicável"
       properties:
         status:
           type: string
           enum:
-            - OK
-            - ERROR
+          - OK
+          - ERROR
           description: OK em sucesso ou ERROR em falha
         statusCode:
           type: integer
@@ -428,8 +567,8 @@ components:
         status:
           type: string
           enum:
-            - OK
-            - ERROR
+          - OK
+          - ERROR
           description: OK em sucesso ou ERROR em falha
         statusCode:
           type: integer
@@ -470,7 +609,7 @@ components:
       type: string
       format: date-time
       examples:
-        - 2022-03-10T16:15:50Z
+      - 2022-03-10T16:15:50Z
     ResponseModel:
       type: object
       description: Envelope padrão de todas as respostas HTTP
@@ -478,8 +617,8 @@ components:
         status:
           type: string
           enum:
-            - OK
-            - ERROR
+          - OK
+          - ERROR
           description: OK em sucesso ou ERROR em falha
         statusCode:
           type: integer
@@ -551,9 +690,9 @@ components:
     SponsorDataCreateDTO:
       type: object
       required:
-        - publicName
-        - tier
-        - entityType
+      - publicName
+      - tier
+      - entityType
       properties:
         publicName:
           type: string
@@ -598,10 +737,10 @@ components:
     SponsorEntityTypeEnum:
       type: string
       enum:
-        - PERSON
-        - COMPANY
-        - GOVERNMENT
-        - NGO
+      - PERSON
+      - COMPANY
+      - GOVERNMENT
+      - NGO
     SponsorMinDTO:
       type: object
       properties:
@@ -619,23 +758,112 @@ components:
     SponsorPersonaEnum:
       type: string
       enum:
-        - POLITICIAN
-        - INFLUENCER
-        - ATHLETE
-        - OTHER
+      - POLITICIAN
+      - INFLUENCER
+      - ATHLETE
+      - OTHER
     SponsorTierEnum:
       type: string
       enum:
-        - BRONZE
-        - SILVER
-        - GOLD
+      - BRONZE
+      - SILVER
+      - GOLD
+    UploadConfirmDTO:
+      type: object
+      required:
+      - entity
+      - entityId
+      - objectKey
+      properties:
+        entity:
+          $ref: "#/components/schemas/UploadTargetEnum"
+        entityId:
+          type: integer
+          format: int64
+        objectKey:
+          type: string
+          pattern: \S
+    UploadConfirmResponseDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        entity:
+          type: string
+        entityId:
+          type: integer
+          format: int64
+        objectKey:
+          type: string
+        url:
+          type: string
+    UploadDeleteDTO:
+      type: object
+      required:
+      - entity
+      - entityId
+      - objectKey
+      properties:
+        entity:
+          $ref: "#/components/schemas/UploadTargetEnum"
+        entityId:
+          type: integer
+          format: int64
+        objectKey:
+          type: string
+          pattern: \S
+    UploadDeleteResponseDTO:
+      type: object
+      properties:
+        success:
+          type: boolean
+    UploadInitDTO:
+      type: object
+      required:
+      - entity
+      - entityId
+      - contentType
+      - size
+      properties:
+        entity:
+          $ref: "#/components/schemas/UploadTargetEnum"
+        entityId:
+          type: integer
+          format: int64
+        fileName:
+          type: string
+        contentType:
+          type: string
+          pattern: \S
+        size:
+          type: integer
+          format: int64
+          minimum: 1
+    UploadInitResponseDTO:
+      type: object
+      properties:
+        objectKey:
+          type: string
+        uploadUrl:
+          type: string
+        publicUrl:
+          type: string
+        expiresIn:
+          type: integer
+          format: int32
+    UploadTargetEnum:
+      type: string
+      enum:
+      - user
+      - sponsor
     UserCreateDTO:
       type: object
       required:
-        - email
-        - name
-        - document
-        - code
+      - email
+      - name
+      - document
+      - code
       properties:
         email:
           type: string
@@ -672,14 +900,14 @@ components:
     UserTypeEnum:
       type: string
       enum:
-        - ADM
-        - SPONSOR
-        - MEMBER
-        - SPONSOR_MEMBER
+      - ADM
+      - SPONSOR
+      - MEMBER
+      - SPONSOR_MEMBER
     UserWithSponsorCreateDTO:
       type: object
       required:
-        - user
+      - user
       properties:
         user:
           $ref: "#/components/schemas/UserCreateDTO"
@@ -731,42 +959,75 @@ components:
       scheme: bearer
       bearerFormat: JWT
 tags:
-  - name: Admin - Benefícios
-  - name: Admin - Usuários
-  - name: Auth
-    description: Autenticação e dados do usuário logado
+- name: Admin - Benefícios
+- name: Admin - Uploads
+- name: Admin - Usuários
+- name: Auth
+  description: Autenticação e dados do usuário logado
 paths:
   /v1/admin/benefit:
     get:
       summary: Listar benefícios
       description: Listagem paginada com filtros por patrocinador e status de ativação.
       tags:
-        - Admin - Benefícios
+      - Admin - Benefícios
       parameters:
-        - description: Filtrar por benefício ativo/inativo
-          name: isActive
-          in: query
-          schema:
-            type: boolean
-        - description: Número da página (0-based)
-          name: page
-          in: query
-          schema:
-            type: integer
-            format: int32
-        - description: Itens por página
-          name: size
-          in: query
-          schema:
-            type: integer
-            format: int32
-        - description: ID do patrocinador
-          name: sponsorId
-          in: query
-          schema:
-            type: integer
-            format: int64
+      - description: Filtrar por benefício ativo/inativo
+        name: isActive
+        in: query
+        schema:
+          type: boolean
+      - description: Número da página (0-based)
+        name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - description: Itens por página
+        name: size
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - description: ID do patrocinador
+        name: sponsorId
+        in: query
+        schema:
+          type: integer
+          format: int64
       responses:
+        "400":
+          description: "Validação (Bean Validation), requisição inválida (BadRequestException)\
+            \ ou regra de negócio com HTTP 400 (BusinessException)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "403":
+          description: Acesso negado (ForbiddenException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "404":
+          description: Recurso não encontrado (NotFoundException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "409":
+          description: Conflito (ConflictException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "500":
+          description: "Erro interno ou exceção não mapeada; corpo com mensagem padronizada\
+            \ e, em desenvolvimento, `stackTrace`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
         "200":
           description: Lista paginada de benefícios
           content:
@@ -775,18 +1036,15 @@ paths:
                 $ref: "#/components/schemas/EnvelopeBenefitListDTO"
         "401":
           description: Not Authorized
-        "403":
-          description: Not Allowed
       security:
-        - bearerAuth:
-            - ADM
+      - bearerAuth:
+        - ADM
     post:
       summary: Criar benefício
-      description:
-        "Cria um benefício geral ou vinculado a um patrocinador. Se sponsorId\
+      description: "Cria um benefício geral ou vinculado a um patrocinador. Se sponsorId\
         \ informado, valida existência."
       tags:
-        - Admin - Benefícios
+      - Admin - Benefícios
       requestBody:
         content:
           application/json:
@@ -794,6 +1052,38 @@ paths:
               $ref: "#/components/schemas/BenefitCreateDTO"
         required: true
       responses:
+        "400":
+          description: "Validação (Bean Validation), requisição inválida (BadRequestException)\
+            \ ou regra de negócio com HTTP 400 (BusinessException)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "403":
+          description: Acesso negado (ForbiddenException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "404":
+          description: Recurso não encontrado (NotFoundException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "409":
+          description: Conflito (ConflictException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "500":
+          description: "Erro interno ou exceção não mapeada; corpo com mensagem padronizada\
+            \ e, em desenvolvimento, `stackTrace`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
         "201":
           description: Benefício criado
           content:
@@ -802,26 +1092,23 @@ paths:
                 $ref: "#/components/schemas/EnvelopeBenefitDTO"
         "401":
           description: Not Authorized
-        "403":
-          description: Not Allowed
       security:
-        - bearerAuth:
-            - ADM
+      - bearerAuth:
+        - ADM
   /v1/admin/benefit/{id}:
     put:
       summary: Atualizar benefício
-      description:
-        Atualização parcial. Permite vincular/desvincular patrocinador
+      description: Atualização parcial. Permite vincular/desvincular patrocinador
         via sponsorId.
       tags:
-        - Admin - Benefícios
+      - Admin - Benefícios
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
       requestBody:
         content:
           application/json:
@@ -829,6 +1116,38 @@ paths:
               $ref: "#/components/schemas/BenefitUpdateDTO"
         required: true
       responses:
+        "400":
+          description: "Validação (Bean Validation), requisição inválida (BadRequestException)\
+            \ ou regra de negócio com HTTP 400 (BusinessException)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "403":
+          description: Acesso negado (ForbiddenException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "404":
+          description: Recurso não encontrado (NotFoundException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "409":
+          description: Conflito (ConflictException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "500":
+          description: "Erro interno ou exceção não mapeada; corpo com mensagem padronizada\
+            \ e, em desenvolvimento, `stackTrace`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
         "200":
           description: Benefício atualizado
           content:
@@ -837,24 +1156,54 @@ paths:
                 $ref: "#/components/schemas/EnvelopeBenefitDTO"
         "401":
           description: Not Authorized
-        "403":
-          description: Not Allowed
       security:
-        - bearerAuth:
-            - ADM
+      - bearerAuth:
+        - ADM
     get:
       summary: Buscar benefício por ID
       description: Retorna o benefício com dados mínimos do patrocinador quando vinculado.
       tags:
-        - Admin - Benefícios
+      - Admin - Benefícios
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
       responses:
+        "400":
+          description: "Validação (Bean Validation), requisição inválida (BadRequestException)\
+            \ ou regra de negócio com HTTP 400 (BusinessException)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "403":
+          description: Acesso negado (ForbiddenException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "404":
+          description: Recurso não encontrado (NotFoundException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "409":
+          description: Conflito (ConflictException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "500":
+          description: "Erro interno ou exceção não mapeada; corpo com mensagem padronizada\
+            \ e, em desenvolvimento, `stackTrace`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
         "200":
           description: Benefício encontrado
           content:
@@ -863,24 +1212,54 @@ paths:
                 $ref: "#/components/schemas/EnvelopeBenefitDTO"
         "401":
           description: Not Authorized
-        "403":
-          description: Not Allowed
       security:
-        - bearerAuth:
-            - ADM
+      - bearerAuth:
+        - ADM
     delete:
       summary: Excluir benefício
       description: Exclusão física e irreversível do benefício.
       tags:
-        - Admin - Benefícios
+      - Admin - Benefícios
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
       responses:
+        "400":
+          description: "Validação (Bean Validation), requisição inválida (BadRequestException)\
+            \ ou regra de negócio com HTTP 400 (BusinessException)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "403":
+          description: Acesso negado (ForbiddenException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "404":
+          description: Recurso não encontrado (NotFoundException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "409":
+          description: Conflito (ConflictException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "500":
+          description: "Erro interno ou exceção não mapeada; corpo com mensagem padronizada\
+            \ e, em desenvolvimento, `stackTrace`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
         "200":
           description: Benefício excluído
           content:
@@ -889,25 +1268,55 @@ paths:
                 $ref: "#/components/schemas/EnvelopeVoid"
         "401":
           description: Not Authorized
-        "403":
-          description: Not Allowed
       security:
-        - bearerAuth:
-            - ADM
+      - bearerAuth:
+        - ADM
   /v1/admin/benefit/{id}/deactivate:
     patch:
       summary: Desativar benefício
       description: Desativação lógica (soft delete). Define isActive como false.
       tags:
-        - Admin - Benefícios
+      - Admin - Benefícios
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
       responses:
+        "400":
+          description: "Validação (Bean Validation), requisição inválida (BadRequestException)\
+            \ ou regra de negócio com HTTP 400 (BusinessException)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "403":
+          description: Acesso negado (ForbiddenException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "404":
+          description: Recurso não encontrado (NotFoundException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "409":
+          description: Conflito (ConflictException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "500":
+          description: "Erro interno ou exceção não mapeada; corpo com mensagem padronizada\
+            \ e, em desenvolvimento, `stackTrace`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
         "200":
           description: Benefício desativado
           content:
@@ -916,48 +1325,287 @@ paths:
                 $ref: "#/components/schemas/EnvelopeVoid"
         "401":
           description: Not Authorized
-        "403":
-          description: Not Allowed
       security:
-        - bearerAuth:
-            - ADM
+      - bearerAuth:
+        - ADM
+  /v1/admin/uploads:
+    delete:
+      summary: Remover imagem
+      description: Remove o objeto no R2 e limpa avatar_url ou logo_url quando a chave
+        coincide com a atual.
+      tags:
+      - Admin - Uploads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadDeleteDTO"
+        required: true
+      responses:
+        "400":
+          description: Validação ou requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "401":
+          description: Não autenticado
+        "403":
+          description: Sem permissão
+        "404":
+          description: Recurso ou objeto não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "413":
+          description: Arquivo excede o tamanho máximo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "415":
+          description: Content-Type não suportado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "429":
+          description: Limite de requisições de upload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "503":
+          description: Armazenamento não configurado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "200":
+          description: Sucesso (idempotente se já não houver imagem)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeUploadDeleteDTO"
+      security:
+      - bearerAuth:
+        - ADM
+  /v1/admin/uploads/confirm:
+    post:
+      summary: Confirmar upload
+      description: Valida o objeto no bucket e persiste avatar_url ou logo_url (path
+        relativo).
+      tags:
+      - Admin - Uploads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadConfirmDTO"
+        required: true
+      responses:
+        "400":
+          description: Validação ou requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "401":
+          description: Não autenticado
+        "403":
+          description: Sem permissão
+        "404":
+          description: Recurso ou objeto não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "413":
+          description: Arquivo excede o tamanho máximo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "415":
+          description: Content-Type não suportado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "429":
+          description: Limite de requisições de upload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "503":
+          description: Armazenamento não configurado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "200":
+          description: Vínculo atualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeUploadConfirmDTO"
+      security:
+      - bearerAuth:
+        - ADM
+  /v1/admin/uploads/init:
+    post:
+      summary: Iniciar upload
+      description: "Retorna URL assinada (PUT) para envio direto ao R2. entity: user\
+        \ (avatar) ou sponsor (logo); entityId: id do User ou do Sponsor."
+      tags:
+      - Admin - Uploads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadInitDTO"
+        required: true
+      responses:
+        "400":
+          description: Validação ou requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "401":
+          description: Não autenticado
+        "403":
+          description: Sem permissão
+        "404":
+          description: Recurso ou objeto não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "413":
+          description: Arquivo excede o tamanho máximo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "415":
+          description: Content-Type não suportado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "429":
+          description: Limite de requisições de upload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "503":
+          description: Armazenamento não configurado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "200":
+          description: URL gerada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeUploadInitDTO"
+      security:
+      - bearerAuth:
+        - ADM
   /v1/admin/user:
     get:
       summary: Listar usuários
-      description:
-        "Listagem paginada com filtros por tipo, tier e status de ativaç\
+      description: "Listagem paginada com filtros por tipo, tier e status de ativaç\
         ão."
       tags:
-        - Admin - Usuários
+      - Admin - Usuários
       parameters:
-        - description: Filtrar por conta ativa/inativa
-          name: isActive
-          in: query
-          schema:
-            type: boolean
-        - description: Número da página (1-based)
-          name: page
-          in: query
-          schema:
-            type: integer
-            format: int32
-        - description: Itens por página
-          name: size
-          in: query
-          schema:
-            type: integer
-            format: int32
-        - description: Tier do patrocinador
-          name: tier
-          in: query
-          schema:
-            $ref: "#/components/schemas/SponsorTierEnum"
-        - description: Tipo do usuário
-          name: type
-          in: query
-          schema:
-            $ref: "#/components/schemas/UserTypeEnum"
+      - description: Filtrar por conta ativa/inativa
+        name: isActive
+        in: query
+        schema:
+          type: boolean
+      - description: Número da página (0-based)
+        name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - description: Itens por página
+        name: size
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - description: Tier do patrocinador
+        schema:
+          enum:
+          - BRONZE
+          - SILVER
+          - GOLD
+        name: tier
+        in: query
+      - description: Tipo do usuário
+        name: type
+        in: query
+        schema:
+          type: string
       responses:
+        "400":
+          description: "Validação (Bean Validation), requisição inválida (BadRequestException)\
+            \ ou regra de negócio com HTTP 400 (BusinessException)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "403":
+          description: Acesso negado (ForbiddenException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "404":
+          description: Recurso não encontrado (NotFoundException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "409":
+          description: Conflito (ConflictException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "500":
+          description: "Erro interno ou exceção não mapeada; corpo com mensagem padronizada\
+            \ e, em desenvolvimento, `stackTrace`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
         "200":
           description: Lista paginada de usuários
           content:
@@ -966,18 +1614,15 @@ paths:
                 $ref: "#/components/schemas/EnvelopeUserWithSponsorListDTO"
         "401":
           description: Not Authorized
-        "403":
-          description: Not Allowed
       security:
-        - bearerAuth:
-            - ADM
+      - bearerAuth:
+        - ADM
     post:
       summary: Criar usuário
-      description:
-        Cria um novo usuário com dados opcionais de patrocinador. Tipo
+      description: Cria um novo usuário com dados opcionais de patrocinador. Tipo
         MEMBER e SPONSOR_MEMBER ainda não implementados.
       tags:
-        - Admin - Usuários
+      - Admin - Usuários
       requestBody:
         content:
           application/json:
@@ -985,6 +1630,38 @@ paths:
               $ref: "#/components/schemas/UserWithSponsorCreateDTO"
         required: true
       responses:
+        "400":
+          description: "Validação (Bean Validation), requisição inválida (BadRequestException)\
+            \ ou regra de negócio com HTTP 400 (BusinessException)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "403":
+          description: Acesso negado (ForbiddenException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "404":
+          description: Recurso não encontrado (NotFoundException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "409":
+          description: Conflito (ConflictException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "500":
+          description: "Erro interno ou exceção não mapeada; corpo com mensagem padronizada\
+            \ e, em desenvolvimento, `stackTrace`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
         "201":
           description: Usuário criado
           content:
@@ -993,26 +1670,23 @@ paths:
                 $ref: "#/components/schemas/EnvelopeUserWithSponsorDTO"
         "401":
           description: Not Authorized
-        "403":
-          description: Not Allowed
       security:
-        - bearerAuth:
-            - ADM
+      - bearerAuth:
+        - ADM
   /v1/admin/user/{id}:
     put:
       summary: Atualizar usuário
-      description:
-        "Atualização parcial do usuário e do patrocinador vinculado, quando\
+      description: "Atualização parcial do usuário e do patrocinador vinculado, quando\
         \ aplicável."
       tags:
-        - Admin - Usuários
+      - Admin - Usuários
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
       requestBody:
         content:
           application/json:
@@ -1020,6 +1694,38 @@ paths:
               $ref: "#/components/schemas/UserWithSponsorUpdateDTO"
         required: true
       responses:
+        "400":
+          description: "Validação (Bean Validation), requisição inválida (BadRequestException)\
+            \ ou regra de negócio com HTTP 400 (BusinessException)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "403":
+          description: Acesso negado (ForbiddenException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "404":
+          description: Recurso não encontrado (NotFoundException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "409":
+          description: Conflito (ConflictException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "500":
+          description: "Erro interno ou exceção não mapeada; corpo com mensagem padronizada\
+            \ e, em desenvolvimento, `stackTrace`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
         "200":
           description: Usuário atualizado
           content:
@@ -1028,24 +1734,54 @@ paths:
                 $ref: "#/components/schemas/EnvelopeUserWithSponsorDTO"
         "401":
           description: Not Authorized
-        "403":
-          description: Not Allowed
       security:
-        - bearerAuth:
-            - ADM
+      - bearerAuth:
+        - ADM
     get:
       summary: Buscar usuário por ID
       description: Retorna o usuário com dados de patrocinador embutidos quando aplicável.
       tags:
-        - Admin - Usuários
+      - Admin - Usuários
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
       responses:
+        "400":
+          description: "Validação (Bean Validation), requisição inválida (BadRequestException)\
+            \ ou regra de negócio com HTTP 400 (BusinessException)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "403":
+          description: Acesso negado (ForbiddenException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "404":
+          description: Recurso não encontrado (NotFoundException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "409":
+          description: Conflito (ConflictException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "500":
+          description: "Erro interno ou exceção não mapeada; corpo com mensagem padronizada\
+            \ e, em desenvolvimento, `stackTrace`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
         "200":
           description: Usuário encontrado
           content:
@@ -1054,26 +1790,55 @@ paths:
                 $ref: "#/components/schemas/EnvelopeUserWithSponsorDTO"
         "401":
           description: Not Authorized
-        "403":
-          description: Not Allowed
       security:
-        - bearerAuth:
-            - ADM
+      - bearerAuth:
+        - ADM
     delete:
       summary: Excluir usuário
-      description:
-        Exclusão física e irreversível. Remove em cascata sponsor e benefícios
+      description: Exclusão física e irreversível. Remove em cascata sponsor e benefícios
         vinculados.
       tags:
-        - Admin - Usuários
+      - Admin - Usuários
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
       responses:
+        "400":
+          description: "Validação (Bean Validation), requisição inválida (BadRequestException)\
+            \ ou regra de negócio com HTTP 400 (BusinessException)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "403":
+          description: Acesso negado (ForbiddenException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "404":
+          description: Recurso não encontrado (NotFoundException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "409":
+          description: Conflito (ConflictException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "500":
+          description: "Erro interno ou exceção não mapeada; corpo com mensagem padronizada\
+            \ e, em desenvolvimento, `stackTrace`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
         "200":
           description: Usuário excluído
           content:
@@ -1082,27 +1847,56 @@ paths:
                 $ref: "#/components/schemas/EnvelopeVoid"
         "401":
           description: Not Authorized
-        "403":
-          description: Not Allowed
       security:
-        - bearerAuth:
-            - ADM
+      - bearerAuth:
+        - ADM
   /v1/admin/user/{id}/deactivate:
     patch:
       summary: Desativar usuário
-      description:
-        "Desativação lógica. Se SPONSOR, desativa também o patrocinador\
+      description: "Desativação lógica. Se SPONSOR, desativa também o patrocinador\
         \ e seus benefícios."
       tags:
-        - Admin - Usuários
+      - Admin - Usuários
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
       responses:
+        "400":
+          description: "Validação (Bean Validation), requisição inválida (BadRequestException)\
+            \ ou regra de negócio com HTTP 400 (BusinessException)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "403":
+          description: Acesso negado (ForbiddenException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "404":
+          description: Recurso não encontrado (NotFoundException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "409":
+          description: Conflito (ConflictException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "500":
+          description: "Erro interno ou exceção não mapeada; corpo com mensagem padronizada\
+            \ e, em desenvolvimento, `stackTrace`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
         "200":
           description: Usuário desativado
           content:
@@ -1111,17 +1905,15 @@ paths:
                 $ref: "#/components/schemas/EnvelopeVoid"
         "401":
           description: Not Authorized
-        "403":
-          description: Not Allowed
       security:
-        - bearerAuth:
-            - ADM
+      - bearerAuth:
+        - ADM
   /v1/auth:
     post:
       summary: Login
       description: Autentica o usuário e retorna um token JWT
       tags:
-        - Auth
+      - Auth
       requestBody:
         content:
           application/json:
@@ -1129,6 +1921,38 @@ paths:
               $ref: "#/components/schemas/AuthCreateDTO"
         required: true
       responses:
+        "400":
+          description: "Validação (Bean Validation), requisição inválida (BadRequestException)\
+            \ ou regra de negócio com HTTP 400 (BusinessException)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "403":
+          description: Acesso negado (ForbiddenException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "404":
+          description: Recurso não encontrado (NotFoundException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "409":
+          description: Conflito (ConflictException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "500":
+          description: "Erro interno ou exceção não mapeada; corpo com mensagem padronizada\
+            \ e, em desenvolvimento, `stackTrace`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
         "200":
           description: Autenticação bem-sucedida
           content:
@@ -1140,8 +1964,40 @@ paths:
       summary: Dados do usuário logado
       description: Retorna os dados do usuário autenticado via token JWT
       tags:
-        - Auth
+      - Auth
       responses:
+        "400":
+          description: "Validação (Bean Validation), requisição inválida (BadRequestException)\
+            \ ou regra de negócio com HTTP 400 (BusinessException)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "403":
+          description: Acesso negado (ForbiddenException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "404":
+          description: Recurso não encontrado (NotFoundException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "409":
+          description: Conflito (ConflictException)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
+        "500":
+          description: "Erro interno ou exceção não mapeada; corpo com mensagem padronizada\
+            \ e, em desenvolvimento, `stackTrace`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
         "200":
           description: Dados do usuário
           content:
@@ -1150,13 +2006,10 @@ paths:
                 $ref: "#/components/schemas/EnvelopeAuthExtDTO"
         "401":
           description: Not Authorized
-        "403":
-          description: Not Allowed
       security:
-        - bearerAuth: []
+      - bearerAuth: []
 info:
   title: Jet Backoffice API
   version: 1.1.0
-  description:
-    API do backoffice da Associação Desportiva Artística e Cultural Joyce
+  description: API do backoffice da Associação Desportiva Artística e Cultural Joyce
     e Teatino

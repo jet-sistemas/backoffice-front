@@ -30,6 +30,7 @@ export function userWithSponsorToEditForm(
     entityType: s.entityType,
     persona,
     logoUrl: s.logoUrl,
+    avatarUrl: user.avatarUrl,
     site: s.site,
     instagram: s.instagram,
     whatsapp: s.whatsapp,

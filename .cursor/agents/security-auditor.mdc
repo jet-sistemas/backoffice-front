@@ -1,6 +1,6 @@
 ---
 name: security-auditor
-model: composer-2-fast
+model: fast
 description: Security specialist. Use when implementing auth, payments, or handling sensitive data.
 readonly: true
 is_background: true
