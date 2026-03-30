@@ -3,11 +3,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import {
   AlertCircle,
-  Ban,
   Building2,
+  Eraser,
   Gift,
   Pencil,
   RefreshCw,
+  Trash2,
 } from "lucide-react";
 
 import { ActiveSponsorSelect } from "@/components/active-sponsor-select";
@@ -468,17 +469,30 @@ export function BenefitListPage() {
                               <Pencil className="size-4" aria-hidden />
                             </Button>
                             {b.isActive ? (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="size-9 text-destructive hover:text-destructive"
-                                aria-label={`Desativar benefício ${b.name}`}
-                                disabled={deactivateMutation.isPending}
-                                onClick={() => handleDeactivate(b)}
-                              >
-                                <Ban className="size-4" aria-hidden />
-                              </Button>
+                              <>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-9 text-destructive hover:text-destructive"
+                                  aria-label={`Desativar benefício ${b.name}`}
+                                  disabled={deactivateMutation.isPending}
+                                  onClick={() => handleDeactivate(b)}
+                                >
+                                  <Eraser className="size-4" aria-hidden />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-9 text-muted-foreground"
+                                  aria-label={`Apagar benefício ${b.name} (indisponível)`}
+                                  disabled
+                                  title="Apagar registo em breve"
+                                >
+                                  <Trash2 className="size-4" aria-hidden />
+                                </Button>
+                              </>
                             ) : null}
                           </div>
                         </TableCell>
