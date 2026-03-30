@@ -2,17 +2,33 @@ import { useState } from "react";
 import {
   AlertCircle,
   Building2,
+  Eraser,
   Pencil,
   Plus,
   RefreshCw,
   Search,
+  Trash2,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
+import { ListPaginationBar } from "@/components/list-pagination-bar";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useDeactivateUserMutation } from "@/hooks/use-deactivate-user-mutation";
 import { useUserListQuery } from "@/hooks/use-user-list-query";
 import { formatDocument, uniqueById } from "@/lib/utils";
-import { ListPaginationBar } from "@/components/list-pagination-bar";
-import type { EntityTypeEnum, SponsorTierEnum } from "@/types/user";
+import type {
+  EntityTypeEnum,
+  SponsorTierEnum,
+  UserWithSponsorDTO,
+} from "@/types/user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -62,6 +78,11 @@ export function SponsorListPage() {
   const [tierFilter, setTierFilter] = useState<string>("ALL");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [searchTerm, setSearchTerm] = useState("");
+  const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
+  const [userToDeactivate, setUserToDeactivate] =
+    useState<UserWithSponsorDTO | null>(null);
+
+  const deactivateMutation = useDeactivateUserMutation();
 
   const { data, isLoading, isError, error, refetch } = useUserListQuery({
     type: "SPONSOR",
@@ -84,6 +105,26 @@ export function SponsorListPage() {
           s.name.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     : sponsors;
+
+  const closeDeactivateDialog = () => {
+    setDeactivateDialogOpen(false);
+    setUserToDeactivate(null);
+  };
+
+  const handleDeactivate = (user: UserWithSponsorDTO) => {
+    setUserToDeactivate(user);
+    setDeactivateDialogOpen(true);
+  };
+
+  const confirmDeactivate = () => {
+    if (userToDeactivate == null) return;
+    deactivateMutation.mutate(userToDeactivate.id, {
+      onSuccess: () => closeDeactivateDialog(),
+    });
+  };
+
+  const sponsorLabel = (user: UserWithSponsorDTO) =>
+    user.sponsor?.publicName ?? user.name;
 
   return (
     <div className="space-y-6">
@@ -206,7 +247,7 @@ export function SponsorListPage() {
                   <TableHead>Tier</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="hidden md:table-cell">Código</TableHead>
-                  <TableHead className="w-[52px] text-right">
+                  <TableHead className="min-w-[140px] text-right">
                     <span className="sr-only">Ações</span>
                   </TableHead>
                 </TableRow>
@@ -256,14 +297,14 @@ export function SponsorListPage() {
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={user.sponsor?.isActive ? "default" : "outline"}
+                        variant={user.isAccountActive ? "default" : "outline"}
                         className={
-                          user.sponsor?.isActive
+                          user.isAccountActive
                             ? "bg-emerald-600 text-white hover:bg-emerald-600/90"
                             : ""
                         }
                       >
-                        {user.sponsor?.isActive ? "Ativo" : "Inativo"}
+                        {user.isAccountActive ? "Ativo" : "Inativo"}
                       </Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
@@ -272,15 +313,48 @@ export function SponsorListPage() {
                       </code>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" className="size-9" asChild>
-                        <Link
-                          to="/admin/patrocinadores/$userId/editar"
-                          params={{ userId: String(user.id) }}
-                          aria-label={`Editar patrocinador ${user.sponsor?.publicName ?? user.name}`}
+                      <div className="flex justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-9"
+                          asChild
                         >
-                          <Pencil className="size-4" aria-hidden />
-                        </Link>
-                      </Button>
+                          <Link
+                            to="/admin/patrocinadores/$userId/editar"
+                            params={{ userId: String(user.id) }}
+                            aria-label={`Editar patrocinador ${sponsorLabel(user)}`}
+                          >
+                            <Pencil className="size-4" aria-hidden />
+                          </Link>
+                        </Button>
+                        {user.isAccountActive ? (
+                          <>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="size-9 text-destructive hover:text-destructive"
+                              aria-label={`Desativar patrocinador ${sponsorLabel(user)}`}
+                              disabled={deactivateMutation.isPending}
+                              onClick={() => handleDeactivate(user)}
+                            >
+                              <Eraser className="size-4" aria-hidden />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="size-9 text-muted-foreground"
+                              aria-label={`Apagar patrocinador ${sponsorLabel(user)} (indisponível)`}
+                              disabled
+                              title="Apagar registo em breve"
+                            >
+                              <Trash2 className="size-4" aria-hidden />
+                            </Button>
+                          </>
+                        ) : null}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -298,6 +372,46 @@ export function SponsorListPage() {
           </ListPaginationBar>
         </>
       )}
+
+      <AlertDialog
+        open={deactivateDialogOpen}
+        onOpenChange={(open) => {
+          if (open) return;
+          if (deactivateMutation.isPending) return;
+          closeDeactivateDialog();
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif">
+              Desativar patrocinador?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              O patrocinador{" "}
+              <span className="font-medium text-foreground">
+                &quot;
+                {userToDeactivate ? sponsorLabel(userToDeactivate) : ""}&quot;
+              </span>{" "}
+              será desativado de forma lógica: a conta deixa de poder iniciar
+              sessão, o patrocinador passa a inativo e os benefícios associados
+              a ele são desativados. O registo permanece na base de dados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel disabled={deactivateMutation.isPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={deactivateMutation.isPending}
+              onClick={confirmDeactivate}
+            >
+              {deactivateMutation.isPending ? "Desativando…" : "Desativar"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -314,7 +428,7 @@ function SponsorTableSkeleton() {
               <TableHead>Tier</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="hidden md:table-cell">Código</TableHead>
-              <TableHead className="w-[52px]" />
+              <TableHead className="min-w-[140px]" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -342,7 +456,11 @@ function SponsorTableSkeleton() {
                   <Skeleton className="h-4 w-14" />
                 </TableCell>
                 <TableCell className="text-right">
-                  <Skeleton className="ml-auto size-9 rounded-md" />
+                  <div className="flex justify-end gap-1">
+                    <Skeleton className="size-9 rounded-md" />
+                    <Skeleton className="size-9 rounded-md" />
+                    <Skeleton className="size-9 rounded-md" />
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
