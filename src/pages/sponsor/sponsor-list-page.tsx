@@ -257,109 +257,111 @@ export function SponsorListPage() {
                 {filteredSponsors.map((user) => {
                   const logoSrc = resolveR2PublicUrl(user.sponsor?.logoUrl);
                   return (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        {logoSrc ? (
-                          <img
-                            src={logoSrc}
-                            alt={user.sponsor?.publicName ?? user.name}
-                            className="size-8 rounded-md object-cover"
-                          />
-                        ) : (
-                          <div className="flex size-8 items-center justify-center rounded-md bg-muted">
-                            <Building2 className="size-4 text-muted-foreground" />
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          {logoSrc ? (
+                            <img
+                              src={logoSrc}
+                              alt={user.sponsor?.publicName ?? user.name}
+                              className="size-8 rounded-md object-cover"
+                            />
+                          ) : (
+                            <div className="flex size-8 items-center justify-center rounded-md bg-muted">
+                              <Building2 className="size-4 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="truncate font-medium">
+                              {user.sponsor?.publicName ?? user.name}
+                            </p>
+                            <p className="truncate text-xs text-muted-foreground">
+                              {user.email}
+                            </p>
                           </div>
-                        )}
-                        <div className="min-w-0">
-                          <p className="truncate font-medium">
-                            {user.sponsor?.publicName ?? user.name}
-                          </p>
-                          <p className="truncate text-xs text-muted-foreground">
-                            {user.email}
-                          </p>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      {formatDocument(user.document)}
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      <span className="text-sm text-muted-foreground">
-                        {user.sponsor?.entityType != null
-                          ? ENTITY_LABELS[user.sponsor.entityType]
-                          : "—"}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {user.sponsor?.tier && (
-                        <Badge variant={TIER_BADGE_VARIANT[user.sponsor.tier]}>
-                          {TIER_LABELS[user.sponsor.tier]}
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={user.isAccountActive ? "default" : "outline"}
-                        className={
-                          user.isAccountActive
-                            ? "bg-emerald-600 text-white hover:bg-emerald-600/90"
-                            : ""
-                        }
-                      >
-                        {user.isAccountActive ? "Ativo" : "Inativo"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
-                        {user.code}
-                      </code>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-9"
-                          asChild
-                        >
-                          <Link
-                            to="/admin/patrocinadores/$userId/editar"
-                            params={{ userId: String(user.id) }}
-                            aria-label={`Editar patrocinador ${sponsorLabel(user)}`}
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        {formatDocument(user.document)}
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        <span className="text-sm text-muted-foreground">
+                          {user.sponsor?.entityType != null
+                            ? ENTITY_LABELS[user.sponsor.entityType]
+                            : "—"}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {user.sponsor?.tier && (
+                          <Badge
+                            variant={TIER_BADGE_VARIANT[user.sponsor.tier]}
                           >
-                            <Pencil className="size-4" aria-hidden />
-                          </Link>
-                        </Button>
-                        {user.isAccountActive ? (
-                          <>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="size-9 text-destructive hover:text-destructive"
-                              aria-label={`Desativar patrocinador ${sponsorLabel(user)}`}
-                              disabled={deactivateMutation.isPending}
-                              onClick={() => handleDeactivate(user)}
+                            {TIER_LABELS[user.sponsor.tier]}
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={user.accountActive ? "default" : "outline"}
+                          className={
+                            user.accountActive
+                              ? "bg-emerald-600 text-white hover:bg-emerald-600/90"
+                              : ""
+                          }
+                        >
+                          {user.accountActive ? "Ativo" : "Inativo"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
+                          {user.code}
+                        </code>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-9"
+                            asChild
+                          >
+                            <Link
+                              to="/admin/patrocinadores/$userId/editar"
+                              params={{ userId: String(user.id) }}
+                              aria-label={`Editar patrocinador ${sponsorLabel(user)}`}
                             >
-                              <Eraser className="size-4" aria-hidden />
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="size-9 text-muted-foreground"
-                              aria-label={`Apagar patrocinador ${sponsorLabel(user)} (indisponível)`}
-                              disabled
-                              title="Apagar registo em breve"
-                            >
-                              <Trash2 className="size-4" aria-hidden />
-                            </Button>
-                          </>
-                        ) : null}
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                              <Pencil className="size-4" aria-hidden />
+                            </Link>
+                          </Button>
+                          {user.accountActive ? (
+                            <>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="size-9 text-destructive hover:text-destructive"
+                                aria-label={`Desativar patrocinador ${sponsorLabel(user)}`}
+                                disabled={deactivateMutation.isPending}
+                                onClick={() => handleDeactivate(user)}
+                              >
+                                <Eraser className="size-4" aria-hidden />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="size-9 text-muted-foreground"
+                                aria-label={`Apagar patrocinador ${sponsorLabel(user)} (indisponível)`}
+                                disabled
+                                title="Apagar registo em breve"
+                              >
+                                <Trash2 className="size-4" aria-hidden />
+                              </Button>
+                            </>
+                          ) : null}
+                        </div>
+                      </TableCell>
+                    </TableRow>
                   );
                 })}
               </TableBody>
