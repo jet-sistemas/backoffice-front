@@ -1320,8 +1320,9 @@ paths:
   /v1/admin/user:
     get:
       summary: Listar usuários
-      description: "Listagem paginada com filtros por tipo, tier e status de ativaç\
-        ão."
+      description: "Listagem paginada com filtros por tipo, tier, tipo de entidade\
+        \ e persona do patrocinador (persona só quando entityType = PERSON), e status\
+        \ de ativação."
       tags:
       - Admin - Usuários
       parameters:
@@ -1355,6 +1356,26 @@ paths:
         in: query
         schema:
           type: string
+      - description: Tipo de entidade do patrocinador
+        name: entityType
+        in: query
+        schema:
+          type: string
+          enum:
+          - PERSON
+          - COMPANY
+          - GOVERNMENT
+          - NGO
+      - description: Persona (quando entityType = PERSON)
+        name: persona
+        in: query
+        schema:
+          type: string
+          enum:
+          - POLITICIAN
+          - INFLUENCER
+          - ATHLETE
+          - OTHER
       responses:
         "200":
           description: Lista paginada de usuários

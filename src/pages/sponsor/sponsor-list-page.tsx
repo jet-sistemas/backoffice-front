@@ -29,6 +29,7 @@ import { resolveR2PublicUrl } from "@/lib/r2-public-url";
 import { formatDocument, uniqueById } from "@/lib/utils";
 import type {
   EntityTypeEnum,
+  SponsorPersonaEnum,
   SponsorTierEnum,
   UserWithSponsorDTO,
 } from "@/types/user";
@@ -74,11 +75,20 @@ const ENTITY_LABELS: Record<EntityTypeEnum, string> = {
   NGO: "ONG",
 };
 
+const PERSONA_LABELS: Record<SponsorPersonaEnum, string> = {
+  POLITICIAN: "Político",
+  INFLUENCER: "Influenciador",
+  ATHLETE: "Atleta",
+  OTHER: "Outro",
+};
+
 const PAGE_SIZE = 10;
 
 export function SponsorListPage() {
   const [page, setPage] = useState(1);
   const [tierFilter, setTierFilter] = useState<string>("ALL");
+  const [entityTypeFilter, setEntityTypeFilter] = useState<string>("ALL");
+  const [personaFilter, setPersonaFilter] = useState<string>("ALL");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [searchTerm, setSearchTerm] = useState("");
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
@@ -96,6 +106,14 @@ export function SponsorListPage() {
   const { data, isLoading, isError, error, refetch } = useUserListQuery({
     type: "SPONSOR",
     tier: tierFilter !== "ALL" ? (tierFilter as SponsorTierEnum) : undefined,
+    entityType:
+      entityTypeFilter !== "ALL"
+        ? (entityTypeFilter as EntityTypeEnum)
+        : undefined,
+    persona:
+      entityTypeFilter === "PERSON" && personaFilter !== "ALL"
+        ? (personaFilter as SponsorPersonaEnum)
+        : undefined,
     isActive: statusFilter !== "ALL" ? statusFilter === "ACTIVE" : undefined,
     page,
     size: PAGE_SIZE,
@@ -171,7 +189,7 @@ export function SponsorListPage() {
         </Button>
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <div className="relative flex-1 sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -203,6 +221,57 @@ export function SponsorListPage() {
             <SelectItem value="BRONZE">Bronze</SelectItem>
           </SelectContent>
         </Select>
+
+        <Select
+          value={entityTypeFilter}
+          onValueChange={(v) => {
+            setEntityTypeFilter(v);
+            if (v !== "PERSON") setPersonaFilter("ALL");
+            setPage(1);
+          }}
+        >
+          <SelectTrigger
+            className="w-full sm:w-48"
+            aria-label="Filtrar por tipo de entidade"
+          >
+            <SelectValue placeholder="Tipo de entidade" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">Todos os tipos</SelectItem>
+            {(Object.keys(ENTITY_LABELS) as EntityTypeEnum[]).map((key) => (
+              <SelectItem key={key} value={key}>
+                {ENTITY_LABELS[key]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {entityTypeFilter === "PERSON" && (
+          <Select
+            value={personaFilter}
+            onValueChange={(v) => {
+              setPersonaFilter(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger
+              className="w-full sm:w-40"
+              aria-label="Filtrar por persona"
+            >
+              <SelectValue placeholder="Persona" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Todas</SelectItem>
+              {(Object.keys(PERSONA_LABELS) as SponsorPersonaEnum[]).map(
+                (key) => (
+                  <SelectItem key={key} value={key}>
+                    {PERSONA_LABELS[key]}
+                  </SelectItem>
+                ),
+              )}
+            </SelectContent>
+          </Select>
+        )}
 
         <Select
           value={statusFilter}
@@ -251,7 +320,11 @@ export function SponsorListPage() {
           <div>
             <p className="font-medium">Nenhum patrocinador encontrado</p>
             <p className="text-sm text-muted-foreground">
-              {searchTerm || tierFilter !== "ALL" || statusFilter !== "ALL"
+              {searchTerm ||
+              tierFilter !== "ALL" ||
+              entityTypeFilter !== "ALL" ||
+              personaFilter !== "ALL" ||
+              statusFilter !== "ALL"
                 ? "Tente ajustar os filtros da busca."
                 : "Comece adicionando o primeiro patrocinador."}
             </p>

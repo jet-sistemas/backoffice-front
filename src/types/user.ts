@@ -42,6 +42,8 @@ export interface UserWithSponsorDTO {
 export interface UserListParams {
   type?: UserTypeEnum;
   tier?: SponsorTierEnum;
+  entityType?: EntityTypeEnum;
+  persona?: SponsorPersonaEnum;
   isActive?: boolean;
   page: number;
   size: number;
