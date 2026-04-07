@@ -18,10 +18,11 @@ const entityTypeValues: [EntityTypeEnum, ...EntityTypeEnum[]] = [
 
 const optionalTrimmed = z
   .string()
-  .optional()
+  .nullish()
   .transform((v) => {
-    const t = v?.trim()
-    return t === '' || t == null ? undefined : t
+    if (v == null) return undefined
+    const t = v.trim()
+    return t === '' ? undefined : t
   })
 
 export const sponsorEditFormSchema = z
