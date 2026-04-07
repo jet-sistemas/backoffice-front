@@ -35,6 +35,7 @@ import type {
 } from "@/types/user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -170,6 +171,23 @@ export function SponsorListPage() {
   const sponsorLabel = (user: UserWithSponsorDTO) =>
     user.sponsor?.publicName ?? user.name;
 
+  const hasActiveServerFilters =
+    tierFilter !== "ALL" ||
+    entityTypeFilter !== "ALL" ||
+    personaFilter !== "ALL" ||
+    statusFilter !== "ALL";
+
+  const hasActiveClientSearch = searchTerm.trim().length > 0;
+
+  const clearAllFilters = () => {
+    setSearchTerm("");
+    setTierFilter("ALL");
+    setEntityTypeFilter("ALL");
+    setPersonaFilter("ALL");
+    setStatusFilter("ALL");
+    setPage(1);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -189,110 +207,157 @@ export function SponsorListPage() {
         </Button>
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-        <div className="relative flex-1 sm:max-w-xs">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por nome..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9"
-            aria-label="Buscar patrocinadores"
-          />
+      <section
+        aria-labelledby="sponsor-filters-heading"
+        className="rounded-lg border bg-card p-4 shadow-sm"
+      >
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-1">
+            <h2
+              id="sponsor-filters-heading"
+              className="text-sm font-semibold leading-none"
+            >
+              Filtrar e buscar
+            </h2>
+            <p className="max-w-2xl text-xs text-muted-foreground">
+              Os menus refinam a lista no servidor. O campo de texto oculta
+              linhas apenas entre os resultados já carregados nesta página.
+            </p>
+          </div>
+          {(hasActiveServerFilters || hasActiveClientSearch) && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="shrink-0 self-start text-muted-foreground"
+              onClick={clearAllFilters}
+            >
+              Limpar tudo
+            </Button>
+          )}
         </div>
 
-        <Select
-          value={tierFilter}
-          onValueChange={(v) => {
-            setTierFilter(v);
-            setPage(1);
-          }}
-        >
-          <SelectTrigger
-            className="w-full sm:w-40"
-            aria-label="Filtrar por tier"
-          >
-            <SelectValue placeholder="Tier" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">Todos os tiers</SelectItem>
-            <SelectItem value="OURO">Ouro</SelectItem>
-            <SelectItem value="PRATA">Prata</SelectItem>
-            <SelectItem value="BRONZE">Bronze</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="mt-4 space-y-4">
+          <div className="max-w-xl space-y-2">
+            <Label htmlFor="sponsor-search">Busca rápida na tabela</Label>
+            <div className="relative">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden
+              />
+              <Input
+                id="sponsor-search"
+                placeholder="Nome de exibição ou nome da conta…"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+                aria-describedby="sponsor-search-hint"
+              />
+            </div>
+            <p id="sponsor-search-hint" className="text-xs text-muted-foreground">
+              Corresponde ao nome público ou ao nome de usuário da linha.
+            </p>
+          </div>
 
-        <Select
-          value={entityTypeFilter}
-          onValueChange={(v) => {
-            setEntityTypeFilter(v);
-            if (v !== "PERSON") setPersonaFilter("ALL");
-            setPage(1);
-          }}
-        >
-          <SelectTrigger
-            className="w-full sm:w-48"
-            aria-label="Filtrar por tipo de entidade"
+          <div
+            className={`grid gap-4 sm:grid-cols-2 ${entityTypeFilter === "PERSON" ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}
           >
-            <SelectValue placeholder="Tipo de entidade" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">Todos os tipos</SelectItem>
-            {(Object.keys(ENTITY_LABELS) as EntityTypeEnum[]).map((key) => (
-              <SelectItem key={key} value={key}>
-                {ENTITY_LABELS[key]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {entityTypeFilter === "PERSON" && (
-          <Select
-            value={personaFilter}
-            onValueChange={(v) => {
-              setPersonaFilter(v);
-              setPage(1);
-            }}
-          >
-            <SelectTrigger
-              className="w-full sm:w-40"
-              aria-label="Filtrar por persona"
+          <div className="space-y-2">
+            <Label htmlFor="sponsor-filter-tier">Tier de patrocínio</Label>
+            <Select
+              value={tierFilter}
+              onValueChange={(v) => {
+                setTierFilter(v);
+                setPage(1);
+              }}
             >
-              <SelectValue placeholder="Persona" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">Todas</SelectItem>
-              {(Object.keys(PERSONA_LABELS) as SponsorPersonaEnum[]).map(
-                (key) => (
-                  <SelectItem key={key} value={key}>
-                    {PERSONA_LABELS[key]}
-                  </SelectItem>
-                ),
-              )}
-            </SelectContent>
-          </Select>
-        )}
+              <SelectTrigger id="sponsor-filter-tier" className="w-full">
+                <SelectValue placeholder="Selecione o tier" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Todos os tiers</SelectItem>
+                <SelectItem value="OURO">Ouro</SelectItem>
+                <SelectItem value="PRATA">Prata</SelectItem>
+                <SelectItem value="BRONZE">Bronze</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-        <Select
-          value={statusFilter}
-          onValueChange={(v) => {
-            setStatusFilter(v);
-            setPage(1);
-          }}
-        >
-          <SelectTrigger
-            className="w-full sm:w-40"
-            aria-label="Filtrar por status"
-          >
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">Todos</SelectItem>
-            <SelectItem value="ACTIVE">Ativo</SelectItem>
-            <SelectItem value="INACTIVE">Inativo</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="sponsor-filter-entity">Tipo de entidade</Label>
+            <Select
+              value={entityTypeFilter}
+              onValueChange={(v) => {
+                setEntityTypeFilter(v);
+                if (v !== "PERSON") setPersonaFilter("ALL");
+                setPage(1);
+              }}
+            >
+              <SelectTrigger id="sponsor-filter-entity" className="w-full">
+                <SelectValue placeholder="Selecione o tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Todos os tipos</SelectItem>
+                {(Object.keys(ENTITY_LABELS) as EntityTypeEnum[]).map(
+                  (key) => (
+                    <SelectItem key={key} value={key}>
+                      {ENTITY_LABELS[key]}
+                    </SelectItem>
+                  ),
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {entityTypeFilter === "PERSON" && (
+            <div className="space-y-2">
+              <Label htmlFor="sponsor-filter-persona">Perfil da pessoa</Label>
+              <Select
+                value={personaFilter}
+                onValueChange={(v) => {
+                  setPersonaFilter(v);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger id="sponsor-filter-persona" className="w-full">
+                  <SelectValue placeholder="Selecione o perfil" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Todos os perfis</SelectItem>
+                  {(Object.keys(PERSONA_LABELS) as SponsorPersonaEnum[]).map(
+                    (key) => (
+                      <SelectItem key={key} value={key}>
+                        {PERSONA_LABELS[key]}
+                      </SelectItem>
+                    ),
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="sponsor-filter-status">Situação da conta</Label>
+            <Select
+              value={statusFilter}
+              onValueChange={(v) => {
+                setStatusFilter(v);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger id="sponsor-filter-status" className="w-full">
+                <SelectValue placeholder="Selecione a situação" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Todas</SelectItem>
+                <SelectItem value="ACTIVE">Ativa</SelectItem>
+                <SelectItem value="INACTIVE">Inativa</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          </div>
+        </div>
+      </section>
 
       {isLoading && <SponsorTableSkeleton />}
 
