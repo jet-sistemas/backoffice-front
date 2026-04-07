@@ -2,7 +2,8 @@ import { useState } from "react";
 import {
   AlertCircle,
   Building2,
-  Eraser,
+  Eye,
+  EyeClosed,
   Pencil,
   Plus,
   RefreshCw,
@@ -21,6 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useActivateUserMutation } from "@/hooks/use-activate-user-mutation";
 import { useDeactivateUserMutation } from "@/hooks/use-deactivate-user-mutation";
 import { useUserListQuery } from "@/hooks/use-user-list-query";
 import { resolveR2PublicUrl } from "@/lib/r2-public-url";
@@ -82,8 +84,14 @@ export function SponsorListPage() {
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const [userToDeactivate, setUserToDeactivate] =
     useState<UserWithSponsorDTO | null>(null);
+  const [activateDialogOpen, setActivateDialogOpen] = useState(false);
+  const [userToActivate, setUserToActivate] =
+    useState<UserWithSponsorDTO | null>(null);
 
   const deactivateMutation = useDeactivateUserMutation();
+  const activateMutation = useActivateUserMutation();
+  const toggleMutationPending =
+    deactivateMutation.isPending || activateMutation.isPending;
 
   const { data, isLoading, isError, error, refetch } = useUserListQuery({
     type: "SPONSOR",
@@ -121,6 +129,23 @@ export function SponsorListPage() {
     if (userToDeactivate == null) return;
     deactivateMutation.mutate(userToDeactivate.id, {
       onSuccess: () => closeDeactivateDialog(),
+    });
+  };
+
+  const closeActivateDialog = () => {
+    setActivateDialogOpen(false);
+    setUserToActivate(null);
+  };
+
+  const handleActivate = (user: UserWithSponsorDTO) => {
+    setUserToActivate(user);
+    setActivateDialogOpen(true);
+  };
+
+  const confirmActivate = () => {
+    if (userToActivate == null) return;
+    activateMutation.mutate(userToActivate.id, {
+      onSuccess: () => closeActivateDialog(),
     });
   };
 
@@ -334,31 +359,41 @@ export function SponsorListPage() {
                             </Link>
                           </Button>
                           {user.accountActive ? (
-                            <>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="size-9 text-destructive hover:text-destructive"
-                                aria-label={`Desativar patrocinador ${sponsorLabel(user)}`}
-                                disabled={deactivateMutation.isPending}
-                                onClick={() => handleDeactivate(user)}
-                              >
-                                <Eraser className="size-4" aria-hidden />
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="size-9 text-muted-foreground"
-                                aria-label={`Apagar patrocinador ${sponsorLabel(user)} (indisponível)`}
-                                disabled
-                                title="Apagar registo em breve"
-                              >
-                                <Trash2 className="size-4" aria-hidden />
-                              </Button>
-                            </>
-                          ) : null}
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="size-9 text-destructive hover:text-accent-foreground"
+                              aria-label={`Desativar patrocinador ${sponsorLabel(user)}`}
+                              disabled={toggleMutationPending}
+                              onClick={() => handleDeactivate(user)}
+                            >
+                              <EyeClosed className="size-4" aria-hidden />
+                            </Button>
+                          ) : (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="size-9 text-sky-600 dark:text-sky-400 hover:text-accent-foreground"
+                              aria-label={`Ativar patrocinador ${sponsorLabel(user)}`}
+                              disabled={toggleMutationPending}
+                              onClick={() => handleActivate(user)}
+                            >
+                              <Eye className="size-4" aria-hidden />
+                            </Button>
+                          )}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="size-9 text-muted-foreground"
+                            aria-label={`Apagar patrocinador ${sponsorLabel(user)} (indisponível)`}
+                            disabled
+                            title="Apagar registro em breve"
+                          >
+                            <Trash2 className="size-4" aria-hidden />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -383,7 +418,7 @@ export function SponsorListPage() {
         open={deactivateDialogOpen}
         onOpenChange={(open) => {
           if (open) return;
-          if (deactivateMutation.isPending) return;
+          if (toggleMutationPending) return;
           closeDeactivateDialog();
         }}
       >
@@ -400,11 +435,11 @@ export function SponsorListPage() {
               </span>{" "}
               será desativado de forma lógica: a conta deixa de poder iniciar
               sessão, o patrocinador passa a inativo e os benefícios associados
-              a ele são desativados. O registo permanece na base de dados.
+              a ele são desativados. O registro permanece na base de dados.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 sm:gap-0">
-            <AlertDialogCancel disabled={deactivateMutation.isPending}>
+            <AlertDialogCancel disabled={toggleMutationPending}>
               Cancelar
             </AlertDialogCancel>
             <Button
@@ -414,6 +449,45 @@ export function SponsorListPage() {
               onClick={confirmDeactivate}
             >
               {deactivateMutation.isPending ? "Desativando…" : "Desativar"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={activateDialogOpen}
+        onOpenChange={(open) => {
+          if (open) return;
+          if (toggleMutationPending) return;
+          closeActivateDialog();
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif">
+              Ativar patrocinador?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              A conta do patrocinador{" "}
+              <span className="font-medium text-foreground">
+                &quot;
+                {userToActivate ? sponsorLabel(userToActivate) : ""}&quot;
+              </span>{" "}
+              será reativada: volta a poder iniciar sessão, o registro de
+              patrocinador e os benefícios associados a esse patrocinador
+              voltam a ficar ativos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel disabled={toggleMutationPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <Button
+              type="button"
+              disabled={activateMutation.isPending}
+              onClick={confirmActivate}
+            >
+              {activateMutation.isPending ? "Ativando…" : "Ativar"}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

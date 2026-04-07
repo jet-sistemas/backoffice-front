@@ -474,7 +474,7 @@ export function BenefitListPage() {
                                   type="button"
                                   variant="ghost"
                                   size="icon"
-                                  className="size-9 text-destructive hover:text-destructive"
+                                  className="size-9 text-destructive hover:text-accent-foreground"
                                   aria-label={`Desativar benefício ${b.name}`}
                                   disabled={deactivateMutation.isPending}
                                   onClick={() => handleDeactivate(b)}
@@ -488,7 +488,7 @@ export function BenefitListPage() {
                                   className="size-9 text-muted-foreground"
                                   aria-label={`Apagar benefício ${b.name} (indisponível)`}
                                   disabled
-                                  title="Apagar registo em breve"
+                                  title="Apagar registro em breve"
                                 >
                                   <Trash2 className="size-4" aria-hidden />
                                 </Button>

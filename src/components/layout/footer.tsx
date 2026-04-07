@@ -50,61 +50,62 @@ export function Footer() {
                 <p className="text-sm text-accent">Joyce e Teatino</p>
               </div>
             </Link>
-            <p className="mt-4 max-w-md text-primary-foreground/80">
-              Nascemos do amor pelo vôlei e pelo propósito de desenvolver
-              talentos no esporte, na arte e na cultura em todo o sul do Piauí.
-              Venha fazer parte dessa família!
-            </p>
+            <div className="mt-4 max-w-md space-y-6">
+              <p className="text-primary-foreground/80">
+                Nascemos do amor pelo vôlei e pelo propósito de desenvolver
+                talentos no esporte, na arte e na cultura em todo o sul do Piauí.
+                Venha fazer parte dessa família!
+              </p>
 
-            {/* Social links */}
-            <div className="mt-6 flex gap-3">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      asChild
-                      variant="secondary"
-                      size="icon"
-                      className="bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
-                    >
-                      <a
-                        href={contactInfo.instagramLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="Instagram"
+              <div className="flex gap-3">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        asChild
+                        variant="secondary"
+                        size="icon"
+                        className="bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
                       >
-                        <Instagram className="size-5" />
-                      </a>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Instagram</p>
-                  </TooltipContent>
-                </Tooltip>
+                        <a
+                          href={contactInfo.instagramLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Instagram"
+                        >
+                          <Instagram className="size-5" />
+                        </a>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Instagram</p>
+                    </TooltipContent>
+                  </Tooltip>
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      asChild
-                      variant="secondary"
-                      size="icon"
-                      className="bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
-                    >
-                      <a
-                        href={contactInfo.whatsappLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="WhatsApp"
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        asChild
+                        variant="secondary"
+                        size="icon"
+                        className="bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
                       >
-                        <MessageCircle className="size-5" />
-                      </a>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>WhatsApp</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+                        <a
+                          href={contactInfo.whatsappLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="WhatsApp"
+                        >
+                          <MessageCircle className="size-5" />
+                        </a>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>WhatsApp</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             </div>
           </div>
 

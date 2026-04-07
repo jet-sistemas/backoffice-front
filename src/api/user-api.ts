@@ -140,4 +140,8 @@ export const userApi = {
   deactivateUser(id: number) {
     return api.patch(`/v1/admin/user/${id}/deactivate`);
   },
+
+  activateUser(id: number) {
+    return api.patch(`/v1/admin/user/${id}/activate`);
+  },
 };
