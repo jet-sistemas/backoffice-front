@@ -6,11 +6,11 @@ import {
   useMemo,
   useState,
 } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { authApi } from '@/api/auth-api'
+import { TOKEN_KEY, setOnUnauthorized } from '@/lib/auth-session'
 import type { UserResponse } from '@/types/auth'
-
-const TOKEN_KEY = '@jet:token'
 
 interface AuthContextData {
   token: string | null
@@ -30,6 +30,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserResponse | null>(null)
   const [isLoadingUser, setIsLoadingUser] = useState(!!token)
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    setOnUnauthorized(() => {
+      queryClient.clear()
+      setToken(null)
+      setUser(null)
+      navigate({ to: '/login', replace: true })
+    })
+    return () => setOnUnauthorized(null)
+  }, [navigate, queryClient])
 
   useEffect(() => {
     if (!token) {

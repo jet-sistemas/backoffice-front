@@ -41,7 +41,6 @@ const navItems = [
     label: "Benefícios",
     href: "/admin/beneficios",
     icon: Gift,
-    disabled: true,
   },
 ];
 
