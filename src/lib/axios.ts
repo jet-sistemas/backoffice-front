@@ -2,7 +2,7 @@ import axios, { type InternalAxiosRequestConfig } from 'axios'
 import { TOKEN_KEY, notifySessionExpired } from '@/lib/auth-session'
 
 export const api = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: import.meta.env.VITE_BACKOFFICE_API_URL,
 })
 
 function isAuthLoginRequest(config: InternalAxiosRequestConfig | undefined) {
