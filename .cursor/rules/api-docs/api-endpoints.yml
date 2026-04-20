@@ -1,10 +1,5 @@
 ---
 openapi: 3.1.0
-tags:
-- name: Admin - Benefícios
-- name: Admin - Usuários
-- name: Auth
-  description: Autenticação e dados do usuário logado
 components:
   schemas:
     AuthCreateDTO:
@@ -19,6 +14,29 @@ components:
         password:
           type: string
           pattern: \S
+    AuthDTO:
+      type: object
+      properties:
+        accessToken:
+          type: string
+    AuthExtDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+        name:
+          type: string
+        avatarUrl:
+          type: string
+        type:
+          $ref: "#/components/schemas/UserTypeEnum"
+        createdAt:
+          $ref: "#/components/schemas/Instant"
+        isAccountActive:
+          type: boolean
     BenefitCreateDTO:
       type: object
       required:
@@ -34,6 +52,26 @@ components:
         sponsorId:
           type: integer
           format: int64
+    BenefitDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        address:
+          type: string
+        isActive:
+          type: boolean
+        sponsor:
+          $ref: "#/components/schemas/SponsorMinDTO"
+        createdAt:
+          $ref: "#/components/schemas/Instant"
+        active:
+          type: boolean
     BenefitUpdateDTO:
       type: object
       properties:
@@ -46,6 +84,695 @@ components:
         sponsorId:
           type: integer
           format: int64
+    EnvelopeAuthDTO:
+      type: object
+      description: Resposta padrão da API com dados de autenticação (token JWT)
+      properties:
+        status:
+          type: string
+          enum:
+          - OK
+          - ERROR
+          description: OK em sucesso ou ERROR em falha
+        statusCode:
+          type: integer
+          format: int32
+          description: Código HTTP da operação
+        message:
+          type: string
+          description: Mensagem única de erro (quando aplicável)
+        messages:
+          type: array
+          items:
+            type: string
+          description: Lista de mensagens de erro ou validação (quando aplicável)
+        data:
+          $ref: "#/components/schemas/AuthDTO"
+          type: object
+          description: Payload em sucesso; em erro costuma ser omitido ou null
+        totalElements:
+          type: integer
+          format: int64
+          description: Total de elementos (listagens paginadas)
+        totalPages:
+          type: integer
+          format: int32
+          description: Total de páginas (listagens paginadas)
+        pageSize:
+          type: integer
+          format: int32
+          description: Tamanho da página (listagens paginadas)
+        currentPage:
+          type: integer
+          format: int32
+          description: "Página atual, 1-based (listagens paginadas)"
+        stackTrace:
+          type: array
+          items:
+            type: string
+          description: Stack trace em ambiente de desenvolvimento (erros)
+    EnvelopeAuthExtDTO:
+      type: object
+      description: Resposta padrão da API com dados estendidos do usuário autenticado
+      properties:
+        status:
+          type: string
+          enum:
+          - OK
+          - ERROR
+          description: OK em sucesso ou ERROR em falha
+        statusCode:
+          type: integer
+          format: int32
+          description: Código HTTP da operação
+        message:
+          type: string
+          description: Mensagem única de erro (quando aplicável)
+        messages:
+          type: array
+          items:
+            type: string
+          description: Lista de mensagens de erro ou validação (quando aplicável)
+        data:
+          $ref: "#/components/schemas/AuthExtDTO"
+          type: object
+          description: Payload em sucesso; em erro costuma ser omitido ou null
+        totalElements:
+          type: integer
+          format: int64
+          description: Total de elementos (listagens paginadas)
+        totalPages:
+          type: integer
+          format: int32
+          description: Total de páginas (listagens paginadas)
+        pageSize:
+          type: integer
+          format: int32
+          description: Tamanho da página (listagens paginadas)
+        currentPage:
+          type: integer
+          format: int32
+          description: "Página atual, 1-based (listagens paginadas)"
+        stackTrace:
+          type: array
+          items:
+            type: string
+          description: Stack trace em ambiente de desenvolvimento (erros)
+    EnvelopeBenefitDTO:
+      type: object
+      description: Resposta padrão da API com um benefício
+      properties:
+        status:
+          type: string
+          enum:
+          - OK
+          - ERROR
+          description: OK em sucesso ou ERROR em falha
+        statusCode:
+          type: integer
+          format: int32
+          description: Código HTTP da operação
+        message:
+          type: string
+          description: Mensagem única de erro (quando aplicável)
+        messages:
+          type: array
+          items:
+            type: string
+          description: Lista de mensagens de erro ou validação (quando aplicável)
+        data:
+          $ref: "#/components/schemas/BenefitDTO"
+          type: object
+          description: Payload em sucesso; em erro costuma ser omitido ou null
+        totalElements:
+          type: integer
+          format: int64
+          description: Total de elementos (listagens paginadas)
+        totalPages:
+          type: integer
+          format: int32
+          description: Total de páginas (listagens paginadas)
+        pageSize:
+          type: integer
+          format: int32
+          description: Tamanho da página (listagens paginadas)
+        currentPage:
+          type: integer
+          format: int32
+          description: "Página atual, 1-based (listagens paginadas)"
+        stackTrace:
+          type: array
+          items:
+            type: string
+          description: Stack trace em ambiente de desenvolvimento (erros)
+    EnvelopeBenefitListDTO:
+      type: object
+      description: "Resposta paginada: data é a lista de benefícios; totalElements,\
+        \ totalPages, pageSize e currentPage quando aplicável"
+      properties:
+        status:
+          type: string
+          enum:
+          - OK
+          - ERROR
+          description: OK em sucesso ou ERROR em falha
+        statusCode:
+          type: integer
+          format: int32
+          description: Código HTTP da operação
+        message:
+          type: string
+          description: Mensagem única de erro (quando aplicável)
+        messages:
+          type: array
+          items:
+            type: string
+          description: Lista de mensagens de erro ou validação (quando aplicável)
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/BenefitDTO"
+          description: Payload em sucesso; em erro costuma ser omitido ou null
+        totalElements:
+          type: integer
+          format: int64
+          description: Total de elementos (listagens paginadas)
+        totalPages:
+          type: integer
+          format: int32
+          description: Total de páginas (listagens paginadas)
+        pageSize:
+          type: integer
+          format: int32
+          description: Tamanho da página (listagens paginadas)
+        currentPage:
+          type: integer
+          format: int32
+          description: "Página atual, 1-based (listagens paginadas)"
+        stackTrace:
+          type: array
+          items:
+            type: string
+          description: Stack trace em ambiente de desenvolvimento (erros)
+    EnvelopeErrorDTO:
+      type: object
+      description: "Envelope de erro padronizado (`ResponseModel`). `status` = ERROR\
+        \ e `statusCode` espelha o HTTP. Em 400 por Bean Validation na borda REST,\
+        \ `RestValidationExceptionMapper` preenche `messages`; demais erros passam\
+        \ pelo `GlobalExceptionMapper` (prefira `message` ou `messages` conforme o\
+        \ caso). Em 500, `stackTrace` pode aparecer em desenvolvimento."
+      properties:
+        status:
+          type: string
+          enum:
+          - OK
+          - ERROR
+          description: OK em sucesso ou ERROR em falha
+        statusCode:
+          type: integer
+          format: int32
+          description: Código HTTP da operação
+        message:
+          type: string
+          description: Mensagem única de erro (quando aplicável)
+        messages:
+          type: array
+          items:
+            type: string
+          description: Lista de mensagens de erro ou validação (quando aplicável)
+        data:
+          description: Payload em sucesso; em erro costuma ser omitido ou null
+        totalElements:
+          type: integer
+          format: int64
+          description: Total de elementos (listagens paginadas)
+        totalPages:
+          type: integer
+          format: int32
+          description: Total de páginas (listagens paginadas)
+        pageSize:
+          type: integer
+          format: int32
+          description: Tamanho da página (listagens paginadas)
+        currentPage:
+          type: integer
+          format: int32
+          description: "Página atual, 1-based (listagens paginadas)"
+        stackTrace:
+          type: array
+          items:
+            type: string
+          description: Stack trace em ambiente de desenvolvimento (erros)
+    EnvelopePublicSponsorListDTO:
+      type: object
+      description: "Resposta paginada: data é a lista de patrocinadores públicos;\
+        \ totalElements, totalPages, pageSize e currentPage quando aplicável"
+      properties:
+        status:
+          type: string
+          enum:
+          - OK
+          - ERROR
+          description: OK em sucesso ou ERROR em falha
+        statusCode:
+          type: integer
+          format: int32
+          description: Código HTTP da operação
+        message:
+          type: string
+          description: Mensagem única de erro (quando aplicável)
+        messages:
+          type: array
+          items:
+            type: string
+          description: Lista de mensagens de erro ou validação (quando aplicável)
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/PublicSponsorItemDTO"
+          description: Payload em sucesso; em erro costuma ser omitido ou null
+        totalElements:
+          type: integer
+          format: int64
+          description: Total de elementos (listagens paginadas)
+        totalPages:
+          type: integer
+          format: int32
+          description: Total de páginas (listagens paginadas)
+        pageSize:
+          type: integer
+          format: int32
+          description: Tamanho da página (listagens paginadas)
+        currentPage:
+          type: integer
+          format: int32
+          description: "Página atual, 1-based (listagens paginadas)"
+        stackTrace:
+          type: array
+          items:
+            type: string
+          description: Stack trace em ambiente de desenvolvimento (erros)
+    EnvelopeUploadConfirmDTO:
+      type: object
+      description: Resposta da confirmação de upload (vínculo persistido)
+      properties:
+        status:
+          type: string
+          enum:
+          - OK
+          - ERROR
+          description: OK em sucesso ou ERROR em falha
+        statusCode:
+          type: integer
+          format: int32
+          description: Código HTTP da operação
+        message:
+          type: string
+          description: Mensagem única de erro (quando aplicável)
+        messages:
+          type: array
+          items:
+            type: string
+          description: Lista de mensagens de erro ou validação (quando aplicável)
+        data:
+          $ref: "#/components/schemas/UploadConfirmResponseDTO"
+          type: object
+          description: Payload em sucesso; em erro costuma ser omitido ou null
+        totalElements:
+          type: integer
+          format: int64
+          description: Total de elementos (listagens paginadas)
+        totalPages:
+          type: integer
+          format: int32
+          description: Total de páginas (listagens paginadas)
+        pageSize:
+          type: integer
+          format: int32
+          description: Tamanho da página (listagens paginadas)
+        currentPage:
+          type: integer
+          format: int32
+          description: "Página atual, 1-based (listagens paginadas)"
+        stackTrace:
+          type: array
+          items:
+            type: string
+          description: Stack trace em ambiente de desenvolvimento (erros)
+    EnvelopeUploadDeleteDTO:
+      type: object
+      description: Resposta da exclusão de imagem no armazenamento
+      properties:
+        status:
+          type: string
+          enum:
+          - OK
+          - ERROR
+          description: OK em sucesso ou ERROR em falha
+        statusCode:
+          type: integer
+          format: int32
+          description: Código HTTP da operação
+        message:
+          type: string
+          description: Mensagem única de erro (quando aplicável)
+        messages:
+          type: array
+          items:
+            type: string
+          description: Lista de mensagens de erro ou validação (quando aplicável)
+        data:
+          $ref: "#/components/schemas/UploadDeleteResponseDTO"
+          type: object
+          description: Payload em sucesso; em erro costuma ser omitido ou null
+        totalElements:
+          type: integer
+          format: int64
+          description: Total de elementos (listagens paginadas)
+        totalPages:
+          type: integer
+          format: int32
+          description: Total de páginas (listagens paginadas)
+        pageSize:
+          type: integer
+          format: int32
+          description: Tamanho da página (listagens paginadas)
+        currentPage:
+          type: integer
+          format: int32
+          description: "Página atual, 1-based (listagens paginadas)"
+        stackTrace:
+          type: array
+          items:
+            type: string
+          description: Stack trace em ambiente de desenvolvimento (erros)
+    EnvelopeUploadInitDTO:
+      type: object
+      description: Resposta do início de upload (URL assinada e chave do objeto)
+      properties:
+        status:
+          type: string
+          enum:
+          - OK
+          - ERROR
+          description: OK em sucesso ou ERROR em falha
+        statusCode:
+          type: integer
+          format: int32
+          description: Código HTTP da operação
+        message:
+          type: string
+          description: Mensagem única de erro (quando aplicável)
+        messages:
+          type: array
+          items:
+            type: string
+          description: Lista de mensagens de erro ou validação (quando aplicável)
+        data:
+          $ref: "#/components/schemas/UploadInitResponseDTO"
+          type: object
+          description: Payload em sucesso; em erro costuma ser omitido ou null
+        totalElements:
+          type: integer
+          format: int64
+          description: Total de elementos (listagens paginadas)
+        totalPages:
+          type: integer
+          format: int32
+          description: Total de páginas (listagens paginadas)
+        pageSize:
+          type: integer
+          format: int32
+          description: Tamanho da página (listagens paginadas)
+        currentPage:
+          type: integer
+          format: int32
+          description: "Página atual, 1-based (listagens paginadas)"
+        stackTrace:
+          type: array
+          items:
+            type: string
+          description: Stack trace em ambiente de desenvolvimento (erros)
+    EnvelopeUserWithSponsorDTO:
+      type: object
+      description: Resposta padrão da API com um usuário (e patrocinador quando aplicável)
+      properties:
+        status:
+          type: string
+          enum:
+          - OK
+          - ERROR
+          description: OK em sucesso ou ERROR em falha
+        statusCode:
+          type: integer
+          format: int32
+          description: Código HTTP da operação
+        message:
+          type: string
+          description: Mensagem única de erro (quando aplicável)
+        messages:
+          type: array
+          items:
+            type: string
+          description: Lista de mensagens de erro ou validação (quando aplicável)
+        data:
+          $ref: "#/components/schemas/UserWithSponsorDTO"
+          type: object
+          description: Payload em sucesso; em erro costuma ser omitido ou null
+        totalElements:
+          type: integer
+          format: int64
+          description: Total de elementos (listagens paginadas)
+        totalPages:
+          type: integer
+          format: int32
+          description: Total de páginas (listagens paginadas)
+        pageSize:
+          type: integer
+          format: int32
+          description: Tamanho da página (listagens paginadas)
+        currentPage:
+          type: integer
+          format: int32
+          description: "Página atual, 1-based (listagens paginadas)"
+        stackTrace:
+          type: array
+          items:
+            type: string
+          description: Stack trace em ambiente de desenvolvimento (erros)
+    EnvelopeUserWithSponsorListDTO:
+      type: object
+      description: "Resposta paginada: data é a lista de usuários; totalElements,\
+        \ totalPages, pageSize e currentPage quando aplicável"
+      properties:
+        status:
+          type: string
+          enum:
+          - OK
+          - ERROR
+          description: OK em sucesso ou ERROR em falha
+        statusCode:
+          type: integer
+          format: int32
+          description: Código HTTP da operação
+        message:
+          type: string
+          description: Mensagem única de erro (quando aplicável)
+        messages:
+          type: array
+          items:
+            type: string
+          description: Lista de mensagens de erro ou validação (quando aplicável)
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserWithSponsorDTO"
+          description: Payload em sucesso; em erro costuma ser omitido ou null
+        totalElements:
+          type: integer
+          format: int64
+          description: Total de elementos (listagens paginadas)
+        totalPages:
+          type: integer
+          format: int32
+          description: Total de páginas (listagens paginadas)
+        pageSize:
+          type: integer
+          format: int32
+          description: Tamanho da página (listagens paginadas)
+        currentPage:
+          type: integer
+          format: int32
+          description: "Página atual, 1-based (listagens paginadas)"
+        stackTrace:
+          type: array
+          items:
+            type: string
+          description: Stack trace em ambiente de desenvolvimento (erros)
+    EnvelopeVoid:
+      type: object
+      description: Resposta padrão da API sem payload em data (pode ser null)
+      properties:
+        status:
+          type: string
+          enum:
+          - OK
+          - ERROR
+          description: OK em sucesso ou ERROR em falha
+        statusCode:
+          type: integer
+          format: int32
+          description: Código HTTP da operação
+        message:
+          type: string
+          description: Mensagem única de erro (quando aplicável)
+        messages:
+          type: array
+          items:
+            type: string
+          description: Lista de mensagens de erro ou validação (quando aplicável)
+        data:
+          description: Payload em sucesso; em erro costuma ser omitido ou null
+        totalElements:
+          type: integer
+          format: int64
+          description: Total de elementos (listagens paginadas)
+        totalPages:
+          type: integer
+          format: int32
+          description: Total de páginas (listagens paginadas)
+        pageSize:
+          type: integer
+          format: int32
+          description: Tamanho da página (listagens paginadas)
+        currentPage:
+          type: integer
+          format: int32
+          description: "Página atual, 1-based (listagens paginadas)"
+        stackTrace:
+          type: array
+          items:
+            type: string
+          description: Stack trace em ambiente de desenvolvimento (erros)
+    Instant:
+      type: string
+      format: date-time
+      examples:
+      - 2022-03-10T16:15:50Z
+    PublicSponsorDataDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        publicName:
+          type: string
+        tier:
+          $ref: "#/components/schemas/SponsorTierEnum"
+        logoUrl:
+          type: string
+        site:
+          type: string
+        instagram:
+          type: string
+        whatsapp:
+          type: string
+    PublicSponsorItemDTO:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/PublicSponsorUserDTO"
+    PublicSponsorUserDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        type:
+          $ref: "#/components/schemas/UserTypeEnum"
+        createdAt:
+          $ref: "#/components/schemas/Instant"
+        sponsor:
+          $ref: "#/components/schemas/PublicSponsorDataDTO"
+    ResponseModel:
+      type: object
+      description: Envelope padrão de todas as respostas HTTP
+      properties:
+        status:
+          type: string
+          enum:
+          - OK
+          - ERROR
+          description: OK em sucesso ou ERROR em falha
+        statusCode:
+          type: integer
+          format: int32
+          description: Código HTTP da operação
+        message:
+          type: string
+          description: Mensagem única de erro (quando aplicável)
+        messages:
+          type: array
+          items:
+            type: string
+          description: Lista de mensagens de erro ou validação (quando aplicável)
+        data:
+          description: Payload em sucesso; em erro costuma ser omitido ou null
+        totalElements:
+          type: integer
+          format: int64
+          description: Total de elementos (listagens paginadas)
+        totalPages:
+          type: integer
+          format: int32
+          description: Total de páginas (listagens paginadas)
+        pageSize:
+          type: integer
+          format: int32
+          description: Tamanho da página (listagens paginadas)
+        currentPage:
+          type: integer
+          format: int32
+          description: "Página atual, 1-based (listagens paginadas)"
+        stackTrace:
+          type: array
+          items:
+            type: string
+          description: Stack trace em ambiente de desenvolvimento (erros)
+    SponsorDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        user:
+          $ref: "#/components/schemas/UserMinDTO"
+        publicName:
+          type: string
+        tier:
+          $ref: "#/components/schemas/SponsorTierEnum"
+        entityType:
+          $ref: "#/components/schemas/SponsorEntityTypeEnum"
+        persona:
+          $ref: "#/components/schemas/SponsorPersonaEnum"
+        logoUrl:
+          type: string
+        site:
+          type: string
+        instagram:
+          type: string
+        whatsapp:
+          type: string
+        isActive:
+          type: boolean
+        lastActiveSponsorship:
+          $ref: "#/components/schemas/Instant"
+        createdAt:
+          $ref: "#/components/schemas/Instant"
+        active:
+          type: boolean
     SponsorDataCreateDTO:
       type: object
       required:
@@ -93,12 +820,129 @@ components:
           type: string
         isActive:
           type: boolean
+    SponsorEntityTypeEnum:
+      type: string
+      enum:
+      - PERSON
+      - COMPANY
+      - GOVERNMENT
+      - NGO
+    SponsorMinDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        publicName:
+          type: string
+        tier:
+          $ref: "#/components/schemas/SponsorTierEnum"
+        isActive:
+          type: boolean
+        active:
+          type: boolean
+    SponsorPersonaEnum:
+      type: string
+      enum:
+      - POLITICIAN
+      - INFLUENCER
+      - ATHLETE
+      - OTHER
     SponsorTierEnum:
       type: string
       enum:
       - BRONZE
       - SILVER
       - GOLD
+    UploadConfirmDTO:
+      type: object
+      required:
+      - entity
+      - entityId
+      - objectKey
+      properties:
+        entity:
+          $ref: "#/components/schemas/UploadTargetEnum"
+        entityId:
+          type: integer
+          format: int64
+        objectKey:
+          type: string
+          pattern: \S
+    UploadConfirmResponseDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        entity:
+          type: string
+        entityId:
+          type: integer
+          format: int64
+        objectKey:
+          type: string
+        url:
+          type: string
+    UploadDeleteDTO:
+      type: object
+      required:
+      - entity
+      - entityId
+      - objectKey
+      properties:
+        entity:
+          $ref: "#/components/schemas/UploadTargetEnum"
+        entityId:
+          type: integer
+          format: int64
+        objectKey:
+          type: string
+          pattern: \S
+    UploadDeleteResponseDTO:
+      type: object
+      properties:
+        success:
+          type: boolean
+    UploadInitDTO:
+      type: object
+      required:
+      - entity
+      - entityId
+      - contentType
+      - size
+      properties:
+        entity:
+          $ref: "#/components/schemas/UploadTargetEnum"
+        entityId:
+          type: integer
+          format: int64
+        fileName:
+          type: string
+        contentType:
+          type: string
+          pattern: \S
+        size:
+          type: integer
+          format: int64
+          minimum: 1
+    UploadInitResponseDTO:
+      type: object
+      properties:
+        objectKey:
+          type: string
+        uploadUrl:
+          type: string
+        publicUrl:
+          type: string
+        expiresIn:
+          type: integer
+          format: int32
+    UploadTargetEnum:
+      type: string
+      enum:
+      - user
+      - sponsor
     UserCreateDTO:
       type: object
       required:
@@ -125,6 +969,20 @@ components:
         code:
           type: string
           pattern: \S
+    UserMinDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+        name:
+          type: string
+        type:
+          $ref: "#/components/schemas/UserTypeEnum"
+        createdAt:
+          $ref: "#/components/schemas/Instant"
     UserTypeEnum:
       type: string
       enum:
@@ -141,6 +999,32 @@ components:
           $ref: "#/components/schemas/UserCreateDTO"
         sponsor:
           $ref: "#/components/schemas/SponsorDataCreateDTO"
+    UserWithSponsorDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+        name:
+          type: string
+        document:
+          type: string
+        code:
+          type: string
+        isAccountActive:
+          type: boolean
+        type:
+          $ref: "#/components/schemas/UserTypeEnum"
+        avatarUrl:
+          type: string
+        createdAt:
+          $ref: "#/components/schemas/Instant"
+        sponsor:
+          $ref: "#/components/schemas/SponsorDTO"
+        accountActive:
+          type: boolean
     UserWithSponsorUpdateDTO:
       type: object
       properties:
@@ -160,6 +1044,14 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+tags:
+- name: Admin - Benefícios
+- name: Admin - Uploads
+- name: Admin - Usuários
+- name: Auth
+  description: Autenticação e dados do usuário logado
+- name: Público
+  description: Endpoints sem autenticação JWT
 paths:
   /v1/admin/benefit:
     get:
@@ -193,10 +1085,11 @@ paths:
           format: int64
       responses:
         "200":
-          description: OK
+          description: Lista paginada de benefícios
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/EnvelopeBenefitListDTO"
         "401":
           description: Not Authorized
         "403":
@@ -217,17 +1110,16 @@ paths:
               $ref: "#/components/schemas/BenefitCreateDTO"
         required: true
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Benefício criado
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/EnvelopeBenefitDTO"
         "401":
           description: Not Authorized
         "403":
           description: Not Allowed
-        "400":
-          description: Bad Request
       security:
       - bearerAuth:
         - ADM
@@ -253,16 +1145,15 @@ paths:
         required: true
       responses:
         "200":
-          description: OK
+          description: Benefício atualizado
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/EnvelopeBenefitDTO"
         "401":
           description: Not Authorized
         "403":
           description: Not Allowed
-        "400":
-          description: Bad Request
       security:
       - bearerAuth:
         - ADM
@@ -280,10 +1171,11 @@ paths:
           format: int64
       responses:
         "200":
-          description: OK
+          description: Benefício encontrado
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/EnvelopeBenefitDTO"
         "401":
           description: Not Authorized
         "403":
@@ -305,10 +1197,11 @@ paths:
           format: int64
       responses:
         "200":
-          description: OK
+          description: Benefício excluído
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/EnvelopeVoid"
         "401":
           description: Not Authorized
         "403":
@@ -331,10 +1224,92 @@ paths:
           format: int64
       responses:
         "200":
-          description: OK
+          description: Benefício desativado
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/EnvelopeVoid"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - bearerAuth:
+        - ADM
+  /v1/admin/uploads:
+    delete:
+      summary: Remover imagem
+      description: Remove o objeto no R2 e limpa avatar_url ou logo_url quando a chave
+        coincide com a atual.
+      tags:
+      - Admin - Uploads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadDeleteDTO"
+        required: true
+      responses:
+        "200":
+          description: Sucesso (idempotente se já não houver imagem)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeUploadDeleteDTO"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - bearerAuth:
+        - ADM
+  /v1/admin/uploads/confirm:
+    post:
+      summary: Confirmar upload
+      description: Valida o objeto no bucket e persiste avatar_url ou logo_url (path
+        relativo).
+      tags:
+      - Admin - Uploads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadConfirmDTO"
+        required: true
+      responses:
+        "200":
+          description: Vínculo atualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeUploadConfirmDTO"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - bearerAuth:
+        - ADM
+  /v1/admin/uploads/init:
+    post:
+      summary: Iniciar upload
+      description: "Retorna URL assinada (PUT) para envio direto ao R2. entity: user\
+        \ (avatar) ou sponsor (logo); entityId: id do User ou do Sponsor."
+      tags:
+      - Admin - Uploads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadInitDTO"
+        required: true
+      responses:
+        "200":
+          description: URL gerada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeUploadInitDTO"
         "401":
           description: Not Authorized
         "403":
@@ -345,8 +1320,9 @@ paths:
   /v1/admin/user:
     get:
       summary: Listar usuários
-      description: "Listagem paginada com filtros por tipo, tier e status de ativaç\
-        ão."
+      description: "Listagem paginada com filtros por tipo, tier, tipo de entidade\
+        \ e persona do patrocinador (persona só quando entityType = PERSON), e status\
+        \ de ativação."
       tags:
       - Admin - Usuários
       parameters:
@@ -368,21 +1344,45 @@ paths:
           type: integer
           format: int32
       - description: Tier do patrocinador
+        schema:
+          enum:
+          - BRONZE
+          - SILVER
+          - GOLD
         name: tier
         in: query
-        schema:
-          $ref: "#/components/schemas/SponsorTierEnum"
       - description: Tipo do usuário
         name: type
         in: query
         schema:
-          $ref: "#/components/schemas/UserTypeEnum"
+          type: string
+      - description: Tipo de entidade do patrocinador
+        name: entityType
+        in: query
+        schema:
+          type: string
+          enum:
+          - PERSON
+          - COMPANY
+          - GOVERNMENT
+          - NGO
+      - description: Persona (quando entityType = PERSON)
+        name: persona
+        in: query
+        schema:
+          type: string
+          enum:
+          - POLITICIAN
+          - INFLUENCER
+          - ATHLETE
+          - OTHER
       responses:
         "200":
-          description: OK
+          description: Lista paginada de usuários
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/EnvelopeUserWithSponsorListDTO"
         "401":
           description: Not Authorized
         "403":
@@ -403,17 +1403,16 @@ paths:
               $ref: "#/components/schemas/UserWithSponsorCreateDTO"
         required: true
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Usuário criado
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/EnvelopeUserWithSponsorDTO"
         "401":
           description: Not Authorized
         "403":
           description: Not Allowed
-        "400":
-          description: Bad Request
       security:
       - bearerAuth:
         - ADM
@@ -439,16 +1438,15 @@ paths:
         required: true
       responses:
         "200":
-          description: OK
+          description: Usuário atualizado
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/EnvelopeUserWithSponsorDTO"
         "401":
           description: Not Authorized
         "403":
           description: Not Allowed
-        "400":
-          description: Bad Request
       security:
       - bearerAuth:
         - ADM
@@ -466,10 +1464,11 @@ paths:
           format: int64
       responses:
         "200":
-          description: OK
+          description: Usuário encontrado
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/EnvelopeUserWithSponsorDTO"
         "401":
           description: Not Authorized
         "403":
@@ -492,10 +1491,40 @@ paths:
           format: int64
       responses:
         "200":
-          description: OK
+          description: Usuário excluído
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/EnvelopeVoid"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - bearerAuth:
+        - ADM
+  /v1/admin/user/{id}/activate:
+    patch:
+      summary: Ativar usuário
+      description: "Reativa a conta (`isAccountActive = true`). Se o tipo for SPONSOR\
+        \ ou SPONSOR_MEMBER, reativa o registro de patrocinador e os benefícios vinculados\
+        \ a esse patrocinador."
+      tags:
+      - Admin - Usuários
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Usuário ativado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeVoid"
         "401":
           description: Not Authorized
         "403":
@@ -519,10 +1548,11 @@ paths:
           format: int64
       responses:
         "200":
-          description: OK
+          description: Usuário desativado
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/EnvelopeVoid"
         "401":
           description: Not Authorized
         "403":
@@ -544,12 +1574,11 @@ paths:
         required: true
       responses:
         "200":
-          description: OK
+          description: Autenticação bem-sucedida
           content:
             application/json:
-              schema: {}
-        "400":
-          description: Bad Request
+              schema:
+                $ref: "#/components/schemas/EnvelopeAuthDTO"
   /v1/auth/me:
     get:
       summary: Dados do usuário logado
@@ -558,16 +1587,59 @@ paths:
       - Auth
       responses:
         "200":
-          description: OK
+          description: Dados do usuário
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/EnvelopeAuthExtDTO"
         "401":
           description: Not Authorized
         "403":
           description: Not Allowed
       security:
       - bearerAuth: []
+  /v1/public/sponsors:
+    get:
+      summary: Listar patrocinadores ativos (público)
+      description: "Listagem paginada de usuários tipo SPONSOR com conta ativa, patrocinador\
+        \ ativo e filtro opcional por tier. Sem dados sensíveis do usuário; apenas\
+        \ campos públicos acordados."
+      tags:
+      - Público
+      parameters:
+      - description: Número da página (1-based)
+        name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - description: Itens por página
+        name: size
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - description: Tier do patrocinador
+        schema:
+          enum:
+          - BRONZE
+          - SILVER
+          - GOLD
+        name: tier
+        in: query
+      responses:
+        "200":
+          description: Lista paginada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopePublicSponsorListDTO"
+        "400":
+          description: Validação de query params
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvelopeErrorDTO"
 info:
   title: Jet Backoffice API
   version: 1.1.0

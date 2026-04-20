@@ -56,7 +56,8 @@ This is a **modern React application** with the following characteristics:
 - '\*.tsx' → React components
 - '\*.ts' → utilities, types, and configs
 - **Named exports** for components and utilities
-- **Default exports** for main components
+- **Page screens** live in `src/pages` (kebab-case files, e.g. `login-page.tsx`) and are exported only as **named exports** (`export function LoginPage()`), never `default export`
+- **Default exports** for other “entry” components when the stack requires it — **not** for files under `src/pages`
 - **Import order:**
   1. React and React-related imports
   2. Third-party libraries
@@ -143,6 +144,7 @@ This is a **modern React application** with the following characteristics:
 - Configure the **QueryClient** globally (retries, staleTime, gcTime, etc.)
 - Use **query invalidation** for cache consistency after mutations
 - Use **infinite queries** for cursor/offset-based pagination
+- For **paginated list queries** where `queryKey` includes page/offset/sort params, set `placeholderData: keepPreviousData` (import `keepPreviousData` from `@tanstack/react-query`) so the previous page stays visible while the next fetch runs (`isLoading` stays false; use `isFetching` for subtle in-list loading if needed). Revisited pages are served from cache per query key when still fresh.
 - **Prefetch** data for routes and views the user is likely to navigate to
 
 ### Hooks Architecture
@@ -170,6 +172,7 @@ This is a **modern React application** with the following characteristics:
 ## TanStack Router Guidelines
 
 - Use **TanStack Router** for all routing and URL state
+- **URLs do app (paths)** expostas ao utilizador devem estar em **português** (sem tradução para inglês nos segmentos), por exemplo `/admin/patrocinadores`, `/admin/associados`, `/admin/beneficios`. Isto não se aplica a paths da **API** backend (que seguem o contrato do servidor).
 - Prefer **file-based routes** when possible
 - Keep **route loaders** focused on data fetching and validation
 - Co-locate **route components, loaders, and actions** by feature
@@ -181,6 +184,12 @@ This is a **modern React application** with the following characteristics:
 - Implement **protected routes** via route middleware or `beforeLoad` to check auth/roles
 - Use **router APIs** (`useNavigate`, `<Link>`) for programmatic navigation — never `window.location`
 - Avoid side effects in loaders; loaders should be pure data-fetching functions
+
+### Route files vs page UI
+
+- Files under `src/routes/` define **only** routing: `createFileRoute` / `createRootRoute`, `beforeLoad`, loaders, and the `component` reference
+- **Do not** implement full page UI inline in route files — import the screen from `src/pages/` and pass it to `component`
+- Each page module in `src/pages/` exports one primary screen as a **named function** (e.g. `export function LoginPage() { ... }`) and is consumed with `import { LoginPage } from '@/pages/login-page'`
 
 ## Component Architecture
 
@@ -199,6 +208,12 @@ Each feature follows a clear separation of concerns:
 3. **API modules** (`<entity>Api.getList`, `<entity>Api.create`) — pure Axios calls, transport-only, no side effects
 
 UI components must **never** import Axios or API modules directly.
+
+### UI Decoupling
+
+- Repeatable UI blocks (pagination, sortable table headers, filter bars) must be extracted into **reusable components** in `src/components/` with controlled props — never inlined in page files
+- Presentational components must **not** call `useQuery`, `useMutation`, or import API modules; pages and custom hooks own data
+- In paginated lists with TanStack Query + `keepPreviousData`, the displayed page index must track the **client-side state** (or URL param) passed to the query — never rely on `currentPage` from the API response for UI rendering, as `placeholderData` may serve stale metadata during refetches
 
 ### Naming Conventions (Hooks & API)
 

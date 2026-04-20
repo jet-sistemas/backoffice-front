@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import Image from "next/image";
 import {
   MessageCircle,
   Mail,
@@ -34,12 +33,14 @@ export function Footer() {
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand column */}
           <div className="lg:col-span-2">
-            <Link href="/" className="inline-flex items-center gap-3">
-              <Image
+            <Link to="/" className="inline-flex items-center gap-3">
+              <img
                 src="/logo.svg"
                 alt="J&T Associação"
                 width={48}
                 height={48}
+                loading="lazy"
+                decoding="async"
                 className="size-12"
               />
               <div>
@@ -49,61 +50,62 @@ export function Footer() {
                 <p className="text-sm text-accent">Joyce e Teatino</p>
               </div>
             </Link>
-            <p className="mt-4 max-w-md text-primary-foreground/80">
-              Nascemos do amor pelo vôlei e pelo propósito de desenvolver
-              talentos no esporte, na arte e na cultura em todo o sul do Piauí.
-              Venha fazer parte dessa família!
-            </p>
+            <div className="mt-4 max-w-md space-y-6">
+              <p className="text-primary-foreground/80">
+                Nascemos do amor pelo vôlei e pelo propósito de desenvolver
+                talentos no esporte, na arte e na cultura em todo o sul do Piauí.
+                Venha fazer parte dessa família!
+              </p>
 
-            {/* Social links */}
-            <div className="mt-6 flex gap-3">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      asChild
-                      variant="secondary"
-                      size="icon"
-                      className="bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
-                    >
-                      <a
-                        href={contactInfo.instagramLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="Instagram"
+              <div className="flex gap-3">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        asChild
+                        variant="secondary"
+                        size="icon"
+                        className="bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
                       >
-                        <Instagram className="size-5" />
-                      </a>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Instagram</p>
-                  </TooltipContent>
-                </Tooltip>
+                        <a
+                          href={contactInfo.instagramLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Instagram"
+                        >
+                          <Instagram className="size-5" />
+                        </a>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Instagram</p>
+                    </TooltipContent>
+                  </Tooltip>
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      asChild
-                      variant="secondary"
-                      size="icon"
-                      className="bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
-                    >
-                      <a
-                        href={contactInfo.whatsappLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="WhatsApp"
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        asChild
+                        variant="secondary"
+                        size="icon"
+                        className="bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
                       >
-                        <MessageCircle className="size-5" />
-                      </a>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>WhatsApp</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+                        <a
+                          href={contactInfo.whatsappLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="WhatsApp"
+                        >
+                          <MessageCircle className="size-5" />
+                        </a>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>WhatsApp</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             </div>
           </div>
 
@@ -116,7 +118,7 @@ export function Footer() {
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
-                  href={link.href}
+                  to={link.href}
                   className="group inline-flex items-center gap-1 text-primary-foreground/70 transition-colors hover:text-primary-foreground"
                 >
                   {link.label}
@@ -124,7 +126,8 @@ export function Footer() {
                 </Link>
               ))}
               <Link
-                href="#pre-cadastro"
+                to="/"
+                hash="pre-cadastro"
                 className="group inline-flex items-center gap-1 font-medium text-secondary transition-colors hover:text-secondary/80"
               >
                 Torne-se um Parceiro
