@@ -10,7 +10,7 @@
 :root {
   --radius: 0.625rem;
 
-  --background: #fff;
+  --background: #f7f8fa;
   --foreground: #050469;
 
   --card: #fff;
@@ -40,13 +40,13 @@
   --chart-4: #bf6a39;
   --chart-5: #8c2b2b;
 
-  --sidebar: oklch(0.98 0 0);
+  --sidebar: #ffffff;
   --sidebar-foreground: oklch(0.2 0.05 240);
   --sidebar-primary: #32598c;
   --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.95 0.02 50);
-  --sidebar-accent-foreground: oklch(0.2 0.05 240);
-  --sidebar-border: oklch(0.9 0 0);
+  --sidebar-accent: #eef2ff;
+  --sidebar-accent-foreground: #050469;
+  --sidebar-border: #e5e7eb;
   --sidebar-ring: #32598c;
 }
 

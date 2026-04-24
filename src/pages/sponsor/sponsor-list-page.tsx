@@ -26,7 +26,7 @@ import { useActivateUserMutation } from "@/hooks/use-activate-user-mutation";
 import { useDeactivateUserMutation } from "@/hooks/use-deactivate-user-mutation";
 import { useUserListQuery } from "@/hooks/use-user-list-query";
 import { resolveR2PublicUrl } from "@/lib/r2-public-url";
-import { formatDocument, uniqueById } from "@/lib/utils";
+import { cn, formatDocument, uniqueById } from "@/lib/utils";
 import type {
   EntityTypeEnum,
   SponsorPersonaEnum,
@@ -52,6 +52,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  tableRowInactiveClassName,
 } from "@/components/ui/table";
 
 const TIER_LABELS: Record<SponsorTierEnum, string> = {
@@ -399,7 +400,7 @@ export function SponsorListPage() {
 
       {!isLoading && !isError && filteredSponsors.length > 0 && (
         <>
-          <div className="rounded-lg border">
+          <div className="rounded-lg border bg-card">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -419,36 +420,73 @@ export function SponsorListPage() {
               <TableBody>
                 {filteredSponsors.map((user) => {
                   const logoSrc = resolveR2PublicUrl(user.sponsor?.logoUrl);
+                  const inactive = !user.accountActive;
                   return (
-                    <TableRow key={user.id}>
+                    <TableRow
+                      key={user.id}
+                      className={cn(inactive && tableRowInactiveClassName)}
+                    >
                       <TableCell>
                         <div className="flex items-center gap-3">
                           {logoSrc ? (
                             <img
                               src={logoSrc}
                               alt={user.sponsor?.publicName ?? user.name}
-                              className="size-8 rounded-md object-cover"
+                              className={cn(
+                                "size-8 rounded-md object-cover",
+                                inactive && "opacity-80",
+                              )}
                             />
                           ) : (
-                            <div className="flex size-8 items-center justify-center rounded-md bg-muted">
-                              <Building2 className="size-4 text-muted-foreground" />
+                            <div
+                              className={cn(
+                                "flex size-8 items-center justify-center rounded-md bg-blue-50",
+                                inactive && "bg-neutral-200",
+                              )}
+                            >
+                              <Building2
+                                className={cn(
+                                  "size-4 text-blue-400",
+                                  inactive && "text-neutral-500",
+                                )}
+                              />
                             </div>
                           )}
                           <div className="min-w-0">
-                            <p className="truncate font-medium">
+                            <p
+                              className={cn(
+                                "truncate font-medium",
+                                inactive && "font-thin text-neutral-600",
+                              )}
+                            >
                               {user.sponsor?.publicName ?? user.name}
                             </p>
-                            <p className="truncate text-xs text-muted-foreground">
+                            <p
+                              className={cn(
+                                "truncate text-xs text-muted-foreground",
+                                inactive && "text-neutral-400",
+                              )}
+                            >
                               {user.email}
                             </p>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="hidden sm:table-cell">
+                      <TableCell
+                        className={cn(
+                          "hidden sm:table-cell",
+                          inactive && "text-neutral-500",
+                        )}
+                      >
                         {formatDocument(user.document)}
                       </TableCell>
                       <TableCell className="hidden sm:table-cell">
-                        <span className="text-sm text-muted-foreground">
+                        <span
+                          className={cn(
+                            "text-sm text-muted-foreground",
+                            inactive && "text-neutral-400",
+                          )}
+                        >
                           {user.sponsor?.entityType != null
                             ? ENTITY_LABELS[user.sponsor.entityType]
                             : "—"}
@@ -458,34 +496,61 @@ export function SponsorListPage() {
                         {user.sponsor?.tier && (
                           <Badge
                             variant={TIER_BADGE_VARIANT[user.sponsor.tier]}
+                            className={cn(inactive && "opacity-90 bg-neutral-200 text-neutral-500")}
                           >
                             {TIER_LABELS[user.sponsor.tier]}
                           </Badge>
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant={user.accountActive ? "default" : "outline"}
-                          className={
-                            user.accountActive
-                              ? "bg-emerald-600 text-white hover:bg-emerald-600/90"
-                              : ""
-                          }
-                        >
-                          {user.accountActive ? "Ativo" : "Inativo"}
-                        </Badge>
+                        {user.accountActive ? (
+                          <Badge
+                            variant="default"
+                            className="bg-emerald-600 text-white hover:bg-emerald-600/90"
+                          >
+                            Ativo
+                          </Badge>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-full border border-neutral-300 bg-neutral-50 px-2 py-0.5 text-[11px] font-bold text-neutral-500">
+                            {/* <span
+                              className="size-1.5 shrink-0 rounded-full bg-neutral-400"
+                              aria-hidden
+                            /> */}
+                            Inativo
+                          </span>
+                        )}
                       </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
+                      <TableCell
+                        className={cn(
+                          "hidden md:table-cell",
+                          inactive && "text-neutral-500",
+                        )}
+                      >
+                        <code
+                          className={cn(
+                            "rounded bg-blue-50 px-1.5 py-0.5 text-xs",
+                            !inactive && "font-bold",
+                            inactive && "bg-neutral-100 text-neutral-500",
+                          )}
+                        >
                           {user.code}
                         </code>
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
+                        <div
+                          className={cn(
+                            "flex justify-end gap-1",
+                            inactive && "opacity-80",
+                          )}
+                        >
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="size-9"
+                            className={cn(
+                              "size-9",
+                              inactive &&
+                                "border border-neutral-200 bg-neutral-50 hover:bg-neutral-100/80",
+                            )}
                             asChild
                           >
                             <Link
@@ -544,11 +609,11 @@ export function SponsorListPage() {
           <ListPaginationBar
             page={page}
             totalPages={totalPages}
+            pageSize={PAGE_SIZE}
+            totalElements={totalElements}
+            entityPlural="patrocinadores"
             onPageChange={setPage}
-          >
-            {totalElements} patrocinador{totalElements !== 1 ? "es" : ""}{" "}
-            encontrado{totalElements !== 1 ? "s" : ""}
-          </ListPaginationBar>
+          />
         </>
       )}
 
@@ -637,7 +702,7 @@ export function SponsorListPage() {
 function SponsorTableSkeleton() {
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border">
+      <div className="rounded-lg border bg-card">
         <Table>
           <TableHeader>
             <TableRow>

@@ -4,7 +4,8 @@ import { Controller, useForm } from "react-hook-form";
 import {
   AlertCircle,
   Building2,
-  Eraser,
+  Eye,
+  EyeClosed,
   Gift,
   Pencil,
   RefreshCw,
@@ -56,12 +57,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  tableRowInactiveClassName,
 } from "@/components/ui/table";
 import { useBenefitListQuery } from "@/hooks/use-benefit-list-query";
 import { useCreateBenefitMutation } from "@/hooks/use-create-benefit-mutation";
 import { useDeactivateBenefitMutation } from "@/hooks/use-deactivate-benefit-mutation";
 import { useUpdateBenefitMutation } from "@/hooks/use-update-benefit-mutation";
-import { uniqueById } from "@/lib/utils";
+import { cn, uniqueById } from "@/lib/utils";
 import {
   benefitFormSchema,
   BENEFIT_DESCRIPTION_MAX_LENGTH,
@@ -370,7 +372,7 @@ export function BenefitListPage() {
 
           {!isLoading && !isError && benefits.length > 0 && (
             <>
-              <div className="rounded-lg border">
+              <div className="rounded-lg border bg-card">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -385,20 +387,37 @@ export function BenefitListPage() {
                       <TableHead className="min-w-[140px]">
                         Patrocinador
                       </TableHead>
-                      <TableHead className="w-[100px] text-right">
+                      <TableHead className="min-w-[140px] text-right">
                         <span className="sr-only">Ações</span>
                       </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {benefits.map((b) => (
-                      <TableRow key={b.id}>
-                        <TableCell className="font-medium">{b.name}</TableCell>
+                    {benefits.map((b) => {
+                      const inactive = !b.isActive;
+                      return (
+                        <TableRow
+                          key={b.id}
+                          className={cn(inactive && tableRowInactiveClassName)}
+                        >
+                        <TableCell
+                          className={cn(
+                            "font-medium",
+                            inactive && "font-semibold text-neutral-600",
+                          )}
+                        >
+                          {b.name}
+                        </TableCell>
                         <TableCell
                           className="hidden max-w-[200px] md:table-cell"
                           title={b.description}
                         >
-                          <span className="line-clamp-2 text-sm text-muted-foreground">
+                          <span
+                            className={cn(
+                              "line-clamp-2 text-sm text-muted-foreground",
+                              inactive && "text-neutral-400",
+                            )}
+                          >
                             {b.description ?? "—"}
                           </span>
                         </TableCell>
@@ -406,28 +425,47 @@ export function BenefitListPage() {
                           className="hidden max-w-[180px] lg:table-cell"
                           title={b.address}
                         >
-                          <span className="line-clamp-2 text-sm text-muted-foreground">
+                          <span
+                            className={cn(
+                              "line-clamp-2 text-sm text-muted-foreground",
+                              inactive && "text-neutral-400",
+                            )}
+                          >
                             {b.address ?? "—"}
                           </span>
                         </TableCell>
                         <TableCell>
-                          <Badge
-                            variant={b.isActive ? "default" : "outline"}
-                            className={
-                              b.isActive
-                                ? "bg-emerald-600 text-white hover:bg-emerald-600/90"
-                                : ""
-                            }
-                          >
-                            {b.isActive ? "Ativo" : "Inativo"}
-                          </Badge>
+                          {b.isActive ? (
+                            <Badge
+                              variant="default"
+                              className="bg-emerald-600 text-white hover:bg-emerald-600/90"
+                            >
+                              Ativo
+                            </Badge>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 rounded-full border border-neutral-300 bg-neutral-50 px-2 py-0.5 text-[11px] font-bold text-neutral-500">
+                              <span
+                                className="size-1.5 shrink-0 rounded-full bg-neutral-400"
+                                aria-hidden
+                              />
+                              Inativo
+                            </span>
+                          )}
                         </TableCell>
                         <TableCell>
                           {b.sponsor != null ? (
                             <div className="flex flex-col gap-1">
-                              <span className="flex items-center gap-1.5 text-sm font-medium">
+                              <span
+                                className={cn(
+                                  "flex items-center gap-1.5 text-sm font-medium",
+                                  inactive && "text-neutral-600",
+                                )}
+                              >
                                 <Building2
-                                  className="size-3.5 shrink-0 text-muted-foreground"
+                                  className={cn(
+                                    "size-3.5 shrink-0 text-muted-foreground",
+                                    inactive && "text-neutral-400",
+                                  )}
                                   aria-hidden
                                 />
                                 <span className="truncate">
@@ -437,6 +475,7 @@ export function BenefitListPage() {
                               <div className="flex flex-wrap items-center gap-1">
                                 <Badge
                                   variant={TIER_BADGE_VARIANT[b.sponsor.tier]}
+                                  className={cn(inactive && "opacity-90")}
                                 >
                                   {TIER_LABELS[b.sponsor.tier]}
                                 </Badge>
@@ -448,18 +487,32 @@ export function BenefitListPage() {
                               </div>
                             </div>
                           ) : (
-                            <span className="text-sm text-muted-foreground">
+                            <span
+                              className={cn(
+                                "text-sm text-muted-foreground",
+                                inactive && "text-neutral-400",
+                              )}
+                            >
                               Geral (associação)
                             </span>
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end gap-1">
+                          <div
+                            className={cn(
+                              "flex justify-end gap-1",
+                              inactive && "opacity-80",
+                            )}
+                          >
                             <Button
                               type="button"
                               variant="ghost"
                               size="icon"
-                              className="size-9"
+                              className={cn(
+                                "size-9",
+                                inactive &&
+                                  "border border-neutral-200 bg-neutral-50 hover:bg-neutral-100/80",
+                              )}
                               aria-label={`Editar benefício ${b.name}`}
                               onClick={() => {
                                 setEditing(b);
@@ -468,36 +521,53 @@ export function BenefitListPage() {
                             >
                               <Pencil className="size-4" aria-hidden />
                             </Button>
-                            {b.isActive ? (
-                              <>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  className="size-9 text-destructive hover:text-accent-foreground"
-                                  aria-label={`Desativar benefício ${b.name}`}
-                                  disabled={deactivateMutation.isPending}
-                                  onClick={() => handleDeactivate(b)}
-                                >
-                                  <Eraser className="size-4" aria-hidden />
-                                </Button>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  className="size-9 text-muted-foreground"
-                                  aria-label={`Apagar benefício ${b.name} (indisponível)`}
-                                  disabled
-                                  title="Apagar registro em breve"
-                                >
-                                  <Trash2 className="size-4" aria-hidden />
-                                </Button>
-                              </>
-                            ) : null}
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className={cn(
+                                "size-9",
+                                b.isActive
+                                  ? "text-destructive hover:text-accent-foreground"
+                                  : "text-sky-600 dark:text-sky-400",
+                              )}
+                              aria-label={
+                                b.isActive
+                                  ? `Desativar benefício ${b.name}`
+                                  : `Benefício ${b.name} inativo (reativação em breve)`
+                              }
+                              disabled={
+                                !b.isActive || deactivateMutation.isPending
+                              }
+                              title={
+                                b.isActive
+                                  ? undefined
+                                  : "Benefício já está inativo"
+                              }
+                              onClick={() => handleDeactivate(b)}
+                            >
+                              {b.isActive ? (
+                                <EyeClosed className="size-4" aria-hidden />
+                              ) : (
+                                <Eye className="size-4" aria-hidden />
+                              )}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="size-9 text-muted-foreground"
+                              aria-label={`Apagar benefício ${b.name} (indisponível)`}
+                              disabled
+                              title="Apagar registro em breve"
+                            >
+                              <Trash2 className="size-4" aria-hidden />
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))}
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
@@ -505,11 +575,11 @@ export function BenefitListPage() {
               <ListPaginationBar
                 page={page}
                 totalPages={totalPages}
+                pageSize={PAGE_SIZE}
+                totalElements={totalElements}
+                entityPlural="benefícios"
                 onPageChange={setPage}
-              >
-                {totalElements} benefício{totalElements !== 1 ? "s" : ""}{" "}
-                encontrado{totalElements !== 1 ? "s" : ""}
-              </ListPaginationBar>
+              />
             </>
           )}
         </div>
@@ -667,14 +737,22 @@ export function BenefitListPage() {
 function BenefitTableSkeleton() {
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border">
+      <div className="rounded-lg border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Nome</TableHead>
+              <TableHead className="hidden md:table-cell max-w-[200px]">
+                Descrição
+              </TableHead>
+              <TableHead className="hidden lg:table-cell max-w-[180px]">
+                Endereço
+              </TableHead>
               <TableHead>Estado</TableHead>
-              <TableHead>Patrocinador</TableHead>
-              <TableHead className="w-[100px]" />
+              <TableHead className="min-w-[140px]">Patrocinador</TableHead>
+              <TableHead className="min-w-[140px] text-right">
+                <span className="sr-only">Ações</span>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -683,14 +761,24 @@ function BenefitTableSkeleton() {
                 <TableCell>
                   <Skeleton className="h-4 w-40" />
                 </TableCell>
+                <TableCell className="hidden max-w-[200px] md:table-cell">
+                  <Skeleton className="h-4 w-full max-w-[180px]" />
+                </TableCell>
+                <TableCell className="hidden max-w-[180px] lg:table-cell">
+                  <Skeleton className="h-4 w-full max-w-[140px]" />
+                </TableCell>
                 <TableCell>
                   <Skeleton className="h-5 w-16" />
                 </TableCell>
-                <TableCell>
+                <TableCell className="min-w-[140px]">
                   <Skeleton className="h-4 w-32" />
                 </TableCell>
-                <TableCell>
-                  <Skeleton className="ml-auto h-8 w-20" />
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-1">
+                    <Skeleton className="size-9 shrink-0 rounded-md" />
+                    <Skeleton className="size-9 shrink-0 rounded-md" />
+                    <Skeleton className="size-9 shrink-0 rounded-md" />
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

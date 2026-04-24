@@ -1,43 +1,10 @@
-import { useId, useRef, useState } from 'react'
-import { AxiosError } from 'axios'
-import { ImagePlus, Loader2, Trash2 } from 'lucide-react'
+import { Loader2, Trash2, ImagePlus } from 'lucide-react'
 
-import { useDirectImageUploadMutation } from '@/hooks/use-direct-image-upload-mutation'
-import { useUploadDeleteMutation } from '@/hooks/use-upload-delete-mutation'
-import { getApiErrorMessage } from '@/lib/api-error'
-import {
-  IMAGE_UPLOAD_ERROR_CONFIRM,
-  IMAGE_UPLOAD_ERROR_EXPIRED,
-  IMAGE_UPLOAD_ERROR_INVALID_TYPE,
-  IMAGE_UPLOAD_ERROR_NETWORK,
-  IMAGE_UPLOAD_ERROR_TOO_LARGE,
-} from '@/lib/image-upload-constants'
-import { resolveR2PublicUrl } from '@/lib/r2-public-url'
+import { useImageUploadField } from '@/hooks/use-image-upload-field'
 import { cn } from '@/lib/utils'
 import type { UploadTarget } from '@/types/upload'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-
-const KNOWN_UPLOAD_MESSAGES = new Set([
-  IMAGE_UPLOAD_ERROR_INVALID_TYPE,
-  IMAGE_UPLOAD_ERROR_TOO_LARGE,
-  IMAGE_UPLOAD_ERROR_EXPIRED,
-  IMAGE_UPLOAD_ERROR_NETWORK,
-  IMAGE_UPLOAD_ERROR_CONFIRM,
-])
-
-function resolveUploadFailureMessage(error: unknown): string {
-  if (error instanceof Error && error.message && KNOWN_UPLOAD_MESSAGES.has(error.message)) {
-    return error.message
-  }
-  if (error instanceof AxiosError) {
-    return getApiErrorMessage(error, IMAGE_UPLOAD_ERROR_CONFIRM)
-  }
-  if (error instanceof Error && error.message) {
-    return error.message
-  }
-  return IMAGE_UPLOAD_ERROR_CONFIRM
-}
 
 export interface ImageUploadFieldProps {
   entity: UploadTarget
@@ -60,91 +27,55 @@ export function ImageUploadField({
   description,
   disabled = false,
 }: ImageUploadFieldProps) {
-  const inputId = useId()
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [localError, setLocalError] = useState<string | null>(null)
-
-  const uploadMutation = useDirectImageUploadMutation()
-  const deleteMutation = useUploadDeleteMutation()
-
-  const previewSrc = resolveR2PublicUrl(value)
-  const busy = uploadMutation.isPending || deleteMutation.isPending
-  const controlsDisabled = disabled || busy
-
-  function isStoredObjectKey(ref: string): boolean {
-    return !/^https?:\/\//i.test(ref.trim())
-  }
-
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    e.target.value = ''
-    if (!file) return
-    setLocalError(null)
-    try {
-      const result = await uploadMutation.mutateAsync({
-        file,
-        entity,
-        entityId,
-        userIdForInvalidation,
-      })
-      const next = result.objectKey?.trim()
-      if (next) onValueChange(next)
-    } catch (err) {
-      setLocalError(resolveUploadFailureMessage(err))
-    }
-  }
-
-  async function handleRemove() {
-    setLocalError(null)
-    const current = value?.trim()
-    if (!current) {
-      onValueChange(undefined)
-      return
-    }
-    if (isStoredObjectKey(current)) {
-      try {
-        await deleteMutation.mutateAsync({
-          payload: { entity, entityId, objectKey: current },
-          userIdForInvalidation,
-        })
-      } catch (err) {
-        setLocalError(resolveUploadFailureMessage(err))
-        return
-      }
-    }
-    onValueChange(undefined)
-  }
+  const {
+    inputId,
+    fileInputRef,
+    localError,
+    previewSrc,
+    busy,
+    controlsDisabled,
+    hasValue,
+    handleFileChange,
+    handleRemove,
+    openFilePicker,
+  } = useImageUploadField({
+    entity,
+    entityId,
+    userIdForInvalidation,
+    value,
+    onValueChange,
+    disabled,
+  })
 
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
-          <Label htmlFor={inputId}>{label}</Label>
+          <Label htmlFor={inputId} className="text-foreground">
+            {label}
+          </Label>
           {description ? (
-            <p className="text-xs text-muted-foreground">{description}</p>
+            <p className="text-xs text-muted-foreground/90">{description}</p>
           ) : null}
         </div>
       </div>
 
       <div
         className={cn(
-          'flex flex-col gap-4 rounded-lg border border-border bg-card/50 p-4 shadow-sm sm:flex-row sm:items-center',
+          'flex flex-col gap-4 rounded-lg border border-border bg-muted/40 p-4 sm:flex-row sm:items-center',
+          'dark:bg-muted/25',
         )}
       >
         <div
           className={cn(
-            'relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-dashed border-muted-foreground/25 bg-muted/40',
-            previewSrc && 'border-solid',
+            'relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-dashed border-foreground/20 bg-background shadow-inner',
+            previewSrc && 'border-solid border-border',
           )}
         >
           {busy ? (
             <Loader2 className="size-8 animate-spin text-muted-foreground" aria-hidden />
           ) : previewSrc ? (
-            <img
-              src={previewSrc}
-              alt=""
-              className="size-full object-cover"
-            />
+            <img src={previewSrc} alt="" className="size-full object-cover" />
           ) : (
             <ImagePlus className="size-8 text-muted-foreground" aria-hidden />
           )}
@@ -163,21 +94,25 @@ export function ImageUploadField({
           <div className="flex flex-wrap gap-2">
             <Button
               type="button"
-              variant="secondary"
+              variant="outline"
               size="sm"
               disabled={controlsDisabled}
-              className="transition-colors duration-200"
-              onClick={() => fileInputRef.current?.click()}
+              className={cn(
+                'border-border bg-background font-medium text-foreground shadow-xs',
+                'hover:bg-muted hover:text-foreground',
+                'dark:border-input dark:bg-background dark:hover:bg-muted/60',
+              )}
+              onClick={openFilePicker}
             >
               {previewSrc ? 'Substituir imagem' : 'Selecionar imagem'}
             </Button>
-            {(value?.trim() ?? '') !== '' && (
+            {hasValue && (
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 disabled={controlsDisabled}
-                className="gap-1 text-destructive hover:bg-destructive/10"
+                className="gap-1 border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
                 onClick={() => void handleRemove()}
               >
                 <Trash2 className="size-4" aria-hidden />
@@ -185,7 +120,7 @@ export function ImageUploadField({
               </Button>
             )}
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-foreground/70 dark:text-foreground/65">
             PNG, JPG ou WebP. Máximo 5 MB.
           </p>
         </div>
