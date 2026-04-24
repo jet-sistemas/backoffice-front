@@ -4,6 +4,7 @@ import {
   Building2,
   Eye,
   EyeClosed,
+  Loader2,
   Pencil,
   Plus,
   RefreshCw,
@@ -114,7 +115,8 @@ export function SponsorListPage() {
   const toggleMutationPending =
     deactivateMutation.isPending || activateMutation.isPending;
 
-  const { data, isLoading, isError, error, refetch } = useUserListQuery({
+  const { data, isLoading, isFetching, isError, error, refetch } =
+    useUserListQuery({
     type: "SPONSOR",
     tier: tierFilter !== "ALL" ? (tierFilter as SponsorTierEnum) : undefined,
     entityType:
@@ -134,6 +136,11 @@ export function SponsorListPage() {
   const sponsors = uniqueById(data?.data ?? []);
   const totalPages = data?.totalPages ?? 0;
   const totalElements = data?.totalElements ?? 0;
+
+  const searchSettling =
+    searchTerm.trim() !== debouncedSearch.trim();
+  const listQueryBusy =
+    isLoading || isFetching || searchSettling;
 
   const closeDeactivateDialog = () => {
     setDeactivateDialogOpen(false);
@@ -222,21 +229,37 @@ export function SponsorListPage() {
               Filtrar e buscar
             </h2>
             <p className="max-w-2xl text-xs text-muted-foreground">
-              Filtros e busca refinam a lista no servidor (paginação coerente
-              com o resultado).
+              Filtros refinam no servidor. O texto de busca é enviado à API após
+              uma breve pausa na digitação; a paginação reflete o resultado da
+              consulta.
             </p>
           </div>
-          {(hasActiveServerFilters || hasActiveSearch) && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="shrink-0 self-start text-muted-foreground"
-              onClick={clearAllFilters}
-            >
-              Limpar tudo
-            </Button>
-          )}
+          <div className="flex shrink-0 flex-col items-end gap-2 self-start sm:flex-row sm:items-center">
+            {listQueryBusy && (
+              <p
+                className="flex items-center gap-2 text-xs text-muted-foreground"
+                role="status"
+                aria-live="polite"
+              >
+                <Loader2
+                  className="size-4 shrink-0 animate-spin text-muted-foreground"
+                  aria-hidden
+                />
+                Buscando resultados…
+              </p>
+            )}
+            {(hasActiveServerFilters || hasActiveSearch) && !listQueryBusy && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground"
+                onClick={clearAllFilters}
+              >
+                Limpar tudo
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="mt-4 space-y-4">
@@ -253,8 +276,14 @@ export function SponsorListPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9"
+                disabled={isLoading || isFetching}
+                aria-busy={listQueryBusy}
               />
             </div>
+            <p className="text-xs text-muted-foreground">
+              Aguarde um instante após digitar para a lista atualizar no
+              servidor.
+            </p>
           </div>
 
           <div
@@ -268,6 +297,7 @@ export function SponsorListPage() {
                 setTierFilter(v);
                 setPage(1);
               }}
+              disabled={listQueryBusy}
             >
               <SelectTrigger id="sponsor-filter-tier" className="w-full">
                 <SelectValue placeholder="Selecione o tier" />
@@ -290,6 +320,7 @@ export function SponsorListPage() {
                 if (v !== "PERSON") setPersonaFilter("ALL");
                 setPage(1);
               }}
+              disabled={listQueryBusy}
             >
               <SelectTrigger id="sponsor-filter-entity" className="w-full">
                 <SelectValue placeholder="Selecione o tipo" />
@@ -316,6 +347,7 @@ export function SponsorListPage() {
                   setPersonaFilter(v);
                   setPage(1);
                 }}
+                disabled={listQueryBusy}
               >
                 <SelectTrigger id="sponsor-filter-persona" className="w-full">
                   <SelectValue placeholder="Selecione o perfil" />
@@ -342,6 +374,7 @@ export function SponsorListPage() {
                 setStatusFilter(v);
                 setPage(1);
               }}
+              disabled={listQueryBusy}
             >
               <SelectTrigger id="sponsor-filter-status" className="w-full">
                 <SelectValue placeholder="Selecione a situação" />
@@ -368,7 +401,11 @@ export function SponsorListPage() {
               {error?.message ?? "Tente novamente mais tarde."}
             </p>
           </div>
-          <Button variant="outline" onClick={() => refetch()}>
+          <Button
+            variant="outline"
+            disabled={listQueryBusy}
+            onClick={() => refetch()}
+          >
             <RefreshCw />
             Tentar novamente
           </Button>
@@ -397,7 +434,13 @@ export function SponsorListPage() {
 
       {!isLoading && !isError && sponsors.length > 0 && (
         <>
-          <div className="rounded-lg border bg-card">
+          <div
+            className={cn(
+              "rounded-lg border bg-card transition-opacity",
+              listQueryBusy && "pointer-events-none opacity-55",
+            )}
+            aria-busy={listQueryBusy}
+          >
             <Table>
               <TableHeader>
                 <TableRow>
@@ -610,6 +653,7 @@ export function SponsorListPage() {
             totalElements={totalElements}
             entityPlural="patrocinadores"
             onPageChange={setPage}
+            disabled={listQueryBusy}
           />
         </>
       )}

@@ -41,6 +41,8 @@ interface ListPaginationBarProps {
   /** Ex.: "patrocinadores" em “Mostrando 1–10 de 96 patrocinadores”. */
   entityPlural?: string
   children?: ReactNode
+  /** Quando true, desativa toda a navegação (ex.: lista a carregar). */
+  disabled?: boolean
 }
 
 export function ListPaginationBar({
@@ -51,10 +53,12 @@ export function ListPaginationBar({
   totalElements,
   entityPlural,
   children,
+  disabled = false,
 }: ListPaginationBarProps) {
   const isFirstPage = page <= 1
   const isLastPage = totalPages === 0 || page >= Math.max(totalPages, 1)
   const items = visiblePageItems(page, totalPages)
+  const navDisabled = disabled
 
   const showRangeSummary =
     pageSize != null &&
@@ -83,13 +87,17 @@ export function ListPaginationBar({
       <nav
         className="flex flex-wrap items-center justify-end gap-1"
         aria-label="Paginação"
+        aria-busy={navDisabled}
       >
         <Button
           type="button"
           variant="outline"
           size="icon"
-          disabled={isFirstPage}
-          onClick={() => onPageChange(Math.max(1, page - 1))}
+          disabled={navDisabled || isFirstPage}
+          onClick={() => {
+            if (navDisabled) return
+            onPageChange(Math.max(1, page - 1))
+          }}
           aria-label="Página anterior"
           className="size-8 shrink-0 border-[#E5E7EB] bg-card text-[#9CA3AF] hover:text-foreground disabled:opacity-50"
         >
@@ -108,11 +116,15 @@ export function ListPaginationBar({
             <button
               key={item}
               type="button"
-              onClick={() => onPageChange(item)}
+              disabled={navDisabled}
+              onClick={() => {
+                if (navDisabled) return
+                onPageChange(item)
+              }}
               aria-label={`Ir para página ${item}`}
               aria-current={item === page ? 'page' : undefined}
               className={cn(
-                'min-h-8 min-w-9 rounded-md px-3 text-[13px] transition-colors',
+                'min-h-8 min-w-9 rounded-md px-3 text-[13px] transition-colors disabled:pointer-events-none disabled:opacity-50',
                 item === page
                   ? 'bg-primary font-semibold text-primary-foreground'
                   : 'border border-[#E5E7EB] bg-card font-normal text-[#374151] hover:bg-muted/40'
@@ -126,8 +138,11 @@ export function ListPaginationBar({
           type="button"
           variant="outline"
           size="icon"
-          disabled={isLastPage}
-          onClick={() => onPageChange(page + 1)}
+          disabled={navDisabled || isLastPage}
+          onClick={() => {
+            if (navDisabled) return
+            onPageChange(page + 1)
+          }}
           aria-label="Próxima página"
           className="size-8 shrink-0 border-[#E5E7EB] bg-card text-[#9CA3AF] hover:text-foreground disabled:opacity-50"
         >
