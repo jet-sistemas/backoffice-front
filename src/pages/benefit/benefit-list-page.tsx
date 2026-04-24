@@ -403,7 +403,7 @@ export function BenefitListPage() {
                         <TableCell
                           className={cn(
                             "font-medium",
-                            inactive && "font-semibold text-neutral-600",
+                            inactive && "font-thin text-neutral-600",
                           )}
                         >
                           {b.name}
@@ -444,10 +444,6 @@ export function BenefitListPage() {
                             </Badge>
                           ) : (
                             <span className="inline-flex items-center gap-1 rounded-full border border-neutral-300 bg-neutral-50 px-2 py-0.5 text-[11px] font-bold text-neutral-500">
-                              <span
-                                className="size-1.5 shrink-0 rounded-full bg-neutral-400"
-                                aria-hidden
-                              />
                               Inativo
                             </span>
                           )}
@@ -475,7 +471,10 @@ export function BenefitListPage() {
                               <div className="flex flex-wrap items-center gap-1">
                                 <Badge
                                   variant={TIER_BADGE_VARIANT[b.sponsor.tier]}
-                                  className={cn(inactive && "opacity-90")}
+                                  className={cn(
+                                    inactive &&
+                                      "opacity-90 bg-neutral-200 text-neutral-500",
+                                  )}
                                 >
                                   {TIER_LABELS[b.sponsor.tier]}
                                 </Badge>
