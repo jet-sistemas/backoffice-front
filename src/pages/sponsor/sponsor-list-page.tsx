@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AlertCircle,
   Building2,
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useActivateUserMutation } from "@/hooks/use-activate-user-mutation";
 import { useDeactivateUserMutation } from "@/hooks/use-deactivate-user-mutation";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useUserListQuery } from "@/hooks/use-user-list-query";
 import { resolveR2PublicUrl } from "@/lib/r2-public-url";
 import { cn, formatDocument, uniqueById } from "@/lib/utils";
@@ -85,6 +86,7 @@ const PERSONA_LABELS: Record<SponsorPersonaEnum, string> = {
 };
 
 const PAGE_SIZE = 10;
+const SEARCH_DEBOUNCE_MS = 500;
 
 export function SponsorListPage() {
   const [page, setPage] = useState(1);
@@ -93,6 +95,13 @@ export function SponsorListPage() {
   const [personaFilter, setPersonaFilter] = useState<string>("ALL");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebouncedValue(searchTerm, SEARCH_DEBOUNCE_MS);
+  const searchQuery =
+    debouncedSearch.trim() !== "" ? debouncedSearch.trim() : undefined;
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const [userToDeactivate, setUserToDeactivate] =
     useState<UserWithSponsorDTO | null>(null);
@@ -117,6 +126,7 @@ export function SponsorListPage() {
         ? (personaFilter as SponsorPersonaEnum)
         : undefined,
     isActive: statusFilter !== "ALL" ? statusFilter === "ACTIVE" : undefined,
+    search: searchQuery,
     page,
     size: PAGE_SIZE,
   });
@@ -124,16 +134,6 @@ export function SponsorListPage() {
   const sponsors = uniqueById(data?.data ?? []);
   const totalPages = data?.totalPages ?? 0;
   const totalElements = data?.totalElements ?? 0;
-
-  const filteredSponsors = searchTerm
-    ? sponsors.filter(
-        (s) =>
-          s.sponsor?.publicName
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          s.name.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
-    : sponsors;
 
   const closeDeactivateDialog = () => {
     setDeactivateDialogOpen(false);
@@ -178,7 +178,8 @@ export function SponsorListPage() {
     personaFilter !== "ALL" ||
     statusFilter !== "ALL";
 
-  const hasActiveClientSearch = searchTerm.trim().length > 0;
+  const hasActiveSearch =
+    debouncedSearch.trim().length > 0 || searchTerm.trim().length > 0;
 
   const clearAllFilters = () => {
     setSearchTerm("");
@@ -221,11 +222,11 @@ export function SponsorListPage() {
               Filtrar e buscar
             </h2>
             <p className="max-w-2xl text-xs text-muted-foreground">
-              Os menus refinam a lista no servidor. O campo de texto oculta
-              linhas apenas entre os resultados já carregados nesta página.
+              Filtros e busca refinam a lista no servidor (paginação coerente
+              com o resultado).
             </p>
           </div>
-          {(hasActiveServerFilters || hasActiveClientSearch) && (
+          {(hasActiveServerFilters || hasActiveSearch) && (
             <Button
               type="button"
               variant="ghost"
@@ -240,7 +241,7 @@ export function SponsorListPage() {
 
         <div className="mt-4 space-y-4">
           <div className="max-w-xl space-y-2">
-            <Label htmlFor="sponsor-search">Busca rápida na tabela</Label>
+            <Label htmlFor="sponsor-search">Buscar patrocinadores</Label>
             <div className="relative">
               <Search
                 className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
@@ -248,16 +249,12 @@ export function SponsorListPage() {
               />
               <Input
                 id="sponsor-search"
-                placeholder="Nome de exibição ou nome da conta…"
+                placeholder="Nome público, nome da conta, documento ou código…"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9"
-                aria-describedby="sponsor-search-hint"
               />
             </div>
-            <p id="sponsor-search-hint" className="text-xs text-muted-foreground">
-              Corresponde ao nome público ou ao nome de usuário da linha.
-            </p>
           </div>
 
           <div
@@ -378,7 +375,7 @@ export function SponsorListPage() {
         </div>
       )}
 
-      {!isLoading && !isError && filteredSponsors.length === 0 && (
+      {!isLoading && !isError && sponsors.length === 0 && (
         <div className="flex flex-col items-center gap-4 py-16 text-center">
           <div className="flex size-16 items-center justify-center rounded-full bg-muted">
             <Building2 className="size-8 text-muted-foreground" />
@@ -386,7 +383,7 @@ export function SponsorListPage() {
           <div>
             <p className="font-medium">Nenhum patrocinador encontrado</p>
             <p className="text-sm text-muted-foreground">
-              {searchTerm ||
+              {searchQuery ||
               tierFilter !== "ALL" ||
               entityTypeFilter !== "ALL" ||
               personaFilter !== "ALL" ||
@@ -398,7 +395,7 @@ export function SponsorListPage() {
         </div>
       )}
 
-      {!isLoading && !isError && filteredSponsors.length > 0 && (
+      {!isLoading && !isError && sponsors.length > 0 && (
         <>
           <div className="rounded-lg border bg-card">
             <Table>
@@ -418,7 +415,7 @@ export function SponsorListPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredSponsors.map((user) => {
+                {sponsors.map((user) => {
                   const logoSrc = resolveR2PublicUrl(user.sponsor?.logoUrl);
                   const inactive = !user.accountActive;
                   return (

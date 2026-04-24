@@ -38,9 +38,14 @@ function mapUserWithSponsorFromApi(
 
 export const userApi = {
   getUsers(params: UserListParams) {
+    const trimmedSearch = params.search?.trim();
     const apiParams = {
       ...params,
       tier: params.tier != null ? sponsorTierToApi(params.tier) : undefined,
+      search:
+        trimmedSearch != null && trimmedSearch !== ""
+          ? trimmedSearch
+          : undefined,
     };
     return api
       .get<PaginatedUsersResponse>("/v1/admin/user", { params: apiParams })

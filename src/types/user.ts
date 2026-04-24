@@ -45,6 +45,8 @@ export interface UserListParams {
   entityType?: EntityTypeEnum;
   persona?: SponsorPersonaEnum;
   isActive?: boolean;
+  /** Busca no servidor: nome da conta, nome público, documento ou código */
+  search?: string;
   page: number;
   size: number;
 }
