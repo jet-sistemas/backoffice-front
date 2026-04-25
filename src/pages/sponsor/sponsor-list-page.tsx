@@ -253,10 +253,11 @@ export function SponsorListPage() {
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="text-muted-foreground"
+                className="text-red-600 hover:bg-red-600 hover:text-white dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-white"
                 onClick={clearAllFilters}
               >
                 Limpar tudo
+                <Trash2 aria-hidden className="size-4" />
               </Button>
             )}
           </div>
