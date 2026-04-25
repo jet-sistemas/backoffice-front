@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -99,23 +99,30 @@ export function ActiveSponsorSelect({
   const sponsors = data?.sponsors ?? [];
   const totalPages = Math.max(data?.totalPages ?? 0, 1);
 
+  useEffect(() => {
+    setListPage(1);
+  }, [value]);
+
   const selectItems = useMemo((): ActiveSponsorOption[] => {
-    const ids = new Set(sponsors.map((s) => s.id));
-    const extra: ActiveSponsorOption[] =
+    const idsOnPage = new Set(sponsors.map((s) => s.id));
+    const byId = new Map<number, ActiveSponsorOption>();
+    for (const s of sponsors) {
+      byId.set(s.id, s);
+    }
+    if (
       value != null &&
       fallbackOption != null &&
       fallbackOption.id === value &&
-      !ids.has(fallbackOption.id)
-        ? [
-            {
-              id: fallbackOption.id,
-              publicName: fallbackOption.publicName,
-              tier: fallbackOption.tier,
-              isActive: fallbackOption.isActive,
-            },
-          ]
-        : [];
-    return [...extra, ...sponsors];
+      !idsOnPage.has(fallbackOption.id)
+    ) {
+      byId.set(fallbackOption.id, {
+        id: fallbackOption.id,
+        publicName: fallbackOption.publicName,
+        tier: fallbackOption.tier,
+        isActive: fallbackOption.isActive,
+      });
+    }
+    return Array.from(byId.values());
   }, [sponsors, value, fallbackOption]);
 
   const stringValue = value == null ? NONE_VALUE : String(value);
@@ -170,10 +177,7 @@ export function ActiveSponsorSelect({
           >
             <SelectValue placeholder="Patrocinador (opcional)" />
           </SelectTrigger>
-          <SelectContent
-            position="popper"
-            className="w-(--radix-select-trigger-width)"
-          >
+          <SelectContent className="max-h-[min(18rem,var(--radix-select-content-available-height))] w-(--radix-select-trigger-width)">
             <SelectItem value={NONE_VALUE}>
               Benefício geral (sem patrocinador)
             </SelectItem>

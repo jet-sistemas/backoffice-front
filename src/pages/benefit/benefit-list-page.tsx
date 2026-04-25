@@ -59,6 +59,7 @@ import {
   TableRow,
   tableRowInactiveClassName,
 } from "@/components/ui/table";
+import { useActivateBenefitMutation } from "@/hooks/use-activate-benefit-mutation";
 import { useBenefitListQuery } from "@/hooks/use-benefit-list-query";
 import { useCreateBenefitMutation } from "@/hooks/use-create-benefit-mutation";
 import { useDeactivateBenefitMutation } from "@/hooks/use-deactivate-benefit-mutation";
@@ -89,6 +90,11 @@ const TIER_BADGE_VARIANT: Record<
   BRONZE: "bronze",
 };
 
+function canReactivateBenefit(b: BenefitDTO): boolean {
+  if (b.sponsor == null) return true;
+  return b.sponsor.isActive;
+}
+
 function mapStatusFilter(v: string): boolean | undefined {
   if (v === "ALL") return undefined;
   if (v === "ACTIVE") return true;
@@ -103,6 +109,9 @@ export function BenefitListPage() {
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const [benefitToDeactivate, setBenefitToDeactivate] =
     useState<BenefitDTO | null>(null);
+  const [activateDialogOpen, setActivateDialogOpen] = useState(false);
+  const [benefitToActivate, setBenefitToActivate] =
+    useState<BenefitDTO | null>(null);
 
   const isActiveParam = mapStatusFilter(statusFilter);
 
@@ -115,6 +124,7 @@ export function BenefitListPage() {
   const createMutation = useCreateBenefitMutation();
   const updateMutation = useUpdateBenefitMutation();
   const deactivateMutation = useDeactivateBenefitMutation();
+  const activateMutation = useActivateBenefitMutation();
 
   const benefits = uniqueById(data?.data ?? []);
   const totalPages = data?.totalPages ?? 0;
@@ -139,6 +149,7 @@ export function BenefitListPage() {
       sponsorId: null,
     },
   });
+  const editSponsorId = editForm.watch("sponsorId");
 
   useEffect(() => {
     if (editing == null) return;
@@ -197,15 +208,32 @@ export function BenefitListPage() {
     setBenefitToDeactivate(null);
   };
 
+  const closeActivateDialog = () => {
+    setActivateDialogOpen(false);
+    setBenefitToActivate(null);
+  };
+
   const handleDeactivate = (b: BenefitDTO) => {
     setBenefitToDeactivate(b);
     setDeactivateDialogOpen(true);
+  };
+
+  const handleActivate = (b: BenefitDTO) => {
+    setBenefitToActivate(b);
+    setActivateDialogOpen(true);
   };
 
   const confirmDeactivate = () => {
     if (benefitToDeactivate == null) return;
     deactivateMutation.mutate(benefitToDeactivate.id, {
       onSuccess: () => closeDeactivateDialog(),
+    });
+  };
+
+  const confirmActivate = () => {
+    if (benefitToActivate == null) return;
+    activateMutation.mutate(benefitToActivate.id, {
+      onSuccess: () => closeActivateDialog(),
     });
   };
 
@@ -533,17 +561,28 @@ export function BenefitListPage() {
                               aria-label={
                                 b.isActive
                                   ? `Desativar benefício ${b.name}`
-                                  : `Benefício ${b.name} inativo (reativação em breve)`
+                                  : canReactivateBenefit(b)
+                                    ? `Reativar benefício ${b.name}`
+                                    : `Não é possível reativar ${b.name}: patrocinador inativo. Reative o patrocinador ou desvincule o benefício ao editar.`
                               }
                               disabled={
-                                !b.isActive || deactivateMutation.isPending
+                                b.isActive
+                                  ? deactivateMutation.isPending
+                                  : !canReactivateBenefit(b) ||
+                                    activateMutation.isPending
                               }
                               title={
                                 b.isActive
                                   ? undefined
-                                  : "Benefício já está inativo"
+                                  : canReactivateBenefit(b)
+                                    ? "Reativar benefício"
+                                    : "Reative o patrocinador ou desvincule o benefício (editar) para reativar."
                               }
-                              onClick={() => handleDeactivate(b)}
+                              onClick={() =>
+                                b.isActive
+                                  ? handleDeactivate(b)
+                                  : handleActivate(b)
+                              }
                             >
                               {b.isActive ? (
                                 <EyeClosed className="size-4" aria-hidden />
@@ -621,6 +660,42 @@ export function BenefitListPage() {
         </AlertDialogContent>
       </AlertDialog>
 
+      <AlertDialog
+        open={activateDialogOpen}
+        onOpenChange={(open) => {
+          if (open) return;
+          if (activateMutation.isPending) return;
+          closeActivateDialog();
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif">
+              Reativar benefício?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              O benefício{" "}
+              <span className="font-medium text-foreground">
+                &quot;{benefitToActivate?.name ?? ""}&quot;
+              </span>{" "}
+              voltará a constar como ativo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel disabled={activateMutation.isPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <Button
+              type="button"
+              disabled={activateMutation.isPending}
+              onClick={confirmActivate}
+            >
+              {activateMutation.isPending ? "Reativando…" : "Reativar"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <Dialog
         open={editOpen}
         onOpenChange={(open) => {
@@ -692,7 +767,7 @@ export function BenefitListPage() {
                   name="sponsorId"
                   render={({ field }) => (
                     <ActiveSponsorSelect
-                      key={editing.id}
+                      key={`${editing.id}-${editSponsorId ?? "none"}`}
                       id="edit-benefit-sponsor"
                       value={field.value}
                       onChange={field.onChange}
