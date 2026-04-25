@@ -1,5 +1,5 @@
 import { Outlet, Link, useRouterState } from "@tanstack/react-router";
-import { Building2, ChevronUp, Gift, LogOut, Users } from "lucide-react";
+import { Bell, Building2, ChevronUp, Gift, LogOut, Users } from "lucide-react";
 
 import { useAuth } from "@/contexts/auth-context";
 import {
@@ -17,6 +17,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   DropdownMenu,
@@ -55,7 +56,11 @@ export function AdminLayout() {
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton size="lg" asChild>
+              <SidebarMenuButton
+                size="lg"
+                asChild
+                className="text-sidebar-foreground hover:text-sidebar-accent-foreground"
+              >
                 <Link to="/admin/patrocinadores">
                   <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary">
                     <img src="/logo.svg" alt="J&T" className="size-5 invert" />
@@ -74,7 +79,7 @@ export function AdminLayout() {
           </SidebarMenu>
         </SidebarHeader>
 
-        <Separator className="mx-2 w-auto bg-sidebar-border" />
+        <Separator className="mx-0 w-full shrink-0 bg-sidebar-border" />
 
         <SidebarContent>
           <SidebarGroup>
@@ -123,6 +128,7 @@ export function AdminLayout() {
                     type="button"
                     size="lg"
                     aria-label="Menu da conta"
+                    className="text-sidebar-foreground hover:text-sidebar-accent-foreground"
                   >
                     <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-accent text-sidebar-accent-foreground">
                       <span className="text-sm font-medium">
@@ -164,12 +170,21 @@ export function AdminLayout() {
       </Sidebar>
 
       <SidebarInset>
-        <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-card px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <h1 className="text-sm font-medium text-muted-foreground">
             Painel Administrativo
           </h1>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="ml-auto shrink-0"
+            aria-label="Notificações"
+          >
+            <Bell className="size-5" aria-hidden />
+          </Button>
         </header>
 
         <main className="flex-1 overflow-auto p-4 md:p-6">

@@ -13,6 +13,8 @@ export function useActivateUserMutation() {
     onSuccess: (_, userId) => {
       void queryClient.invalidateQueries({ queryKey: ['users'] })
       void queryClient.invalidateQueries({ queryKey: ['user', userId] })
+      void queryClient.invalidateQueries({ queryKey: ['benefits'] })
+      void queryClient.invalidateQueries({ queryKey: ['sponsor-options'] })
       toast.success('Patrocinador ativado.')
     },
     onError: (error) => {

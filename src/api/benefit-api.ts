@@ -134,4 +134,8 @@ export const benefitApi = {
   deactivateBenefit(id: number) {
     return api.patch(`/v1/admin/benefit/${id}/deactivate`)
   },
+
+  activateBenefit(id: number) {
+    return api.patch(`/v1/admin/benefit/${id}/activate`)
+  },
 }

@@ -1,54 +1,154 @@
+import type { ReactNode } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+
+function visiblePageItems(
+  current: number,
+  total: number
+): (number | 'ellipsis')[] {
+  if (total <= 0) return []
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1)
+  }
+  const pages = new Set<number>()
+  pages.add(1)
+  pages.add(total)
+  for (let d = -1; d <= 1; d++) {
+    const p = current + d
+    if (p >= 1 && p <= total) pages.add(p)
+  }
+  const sorted = [...pages].sort((a, b) => a - b)
+  const out: (number | 'ellipsis')[] = []
+  for (let i = 0; i < sorted.length; i++) {
+    const p = sorted[i]
+    if (i > 0 && p - sorted[i - 1] > 1) {
+      out.push('ellipsis')
+    }
+    out.push(p)
+  }
+  return out
+}
 
 interface ListPaginationBarProps {
   page: number
   totalPages: number
   onPageChange: (page: number) => void
-  children?: React.ReactNode
+  /** Com `totalElements`, exibe “Mostrando a–b de n …”. */
+  pageSize?: number
+  totalElements?: number
+  /** Ex.: "patrocinadores" em “Mostrando 1–10 de 96 patrocinadores”. */
+  entityPlural?: string
+  children?: ReactNode
+  /** Quando true, desativa toda a navegação (ex.: lista a carregar). */
+  disabled?: boolean
 }
 
 export function ListPaginationBar({
   page,
   totalPages,
   onPageChange,
+  pageSize,
+  totalElements,
+  entityPlural,
   children,
+  disabled = false,
 }: ListPaginationBarProps) {
-  const pageCount = Math.max(totalPages, 1)
   const isFirstPage = page <= 1
-  const isLastPage = totalPages === 0 || page >= pageCount
+  const isLastPage = totalPages === 0 || page >= Math.max(totalPages, 1)
+  const items = visiblePageItems(page, totalPages)
+  const navDisabled = disabled
+
+  const showRangeSummary =
+    pageSize != null &&
+    totalElements != null &&
+    entityPlural != null &&
+    totalElements > 0
+
+  let leftContent: ReactNode = children
+  if (showRangeSummary) {
+    const start = (page - 1) * pageSize + 1
+    const end = Math.min(page * pageSize, totalElements)
+    leftContent = (
+      <span className="text-[#6B7280]">
+        Mostrando {start}–{end} de {totalElements} {entityPlural}
+      </span>
+    )
+  }
 
   return (
-    <div className="flex items-center justify-between">
-      {children && (
-        <div className="text-sm text-muted-foreground">{children}</div>
+    <div className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      {leftContent ? (
+        <div className="text-sm">{leftContent}</div>
+      ) : (
+        <div />
       )}
-      <div className="ml-auto flex items-center gap-2">
+      <nav
+        className="flex flex-wrap items-center justify-end gap-1"
+        aria-label="Paginação"
+        aria-busy={navDisabled}
+      >
         <Button
+          type="button"
           variant="outline"
-          size="sm"
-          disabled={isFirstPage}
-          onClick={() => onPageChange(Math.max(1, page - 1))}
+          size="icon"
+          disabled={navDisabled || isFirstPage}
+          onClick={() => {
+            if (navDisabled) return
+            onPageChange(Math.max(1, page - 1))
+          }}
           aria-label="Página anterior"
+          className="size-8 shrink-0 border-[#E5E7EB] bg-card text-[#9CA3AF] hover:text-foreground disabled:opacity-50"
         >
-          <ChevronLeft />
-          Anterior
+          <ChevronLeft className="size-3.5" aria-hidden />
         </Button>
-        <span className="text-sm text-muted-foreground">
-          Página {page} de {pageCount}
-        </span>
+        {items.map((item, idx) =>
+          item === 'ellipsis' ? (
+            <span
+              key={`ellipsis-${idx}`}
+              className="flex min-w-8 items-center justify-center px-1 text-sm text-muted-foreground"
+              aria-hidden
+            >
+              …
+            </span>
+          ) : (
+            <button
+              key={item}
+              type="button"
+              disabled={navDisabled}
+              onClick={() => {
+                if (navDisabled) return
+                onPageChange(item)
+              }}
+              aria-label={`Ir para página ${item}`}
+              aria-current={item === page ? 'page' : undefined}
+              className={cn(
+                'min-h-8 min-w-9 rounded-md px-3 text-[13px] transition-colors disabled:pointer-events-none disabled:opacity-50',
+                item === page
+                  ? 'bg-primary font-semibold text-primary-foreground'
+                  : 'border border-[#E5E7EB] bg-card font-normal text-[#374151] hover:bg-muted/40'
+              )}
+            >
+              {item}
+            </button>
+          )
+        )}
         <Button
+          type="button"
           variant="outline"
-          size="sm"
-          disabled={isLastPage}
-          onClick={() => onPageChange(page + 1)}
+          size="icon"
+          disabled={navDisabled || isLastPage}
+          onClick={() => {
+            if (navDisabled) return
+            onPageChange(page + 1)
+          }}
           aria-label="Próxima página"
+          className="size-8 shrink-0 border-[#E5E7EB] bg-card text-[#9CA3AF] hover:text-foreground disabled:opacity-50"
         >
-          Próximo
-          <ChevronRight />
+          <ChevronRight className="size-3.5" aria-hidden />
         </Button>
-      </div>
+      </nav>
     </div>
   )
 }
