@@ -36,7 +36,6 @@ const navItems = [
     label: "Associados",
     href: "/admin/associados",
     icon: Users,
-    disabled: true,
   },
   {
     label: "Benefícios",
