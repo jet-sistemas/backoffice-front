@@ -19,7 +19,10 @@ export function usePatchSubscriberMemberMutation() {
     onSuccess: async (_response, { userId }) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['member-user', userId] }),
+        queryClient.invalidateQueries({ queryKey: ['user-with-member', userId] }),
+        queryClient.invalidateQueries({ queryKey: ['user', userId] }),
         queryClient.invalidateQueries({ queryKey: ['members'] }),
+        queryClient.invalidateQueries({ queryKey: ['users'] }),
       ])
       toast.success('Dados da mensalidade atualizados.')
     },

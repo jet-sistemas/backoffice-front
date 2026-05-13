@@ -27,7 +27,7 @@ export interface SponsorDTO {
   whatsapp?: string;
 }
 
-export interface UserWithSponsorDTO {
+export interface UserBaseDTO {
   id: number;
   email: string;
   name: string;
@@ -37,8 +37,28 @@ export interface UserWithSponsorDTO {
   accountActive: boolean;
   avatarUrl?: string;
   createdAt: string;
+}
+
+export interface UserWithSponsorDTO extends UserBaseDTO {
   sponsor?: SponsorDTO;
+}
+
+export interface UserWithMemberDTO extends UserBaseDTO {
   member?: MemberDTO;
+}
+
+export type UserDetailDTO = UserWithSponsorDTO | UserWithMemberDTO;
+
+export function isUserWithSponsor(
+  user: UserDetailDTO,
+): user is UserWithSponsorDTO {
+  return user.type === "SPONSOR" || user.type === "SPONSOR_MEMBER";
+}
+
+export function isUserWithMember(
+  user: UserDetailDTO,
+): user is UserWithMemberDTO {
+  return user.type === "MEMBER";
 }
 
 export interface UserListParams {
@@ -55,7 +75,7 @@ export interface UserListParams {
 }
 
 export interface PaginatedUsersResponse extends ApiEnvelopeBase {
-  data: UserWithSponsorDTO[];
+  data: UserDetailDTO[];
 }
 
 export interface UserWithSponsorCreateDTO {
@@ -83,6 +103,10 @@ export interface EnvelopeUserWithSponsorDTO extends ApiEnvelopeBase {
   data?: UserWithSponsorDTO | null;
 }
 
+export interface EnvelopeUserDetailDTO extends ApiEnvelopeBase {
+  data?: UserDetailDTO | null;
+}
+
 export interface SponsorDataUpdateDTO {
   publicName?: string;
   tier?: SponsorTierEnum;
@@ -95,10 +119,16 @@ export interface SponsorDataUpdateDTO {
   isActive?: boolean;
 }
 
+export interface MemberDataUpdateDTO {
+  fullname?: string;
+  whatsapp?: string;
+}
+
 export interface UserWithSponsorUpdateDTO {
   email?: string;
   name?: string;
   document?: string;
   avatarUrl?: string;
   sponsor?: SponsorDataUpdateDTO;
+  member?: MemberDataUpdateDTO;
 }

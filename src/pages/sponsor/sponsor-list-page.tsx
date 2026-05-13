@@ -29,11 +29,12 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useUserListQuery } from "@/hooks/use-user-list-query";
 import { resolveR2PublicUrl } from "@/lib/r2-public-url";
 import { cn, formatDocument, uniqueById } from "@/lib/utils";
-import type {
-  EntityTypeEnum,
-  SponsorPersonaEnum,
-  SponsorTierEnum,
-  UserWithSponsorDTO,
+import {
+  isUserWithSponsor,
+  type EntityTypeEnum,
+  type SponsorPersonaEnum,
+  type SponsorTierEnum,
+  type UserWithSponsorDTO,
 } from "@/types/user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -133,14 +134,16 @@ export function SponsorListPage() {
     size: PAGE_SIZE,
   });
 
-  const sponsors = uniqueById(data?.data ?? []);
+  const sponsors = uniqueById(
+    (data?.data ?? []).filter(isUserWithSponsor),
+  ) as UserWithSponsorDTO[];
   const totalPages = data?.totalPages ?? 0;
   const totalElements = data?.totalElements ?? 0;
 
   const searchSettling =
     searchTerm.trim() !== debouncedSearch.trim();
-  const listQueryBusy =
-    isLoading || isFetching || searchSettling;
+  const listFetchBusy = isLoading || isFetching;
+  const listUiStale = listFetchBusy || searchSettling;
 
   const closeDeactivateDialog = () => {
     setDeactivateDialogOpen(false);
@@ -235,7 +238,7 @@ export function SponsorListPage() {
             </p>
           </div>
           <div className="flex shrink-0 flex-col items-end gap-2 self-start sm:flex-row sm:items-center">
-            {listQueryBusy && (
+            {listUiStale && (
               <p
                 className="flex items-center gap-2 text-xs text-muted-foreground"
                 role="status"
@@ -245,10 +248,10 @@ export function SponsorListPage() {
                   className="size-4 shrink-0 animate-spin text-muted-foreground"
                   aria-hidden
                 />
-                Buscando resultados…
+                {listFetchBusy ? "Atualizando lista…" : "Aguardando busca…"}
               </p>
             )}
-            {(hasActiveServerFilters || hasActiveSearch) && !listQueryBusy && (
+            {(hasActiveServerFilters || hasActiveSearch) && !listFetchBusy && (
               <Button
                 type="button"
                 variant="ghost"
@@ -263,7 +266,13 @@ export function SponsorListPage() {
           </div>
         </div>
 
-        <div className="mt-4 space-y-4">
+        <div
+          className={cn(
+            "mt-4 space-y-4 transition-opacity duration-200",
+            listFetchBusy && "pointer-events-none opacity-50",
+          )}
+          aria-busy={listFetchBusy ? true : undefined}
+        >
           <div className="max-w-xl space-y-2">
             <Label htmlFor="sponsor-search">Buscar patrocinadores</Label>
             <div className="relative">
@@ -277,8 +286,8 @@ export function SponsorListPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9"
-                disabled={isLoading || isFetching}
-                aria-busy={listQueryBusy}
+                disabled={listFetchBusy}
+                aria-busy={listFetchBusy ? true : undefined}
               />
             </div>
             <p className="text-xs text-muted-foreground">
@@ -298,7 +307,7 @@ export function SponsorListPage() {
                 setTierFilter(v);
                 setPage(1);
               }}
-              disabled={listQueryBusy}
+              disabled={listFetchBusy}
             >
               <SelectTrigger id="sponsor-filter-tier" className="w-full">
                 <SelectValue placeholder="Selecione o tier" />
@@ -321,7 +330,7 @@ export function SponsorListPage() {
                 if (v !== "PERSON") setPersonaFilter("ALL");
                 setPage(1);
               }}
-              disabled={listQueryBusy}
+              disabled={listFetchBusy}
             >
               <SelectTrigger id="sponsor-filter-entity" className="w-full">
                 <SelectValue placeholder="Selecione o tipo" />
@@ -348,7 +357,7 @@ export function SponsorListPage() {
                   setPersonaFilter(v);
                   setPage(1);
                 }}
-                disabled={listQueryBusy}
+                disabled={listFetchBusy}
               >
                 <SelectTrigger id="sponsor-filter-persona" className="w-full">
                   <SelectValue placeholder="Selecione o perfil" />
@@ -375,7 +384,7 @@ export function SponsorListPage() {
                 setStatusFilter(v);
                 setPage(1);
               }}
-              disabled={listQueryBusy}
+              disabled={listFetchBusy}
             >
               <SelectTrigger id="sponsor-filter-status" className="w-full">
                 <SelectValue placeholder="Selecione a situação" />
@@ -404,7 +413,7 @@ export function SponsorListPage() {
           </div>
           <Button
             variant="outline"
-            disabled={listQueryBusy}
+            disabled={listUiStale}
             onClick={() => refetch()}
           >
             <RefreshCw />
@@ -437,10 +446,10 @@ export function SponsorListPage() {
         <>
           <div
             className={cn(
-              "rounded-lg border bg-card transition-opacity",
-              listQueryBusy && "pointer-events-none opacity-55",
+              "rounded-lg border bg-card transition-opacity duration-200",
+              listUiStale && "pointer-events-none opacity-50",
             )}
-            aria-busy={listQueryBusy}
+            aria-busy={listUiStale ? true : undefined}
           >
             <Table>
               <TableHeader>
@@ -654,7 +663,7 @@ export function SponsorListPage() {
             totalElements={totalElements}
             entityPlural="patrocinadores"
             onPageChange={setPage}
-            disabled={listQueryBusy}
+            disabled={listUiStale}
           />
         </>
       )}

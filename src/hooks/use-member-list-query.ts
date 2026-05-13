@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
 import { userApi } from '@/api/user-api'
 import { getApiErrorMessage } from '@/lib/api-error'
@@ -7,10 +7,12 @@ import type {
   MemberListRow,
   PaginatedMemberListRowsResponse,
 } from '@/types/member'
+import { isUserWithMember } from '@/types/user'
 
 export function useMemberListQuery(params: MemberListParams) {
   return useQuery({
     queryKey: ['members', params],
+    placeholderData: keepPreviousData,
     queryFn: async () => {
       try {
         const response = await userApi.getUsers({
@@ -24,6 +26,7 @@ export function useMemberListQuery(params: MemberListParams) {
         const envelope = response.data
         const rows: MemberListRow[] = (envelope.data ?? [])
           .map((u) => {
+            if (!isUserWithMember(u)) return null
             const member = u.member
             if (member == null) return null
             return {

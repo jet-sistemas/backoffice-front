@@ -94,7 +94,8 @@ export function MemberListPage() {
   const totalElements = data?.totalElements ?? 0
 
   const searchSettling = searchTerm.trim() !== debouncedSearch.trim()
-  const listQueryBusy = isLoading || isFetching || searchSettling
+  const listFetchBusy = isLoading || isFetching
+  const listUiStale = listFetchBusy || searchSettling
 
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false)
   const [rowToDeactivate, setRowToDeactivate] = useState<MemberListRow | null>(null)
@@ -186,7 +187,7 @@ export function MemberListPage() {
             </p>
           </div>
           <div className="flex shrink-0 flex-col items-end gap-2 self-start sm:flex-row sm:items-center">
-            {listQueryBusy && (
+            {listUiStale && (
               <p
                 className="flex items-center gap-2 text-xs text-muted-foreground"
                 role="status"
@@ -196,10 +197,10 @@ export function MemberListPage() {
                   className="size-4 shrink-0 animate-spin text-muted-foreground"
                   aria-hidden
                 />
-                Buscando resultados…
+                {listFetchBusy ? 'Atualizando lista…' : 'Aguardando busca…'}
               </p>
             )}
-            {(hasActiveServerFilters || hasActiveSearch) && !listQueryBusy && (
+            {(hasActiveServerFilters || hasActiveSearch) && !listFetchBusy && (
               <Button
                 type="button"
                 variant="ghost"
@@ -214,7 +215,13 @@ export function MemberListPage() {
           </div>
         </div>
 
-        <div className="mt-4 space-y-4">
+        <div
+          className={cn(
+            'mt-4 space-y-4 transition-opacity duration-200',
+            listFetchBusy && 'pointer-events-none opacity-50',
+          )}
+          aria-busy={listFetchBusy ? true : undefined}
+        >
           <div className="max-w-xl space-y-2">
             <Label htmlFor="member-search">Buscar associados</Label>
             <div className="relative">
@@ -228,8 +235,8 @@ export function MemberListPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9"
-                disabled={isLoading || isFetching}
-                aria-busy={listQueryBusy}
+                disabled={listFetchBusy}
+                aria-busy={listFetchBusy ? true : undefined}
               />
             </div>
             <p className="text-xs text-muted-foreground">
@@ -246,7 +253,7 @@ export function MemberListPage() {
                   setType(v)
                   setPage(1)
                 }}
-                disabled={listQueryBusy}
+                disabled={listFetchBusy}
               >
                 <SelectTrigger id="member-filter-type" className="w-full">
                   <SelectValue placeholder="Tipo de membro" />
@@ -267,7 +274,7 @@ export function MemberListPage() {
                   setActiveFilter(v)
                   setPage(1)
                 }}
-                disabled={listQueryBusy}
+                disabled={listFetchBusy}
               >
                 <SelectTrigger id="member-filter-status" className="w-full">
                   <SelectValue placeholder="Situação da conta" />
@@ -294,7 +301,7 @@ export function MemberListPage() {
               {error instanceof Error ? error.message : 'Tente novamente mais tarde.'}
             </p>
           </div>
-          <Button variant="outline" disabled={listQueryBusy} onClick={() => void refetch()}>
+          <Button variant="outline" disabled={listUiStale} onClick={() => void refetch()}>
             <RefreshCw />
             Tentar novamente
           </Button>
@@ -321,10 +328,10 @@ export function MemberListPage() {
         <>
           <div
             className={cn(
-              'rounded-lg border bg-card transition-opacity',
-              listQueryBusy && 'pointer-events-none opacity-55',
+              'rounded-lg border bg-card transition-opacity duration-200',
+              listUiStale && 'pointer-events-none opacity-50',
             )}
-            aria-busy={listQueryBusy}
+            aria-busy={listUiStale ? true : undefined}
           >
             <Table>
               <TableHeader>
@@ -537,7 +544,7 @@ export function MemberListPage() {
             totalElements={totalElements}
             entityPlural="associados"
             onPageChange={setPage}
-            disabled={listQueryBusy}
+            disabled={listUiStale}
           />
         </>
       )}

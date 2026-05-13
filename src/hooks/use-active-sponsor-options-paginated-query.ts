@@ -2,7 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 
 import { userApi } from "@/api/user-api";
 import { getApiErrorMessage } from "@/lib/api-error";
-import type { SponsorTierEnum, UserWithSponsorDTO } from "@/types/user";
+import {
+  isUserWithSponsor,
+  type SponsorTierEnum,
+  type UserDetailDTO,
+} from "@/types/user";
 
 export const ACTIVE_SPONSOR_OPTIONS_PAGE_SIZE = 30;
 
@@ -14,10 +18,11 @@ export interface ActiveSponsorOption {
 }
 
 function mapPageToSponsorOptions(
-  users: UserWithSponsorDTO[],
+  users: UserDetailDTO[],
 ): ActiveSponsorOption[] {
   const bySponsorId = new Map<number, ActiveSponsorOption>();
   for (const u of users) {
+    if (!isUserWithSponsor(u)) continue;
     const s = u.sponsor;
     if (s == null) continue;
     if (!bySponsorId.has(s.id)) {

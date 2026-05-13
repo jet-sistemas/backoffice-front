@@ -3,7 +3,9 @@ import { render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { useMemberQuery } from '@/hooks/use-member-query'
+import { useUpdateMemberAccountMutation } from '@/hooks/use-update-member-account-mutation'
+import { useUpdateMemberProfileMutation } from '@/hooks/use-update-member-profile-mutation'
+import { useUserWithMemberQuery } from '@/hooks/use-user-with-member-query'
 
 import { MemberDetailPage } from './member-detail-page'
 
@@ -14,46 +16,82 @@ vi.mock('@/hooks/use-patch-subscriber-member-mutation', () => ({
   }),
 }))
 
-vi.mock('@/hooks/use-member-query', () => ({
-  useMemberQuery: vi.fn(),
+vi.mock('@/hooks/use-update-member-account-mutation', () => ({
+  useUpdateMemberAccountMutation: vi.fn(),
+}))
+
+vi.mock('@/hooks/use-update-member-profile-mutation', () => ({
+  useUpdateMemberProfileMutation: vi.fn(),
+}))
+
+vi.mock('@/hooks/use-user-with-member-query', () => ({
+  useUserWithMemberQuery: vi.fn(),
 }))
 
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ children }: { children: ReactNode }) => <span>{children}</span>,
 }))
 
+beforeEach(() => {
+  vi.mocked(useUpdateMemberAccountMutation).mockReturnValue({
+    mutate: vi.fn(),
+    isPending: false,
+  } as ReturnType<typeof useUpdateMemberAccountMutation>)
+  vi.mocked(useUpdateMemberProfileMutation).mockReturnValue({
+    mutate: vi.fn(),
+    isPending: false,
+  } as ReturnType<typeof useUpdateMemberProfileMutation>)
+})
+
 describe('MemberDetailPage', () => {
   it('exibe blocos de assinante e patrocínio quando presentes', () => {
-    vi.mocked(useMemberQuery).mockReturnValue({
+    vi.mocked(useUserWithMemberQuery).mockReturnValue({
       data: {
-        id: 1,
-        userId: 10,
+        id: 10,
         email: 'a@a.com',
-        code: 'ABCDE',
+        name: 'Conta do Fulano',
         document: '98765432109',
-        fullname: 'Fulano',
-        whatsapp: '11999990000',
-        type: 'SUBSCRIBER',
-        active: true,
+        code: 'ABCDE',
+        type: 'MEMBER',
+        accountActive: true,
         createdAt: '2026-01-01T00:00:00Z',
-        subscriber: {
-          id: 99,
-          monthlyFeeAmount: 150.5,
-          billingDay: 10,
-          status: 'ACTIVE',
-          nextDueDate: '2026-06-10',
-        },
-        sponsored: {
-          memberId: 1,
-          grantedByUserId: 42,
-          startAt: '2026-01-05',
+        member: {
+          id: 1,
+          userId: 10,
+          email: 'a@a.com',
+          code: 'ABCDE',
+          document: '98765432109',
+          fullname: 'Fulano',
+          whatsapp: '11999990000',
+          type: 'SUBSCRIBER',
           active: true,
+          createdAt: '2026-01-01T00:00:00Z',
+          subscriber: {
+            id: 99,
+            monthlyFeeAmount: 150.5,
+            billingDay: 10,
+            status: 'ACTIVE',
+            nextDueDate: '2026-06-10',
+          },
+          sponsored: {
+            memberId: 1,
+            grantedByUserId: 42,
+            grantedByUser: {
+              id: 42,
+              email: 'patrocinador@exemplo.com',
+              name: 'Conta Patrocinador',
+              type: 'SPONSOR',
+            },
+            startAt: '2026-01-05',
+            active: true,
+          },
         },
       },
       isLoading: false,
       isError: false,
       error: null,
-    } as ReturnType<typeof useMemberQuery>)
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof useUserWithMemberQuery>)
 
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     render(
@@ -62,23 +100,22 @@ describe('MemberDetailPage', () => {
       </QueryClientProvider>,
     )
 
+    expect(screen.getByText('Editar associado')).toBeInTheDocument()
     expect(screen.getByText('Mensalidade (assinante)')).toBeInTheDocument()
     expect(screen.getByText('Patrocínio')).toBeInTheDocument()
-    expect(
-      screen.getAllByRole('paragraph').some((p) =>
-        p.textContent?.includes('Concedido por (user id):') &&
-        p.textContent?.includes('42'),
-      ),
-    ).toBe(true)
+    expect(screen.getByText('Conta Patrocinador')).toBeInTheDocument()
+    expect(screen.getByText('patrocinador@exemplo.com')).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: 'Cancelar' })).toHaveLength(3)
   })
 
   it('mostra erro quando query falha', () => {
-    vi.mocked(useMemberQuery).mockReturnValue({
-      data: null,
+    vi.mocked(useUserWithMemberQuery).mockReturnValue({
+      data: undefined,
       isLoading: false,
       isError: true,
       error: new Error('falhou'),
-    } as ReturnType<typeof useMemberQuery>)
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof useUserWithMemberQuery>)
 
     const client = new QueryClient()
     render(

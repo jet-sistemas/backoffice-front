@@ -7,13 +7,6 @@ function optionalNumber() {
   )
 }
 
-function optionalPositiveInt() {
-  return z.preprocess(
-    (v) => (v === '' || v == null ? undefined : Number(v)),
-    z.number().int().positive().optional(),
-  )
-}
-
 export const memberCreateSchema = z
   .object({
     email: z.string().min(1, 'E-mail obrigatório').email('E-mail inválido'),
@@ -34,8 +27,6 @@ export const memberCreateSchema = z
     type: z.enum(['SUBSCRIBER', 'SPONSORED']),
     monthlyFeeAmount: optionalNumber(),
     billingDay: optionalNumber(),
-    grantedByUserId: optionalPositiveInt(),
-    startAt: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.type === 'SUBSCRIBER') {
@@ -48,14 +39,6 @@ export const memberCreateSchema = z
         ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Dia de cobrança obrigatório (1–28)', path: ['billingDay'] })
       } else if (data.billingDay < 1 || data.billingDay > 28) {
         ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Dia de cobrança deve ser entre 1 e 28', path: ['billingDay'] })
-      }
-    }
-    if (data.type === 'SPONSORED') {
-      if (data.grantedByUserId == null || Number.isNaN(data.grantedByUserId)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'ID do patrocinador concedente obrigatório', path: ['grantedByUserId'] })
-      }
-      if (data.startAt == null || data.startAt.trim() === '') {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Data de início obrigatória', path: ['startAt'] })
       }
     }
   })

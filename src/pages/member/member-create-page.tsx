@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useAuth } from '@/contexts/auth-context'
 import { useCreateMemberMutation } from '@/hooks/use-create-member-mutation'
 import { formatCPF, formatPhone } from '@/lib/utils'
 import { memberCreateSchema, type MemberCreateFormData } from '@/schemas/member-create-schema'
@@ -16,8 +17,13 @@ function onlyDigits(value: string) {
   return value.replace(/\D/g, '')
 }
 
+function todayISO() {
+  return new Date().toISOString().slice(0, 10)
+}
+
 export function MemberCreatePage() {
   const { mutate, isPending } = useCreateMemberMutation()
+  const { user } = useAuth()
   const {
     register,
     handleSubmit,
@@ -36,8 +42,6 @@ export function MemberCreatePage() {
       type: 'SUBSCRIBER',
       monthlyFeeAmount: undefined,
       billingDay: undefined,
-      grantedByUserId: undefined,
-      startAt: '',
     },
   })
 
@@ -70,8 +74,8 @@ export function MemberCreatePage() {
           : {
               ...baseMember,
               sponsored: {
-                grantedByUserId: values.grantedByUserId!,
-                startAt: values.startAt!.trim(),
+                grantedByUserId: user!.id,
+                startAt: todayISO(),
               },
             },
     })
@@ -275,43 +279,13 @@ export function MemberCreatePage() {
                 </div>
               </>
             ) : (
-              <>
-                <div className="space-y-2 sm:col-span-2 border-t pt-4">
-                  <p className="text-sm font-medium text-foreground">Patrocínio</p>
-                  <p className="text-xs text-muted-foreground">
-                    Informe o usuário patrocinador concedente (tipo SPONSOR ou SPONSOR_MEMBER) e a data de início.
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="member-granted-by">ID do usuário concedente</Label>
-                  <Input
-                    id="member-granted-by"
-                    type="number"
-                    min={1}
-                    aria-invalid={Boolean(errors.grantedByUserId)}
-                    {...register('grantedByUserId')}
-                  />
-                  {errors.grantedByUserId && (
-                    <p className="text-sm text-destructive" role="alert">
-                      {errors.grantedByUserId.message}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="member-sponsored-start">Início do patrocínio</Label>
-                  <Input
-                    id="member-sponsored-start"
-                    type="date"
-                    aria-invalid={Boolean(errors.startAt)}
-                    {...register('startAt')}
-                  />
-                  {errors.startAt && (
-                    <p className="text-sm text-destructive" role="alert">
-                      {errors.startAt.message}
-                    </p>
-                  )}
-                </div>
-              </>
+              <div className="space-y-2 sm:col-span-2 border-t pt-4">
+                <p className="text-sm font-medium text-foreground">Patrocínio</p>
+                <p className="text-xs text-muted-foreground">
+                  Este associado será vinculado automaticamente ao seu usuário como
+                  concedente, com início na data de hoje.
+                </p>
+              </div>
             )}
           </CardContent>
           <CardFooter className="flex justify-end gap-2">

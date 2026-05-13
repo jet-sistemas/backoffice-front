@@ -1,4 +1,4 @@
-import type { ApiEnvelopeBase } from './auth'
+import type { ApiEnvelopeBase, UserTypeEnum } from './auth'
 
 export type MemberTypeEnum = 'SUBSCRIBER' | 'SPONSORED'
 
@@ -14,9 +14,18 @@ export interface SubscriberMemberDTO {
   createdAt?: string | null
 }
 
+export interface SponsoredGrantUserDTO {
+  id: number
+  email: string
+  name: string
+  type: UserTypeEnum
+  createdAt?: string | null
+}
+
 export interface SponsoredMemberDTO {
   memberId: number
   grantedByUserId: number
+  grantedByUser?: SponsoredGrantUserDTO | null
   startAt: string
   endAt?: string | null
   reason?: string | null
