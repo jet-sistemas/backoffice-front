@@ -42,6 +42,10 @@ const defaultListReturn = {
     totalPages: 1,
   },
   isLoading: false,
+  isFetching: false,
+  isError: false,
+  error: null,
+  refetch: vi.fn(),
 }
 
 describe('MemberListPage', () => {
@@ -58,6 +62,7 @@ describe('MemberListPage', () => {
     )
 
     expect(screen.getByText('Associados')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Filtrar e buscar' })).toBeInTheDocument()
     expect(screen.getByText('Maria de Souza')).toBeInTheDocument()
     expect(screen.getByText('maria@test.com')).toBeInTheDocument()
     expect(screen.getByText('Ativo')).toBeInTheDocument()
