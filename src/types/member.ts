@@ -85,8 +85,16 @@ export interface MemberListParams {
   size: number
 }
 
-export interface PaginatedMembersResponse extends ApiEnvelopeBase {
-  data: MemberDTO[]
+/** Linha da listagem admin: membro + campos do utilizador necessários à UI. */
+export interface MemberListRow {
+  userId: number
+  avatarUrl?: string
+  accountActive: boolean
+  member: MemberDTO
+}
+
+export interface PaginatedMemberListRowsResponse extends ApiEnvelopeBase {
+  data: MemberListRow[]
 }
 
 export interface EnvelopeMemberDTO extends ApiEnvelopeBase {

@@ -2,7 +2,11 @@ import { useQuery } from '@tanstack/react-query'
 
 import { userApi } from '@/api/user-api'
 import { getApiErrorMessage } from '@/lib/api-error'
-import type { MemberListParams, PaginatedMembersResponse } from '@/types/member'
+import type {
+  MemberListParams,
+  MemberListRow,
+  PaginatedMemberListRowsResponse,
+} from '@/types/member'
 
 export function useMemberListQuery(params: MemberListParams) {
   return useQuery({
@@ -18,13 +22,22 @@ export function useMemberListQuery(params: MemberListParams) {
           size: params.size,
         })
         const envelope = response.data
-        const members = (envelope.data ?? [])
-          .map((u) => u.member)
-          .filter((m): m is NonNullable<typeof m> => m != null)
+        const rows: MemberListRow[] = (envelope.data ?? [])
+          .map((u) => {
+            const member = u.member
+            if (member == null) return null
+            return {
+              userId: u.id,
+              avatarUrl: u.avatarUrl,
+              accountActive: u.accountActive,
+              member,
+            } satisfies MemberListRow
+          })
+          .filter((row): row is MemberListRow => row != null)
         return {
           ...envelope,
-          data: members,
-        } as PaginatedMembersResponse
+          data: rows,
+        } satisfies PaginatedMemberListRowsResponse
       } catch (error) {
         throw new Error(getApiErrorMessage(error))
       }

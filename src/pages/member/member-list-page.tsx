@@ -2,18 +2,33 @@ import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import {
   AlertCircle,
+  Eye,
+  EyeClosed,
   Loader2,
+  Pencil,
   Plus,
   RefreshCw,
   Search,
   Trash2,
+  User,
   Users,
 } from 'lucide-react'
 
 import { ListPaginationBar } from '@/components/list-pagination-bar'
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   Select,
   SelectContent,
@@ -28,14 +43,27 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  tableRowInactiveClassName,
 } from '@/components/ui/table'
+import { useActivateUserMutation } from '@/hooks/use-activate-user-mutation'
+import { useDeactivateUserMutation } from '@/hooks/use-deactivate-user-mutation'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { useMemberListQuery } from '@/hooks/use-member-list-query'
-import { cn } from '@/lib/utils'
-import type { MemberTypeEnum } from '@/types/member'
+import { resolveR2PublicUrl } from '@/lib/r2-public-url'
+import { cn, formatDocument } from '@/lib/utils'
+import type { MemberListRow, MemberTypeEnum } from '@/types/member'
 
 const PAGE_SIZE = 10
 const SEARCH_DEBOUNCE_MS = 500
+
+const MEMBER_TYPE_LABELS: Record<MemberTypeEnum, string> = {
+  SUBSCRIBER: 'Assinante',
+  SPONSORED: 'Patrocinado',
+}
+
+function memberRowLabel(row: MemberListRow) {
+  return row.member.fullname
+}
 
 export function MemberListPage() {
   const [page, setPage] = useState(1)
@@ -61,12 +89,56 @@ export function MemberListPage() {
     size: PAGE_SIZE,
   })
 
-  const members = data?.data ?? []
+  const rows = data?.data ?? []
   const totalPages = data?.totalPages ?? 0
   const totalElements = data?.totalElements ?? 0
 
   const searchSettling = searchTerm.trim() !== debouncedSearch.trim()
   const listQueryBusy = isLoading || isFetching || searchSettling
+
+  const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false)
+  const [rowToDeactivate, setRowToDeactivate] = useState<MemberListRow | null>(null)
+  const [activateDialogOpen, setActivateDialogOpen] = useState(false)
+  const [rowToActivate, setRowToActivate] = useState<MemberListRow | null>(null)
+
+  const deactivateMutation = useDeactivateUserMutation()
+  const activateMutation = useActivateUserMutation()
+  const toggleMutationPending =
+    deactivateMutation.isPending || activateMutation.isPending
+
+  const closeDeactivateDialog = () => {
+    setDeactivateDialogOpen(false)
+    setRowToDeactivate(null)
+  }
+
+  const handleDeactivate = (row: MemberListRow) => {
+    setRowToDeactivate(row)
+    setDeactivateDialogOpen(true)
+  }
+
+  const confirmDeactivate = () => {
+    if (rowToDeactivate == null) return
+    deactivateMutation.mutate(rowToDeactivate.userId, {
+      onSuccess: () => closeDeactivateDialog(),
+    })
+  }
+
+  const closeActivateDialog = () => {
+    setActivateDialogOpen(false)
+    setRowToActivate(null)
+  }
+
+  const handleActivate = (row: MemberListRow) => {
+    setRowToActivate(row)
+    setActivateDialogOpen(true)
+  }
+
+  const confirmActivate = () => {
+    if (rowToActivate == null) return
+    activateMutation.mutate(rowToActivate.userId, {
+      onSuccess: () => closeActivateDialog(),
+    })
+  }
 
   const hasActiveServerFilters = type !== 'ALL' || activeFilter !== 'ALL'
   const hasActiveSearch =
@@ -152,7 +224,7 @@ export function MemberListPage() {
               />
               <Input
                 id="member-search"
-                placeholder="Nome, e-mail, documento, código ou WhatsApp…"
+                placeholder="Buscar por nome, e-mail, documento, código ou WhatsApp…"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9"
@@ -188,7 +260,7 @@ export function MemberListPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="member-filter-status">Situação</Label>
+              <Label htmlFor="member-filter-status">Situação da conta</Label>
               <Select
                 value={activeFilter}
                 onValueChange={(v) => {
@@ -198,7 +270,7 @@ export function MemberListPage() {
                 disabled={listQueryBusy}
               >
                 <SelectTrigger id="member-filter-status" className="w-full">
-                  <SelectValue placeholder="Situação" />
+                  <SelectValue placeholder="Situação da conta" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ALL">Ativos e inativos</SelectItem>
@@ -211,11 +283,7 @@ export function MemberListPage() {
         </div>
       </section>
 
-      {isLoading && (
-        <div className="rounded-lg border bg-card p-8 text-center text-sm text-muted-foreground">
-          Carregando associados…
-        </div>
-      )}
+      {isLoading && <MemberTableSkeleton />}
 
       {isError && (
         <div className="flex flex-col items-center gap-4 rounded-lg border border-destructive/20 bg-destructive/5 py-12">
@@ -233,7 +301,7 @@ export function MemberListPage() {
         </div>
       )}
 
-      {!isLoading && !isError && members.length === 0 && (
+      {!isLoading && !isError && rows.length === 0 && (
         <div className="flex flex-col items-center gap-4 py-16 text-center">
           <div className="flex size-16 items-center justify-center rounded-full bg-muted">
             <Users className="size-8 text-muted-foreground" />
@@ -249,7 +317,7 @@ export function MemberListPage() {
         </div>
       )}
 
-      {!isLoading && !isError && members.length > 0 && (
+      {!isLoading && !isError && rows.length > 0 && (
         <>
           <div
             className={cn(
@@ -262,35 +330,202 @@ export function MemberListPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
-                  <TableHead>E-mail</TableHead>
-                  <TableHead>WhatsApp</TableHead>
+                  <TableHead className="hidden sm:table-cell">Documento</TableHead>
+                  <TableHead className="hidden lg:table-cell">WhatsApp</TableHead>
                   <TableHead>Tipo</TableHead>
-                  <TableHead>Situação</TableHead>
-                  <TableHead className="text-right">Detalhe</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="hidden md:table-cell">Código</TableHead>
+                  <TableHead className="min-w-[140px] text-right">
+                    <span className="sr-only">Ações</span>
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {members.map((m) => (
-                  <TableRow key={m.id}>
-                    <TableCell>{m.fullname}</TableCell>
-                    <TableCell>{m.email}</TableCell>
-                    <TableCell>{m.whatsapp}</TableCell>
-                    <TableCell>
-                      {m.type === 'SUBSCRIBER' ? 'Assinante' : 'Patrocinado'}
-                    </TableCell>
-                    <TableCell>{m.active ? 'Ativo' : 'Inativo'}</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" asChild>
-                        <Link
-                          to="/admin/associados/$userId"
-                          params={{ userId: String(m.userId) }}
+                {rows.map((row) => {
+                  const m = row.member
+                  const avatarSrc = resolveR2PublicUrl(row.avatarUrl)
+                  const inactive = !row.accountActive
+                  const typeVariant = m.type === 'SUBSCRIBER' ? 'gold' : 'accent'
+                  return (
+                    <TableRow
+                      key={row.userId}
+                      className={cn(inactive && tableRowInactiveClassName)}
+                    >
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          {avatarSrc ? (
+                            <img
+                              src={avatarSrc}
+                              alt={m.fullname}
+                              className={cn(
+                                'size-8 rounded-md object-cover',
+                                inactive && 'opacity-80',
+                              )}
+                            />
+                          ) : (
+                            <div
+                              role="img"
+                              aria-label="Sem foto de perfil"
+                              className={cn(
+                                'flex size-8 items-center justify-center rounded-md bg-blue-50',
+                                inactive && 'bg-neutral-200',
+                              )}
+                            >
+                              <User
+                                className={cn(
+                                  'size-4 text-blue-400',
+                                  inactive && 'text-neutral-500',
+                                )}
+                                aria-hidden
+                              />
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p
+                              className={cn(
+                                'truncate font-medium',
+                                inactive && 'font-thin text-neutral-600',
+                              )}
+                            >
+                              {m.fullname}
+                            </p>
+                            <p
+                              className={cn(
+                                'truncate text-xs text-muted-foreground',
+                                inactive && 'text-neutral-400',
+                              )}
+                            >
+                              {m.email}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell
+                        className={cn(
+                          'hidden sm:table-cell',
+                          inactive && 'text-neutral-500',
+                        )}
+                      >
+                        {formatDocument(m.document)}
+                      </TableCell>
+                      <TableCell
+                        className={cn(
+                          'hidden lg:table-cell',
+                          inactive && 'text-neutral-500',
+                        )}
+                      >
+                        {m.whatsapp}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={typeVariant}
+                          className={cn(
+                            m.type === 'SUBSCRIBER' &&
+                              !inactive &&
+                              'text-amber-950 [a&]:hover:bg-jet-gold/90',
+                            inactive &&
+                              'opacity-90 bg-neutral-200 text-neutral-500 border-neutral-200',
+                          )}
                         >
-                          Ver
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                          {MEMBER_TYPE_LABELS[m.type]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {row.accountActive ? (
+                          <Badge
+                            variant="default"
+                            className="bg-emerald-600 text-white hover:bg-emerald-600/90"
+                          >
+                            Ativo
+                          </Badge>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-full border border-neutral-300 bg-neutral-50 px-2 py-0.5 text-[11px] font-bold text-neutral-500">
+                            Inativo
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell
+                        className={cn(
+                          'hidden md:table-cell',
+                          inactive && 'text-neutral-500',
+                        )}
+                      >
+                        <code
+                          className={cn(
+                            'rounded bg-blue-50 px-1.5 py-0.5 text-xs',
+                            !inactive && 'font-bold',
+                            inactive && 'bg-neutral-100 text-neutral-500',
+                          )}
+                        >
+                          {m.code}
+                        </code>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div
+                          className={cn(
+                            'flex justify-end gap-1',
+                            inactive && 'opacity-80',
+                          )}
+                        >
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={cn(
+                              'size-9',
+                              inactive &&
+                                'border border-neutral-200 bg-neutral-50 hover:bg-neutral-100/80',
+                            )}
+                            asChild
+                          >
+                            <Link
+                              to="/admin/associados/$userId"
+                              params={{ userId: String(row.userId) }}
+                              aria-label={`Editar associado ${memberRowLabel(row)}`}
+                            >
+                              <Pencil className="size-4" aria-hidden />
+                            </Link>
+                          </Button>
+                          {row.accountActive ? (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="size-9 text-destructive hover:text-accent-foreground"
+                              aria-label={`Desativar associado ${memberRowLabel(row)}`}
+                              disabled={toggleMutationPending}
+                              onClick={() => handleDeactivate(row)}
+                            >
+                              <EyeClosed className="size-4" aria-hidden />
+                            </Button>
+                          ) : (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="size-9 text-sky-600 dark:text-sky-400 hover:text-accent-foreground"
+                              aria-label={`Ativar associado ${memberRowLabel(row)}`}
+                              disabled={toggleMutationPending}
+                              onClick={() => handleActivate(row)}
+                            >
+                              <Eye className="size-4" aria-hidden />
+                            </Button>
+                          )}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="size-9 text-muted-foreground"
+                            aria-label={`Apagar associado ${memberRowLabel(row)} (indisponível)`}
+                            disabled
+                            title="Apagar registro em breve"
+                          >
+                            <Trash2 className="size-4" aria-hidden />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
           </div>
@@ -302,9 +537,136 @@ export function MemberListPage() {
             totalElements={totalElements}
             entityPlural="associados"
             onPageChange={setPage}
+            disabled={listQueryBusy}
           />
         </>
       )}
+
+      <AlertDialog
+        open={deactivateDialogOpen}
+        onOpenChange={(open) => {
+          if (open) return
+          if (toggleMutationPending) return
+          closeDeactivateDialog()
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif">Desativar associado?</AlertDialogTitle>
+            <AlertDialogDescription>
+              O associado{' '}
+              <span className="font-medium text-foreground">
+                &quot;{rowToDeactivate ? memberRowLabel(rowToDeactivate) : ''}&quot;
+              </span>{' '}
+              será desativado de forma lógica: a conta deixa de poder iniciar sessão e o
+              registro de membro passa a inativo. O registro permanece na base de dados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel disabled={toggleMutationPending}>Cancelar</AlertDialogCancel>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={deactivateMutation.isPending}
+              onClick={confirmDeactivate}
+            >
+              {deactivateMutation.isPending ? 'Desativando…' : 'Desativar'}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={activateDialogOpen}
+        onOpenChange={(open) => {
+          if (open) return
+          if (toggleMutationPending) return
+          closeActivateDialog()
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif">Ativar associado?</AlertDialogTitle>
+            <AlertDialogDescription>
+              A conta do associado{' '}
+              <span className="font-medium text-foreground">
+                &quot;{rowToActivate ? memberRowLabel(rowToActivate) : ''}&quot;
+              </span>{' '}
+              será reativada: volta a poder iniciar sessão e o registro de membro volta a
+              ficar ativo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel disabled={toggleMutationPending}>Cancelar</AlertDialogCancel>
+            <Button
+              type="button"
+              disabled={activateMutation.isPending}
+              onClick={confirmActivate}
+            >
+              {activateMutation.isPending ? 'Ativando…' : 'Ativar'}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  )
+}
+
+function MemberTableSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="rounded-lg border bg-card">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nome</TableHead>
+              <TableHead className="hidden sm:table-cell">Documento</TableHead>
+              <TableHead className="hidden lg:table-cell">WhatsApp</TableHead>
+              <TableHead>Tipo</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="hidden md:table-cell">Código</TableHead>
+              <TableHead className="min-w-[140px]" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <TableRow key={i}>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="size-8 rounded-md" />
+                    <div className="space-y-1.5">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="hidden sm:table-cell">
+                  <Skeleton className="h-4 w-28" />
+                </TableCell>
+                <TableCell className="hidden lg:table-cell">
+                  <Skeleton className="h-4 w-24" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-5 w-20 rounded-md" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-5 w-12 rounded-md" />
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  <Skeleton className="h-4 w-14" />
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-1">
+                    <Skeleton className="size-9 rounded-md" />
+                    <Skeleton className="size-9 rounded-md" />
+                    <Skeleton className="size-9 rounded-md" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   )
 }

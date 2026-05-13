@@ -18,10 +18,19 @@ export const memberCreateSchema = z
   .object({
     email: z.string().min(1, 'E-mail obrigatório').email('E-mail inválido'),
     name: z.string().min(1, 'Nome obrigatório'),
-    document: z.string().min(11, 'Documento inválido'),
+    document: z
+      .string()
+      .min(1, 'Documento obrigatório')
+      .refine((v) => v.replace(/\D/g, '').length === 11, 'CPF inválido'),
     code: z.string().length(5, 'Código deve ter 5 caracteres'),
     fullname: z.string().min(1, 'Nome completo obrigatório'),
-    whatsapp: z.string().min(8, 'WhatsApp inválido').max(50, 'WhatsApp inválido'),
+    whatsapp: z
+      .string()
+      .min(1, 'WhatsApp obrigatório')
+      .refine((v) => {
+        const d = v.replace(/\D/g, '')
+        return d.length >= 10 && d.length <= 11
+      }, 'WhatsApp inválido (DDD + número)'),
     type: z.enum(['SUBSCRIBER', 'SPONSORED']),
     monthlyFeeAmount: optionalNumber(),
     billingDay: optionalNumber(),

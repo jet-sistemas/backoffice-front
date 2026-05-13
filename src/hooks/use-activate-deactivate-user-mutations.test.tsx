@@ -34,7 +34,7 @@ function expectInvalidatesBenefitsSponsorOptions(
     (c) => (c[0] as { queryKey: unknown[] }).queryKey,
   )
   expect(keys).toEqual(
-    expect.arrayContaining([['users'], ['user', 7], ['benefits']]),
+    expect.arrayContaining([['users'], ['members'], ['user', 7], ['benefits']]),
   )
   expect(
     keys.some((k) => Array.isArray(k) && k[0] === 'sponsor-options'),

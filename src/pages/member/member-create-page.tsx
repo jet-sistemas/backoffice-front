@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from '@tanstack/react-router'
-import { useForm } from 'react-hook-form'
+import { ArrowLeft } from 'lucide-react'
+import { Controller, useForm } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,11 +9,22 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useCreateMemberMutation } from '@/hooks/use-create-member-mutation'
+import { formatCPF, formatPhone } from '@/lib/utils'
 import { memberCreateSchema, type MemberCreateFormData } from '@/schemas/member-create-schema'
+
+function onlyDigits(value: string) {
+  return value.replace(/\D/g, '')
+}
 
 export function MemberCreatePage() {
   const { mutate, isPending } = useCreateMemberMutation()
-  const form = useForm<MemberCreateFormData>({
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    formState: { errors },
+  } = useForm<MemberCreateFormData>({
     resolver: zodResolver(memberCreateSchema),
     defaultValues: {
       email: '',
@@ -29,12 +41,12 @@ export function MemberCreatePage() {
     },
   })
 
-  const memberType = form.watch('type')
+  const memberType = watch('type')
 
-  const onSubmit = form.handleSubmit((values) => {
+  const onSubmit = handleSubmit((values) => {
     const baseMember = {
       fullname: values.fullname.trim(),
-      whatsapp: values.whatsapp.trim(),
+      whatsapp: onlyDigits(values.whatsapp),
       type: values.type,
     }
 
@@ -42,7 +54,7 @@ export function MemberCreatePage() {
       user: {
         email: values.email.trim(),
         name: values.name.trim(),
-        document: values.document.trim(),
+        document: onlyDigits(values.document),
         code: values.code.trim().toUpperCase(),
         type: 'MEMBER',
       },
@@ -67,8 +79,20 @@ export function MemberCreatePage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <h1 className="font-serif text-2xl font-bold tracking-tight">Novo associado</h1>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <Button variant="ghost" size="sm" className="-ml-3 w-fit gap-1" asChild>
+            <Link to="/admin/associados">
+              <ArrowLeft className="size-4" aria-hidden />
+              Voltar à lista
+            </Link>
+          </Button>
+          <h1 className="font-serif text-2xl font-bold tracking-tight">Novo associado</h1>
+          <p className="text-sm text-muted-foreground">
+            Cadastro vinculado a um usuário do tipo associado (MEMBER). Informe os dados
+            da conta e selecione o tipo inicial (assinante ou patrocinado).
+          </p>
+        </div>
       </div>
       <form onSubmit={onSubmit}>
         <Card>
@@ -79,40 +103,135 @@ export function MemberCreatePage() {
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="member-email">E-mail</Label>
-              <Input id="member-email" {...form.register('email')} />
+              <Input
+                id="member-email"
+                type="email"
+                autoComplete="email"
+                aria-invalid={Boolean(errors.email)}
+                {...register('email')}
+              />
+              {errors.email && (
+                <p className="text-sm text-destructive" role="alert">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="member-name">Nome da conta</Label>
-              <Input id="member-name" {...form.register('name')} />
+              <Input
+                id="member-name"
+                autoComplete="username"
+                aria-invalid={Boolean(errors.name)}
+                {...register('name')}
+              />
+              {errors.name && (
+                <p className="text-sm text-destructive" role="alert">
+                  {errors.name.message}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="member-fullname">Nome completo</Label>
-              <Input id="member-fullname" {...form.register('fullname')} />
+              <Input
+                id="member-fullname"
+                autoComplete="name"
+                aria-invalid={Boolean(errors.fullname)}
+                {...register('fullname')}
+              />
+              {errors.fullname && (
+                <p className="text-sm text-destructive" role="alert">
+                  {errors.fullname.message}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="member-document">Documento</Label>
-              <Input id="member-document" {...form.register('document')} />
+              <Controller
+                name="document"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    id="member-document"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    maxLength={14}
+                    placeholder="000.000.000-00"
+                    aria-invalid={Boolean(errors.document)}
+                    value={field.value}
+                    onBlur={field.onBlur}
+                    ref={field.ref}
+                    onChange={(e) => field.onChange(formatCPF(e.target.value))}
+                  />
+                )}
+              />
+              {errors.document && (
+                <p className="text-sm text-destructive" role="alert">
+                  {errors.document.message}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="member-code">Código (5)</Label>
-              <Input id="member-code" maxLength={5} {...form.register('code')} />
+              <Input
+                id="member-code"
+                maxLength={5}
+                autoComplete="off"
+                className="font-mono uppercase"
+                aria-invalid={Boolean(errors.code)}
+                {...register('code')}
+              />
+              {errors.code && (
+                <p className="text-sm text-destructive" role="alert">
+                  {errors.code.message}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="member-whatsapp">WhatsApp</Label>
-              <Input id="member-whatsapp" {...form.register('whatsapp')} />
+              <Controller
+                name="whatsapp"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    id="member-whatsapp"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    maxLength={15}
+                    placeholder="(00) 00000-0000"
+                    aria-invalid={Boolean(errors.whatsapp)}
+                    value={field.value}
+                    onBlur={field.onBlur}
+                    ref={field.ref}
+                    onChange={(e) => field.onChange(formatPhone(e.target.value))}
+                  />
+                )}
+              />
+              {errors.whatsapp && (
+                <p className="text-sm text-destructive" role="alert">
+                  {errors.whatsapp.message}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
-              <Label>Tipo inicial</Label>
-              <Select
-                value={form.watch('type')}
-                onValueChange={(v) => form.setValue('type', v as 'SUBSCRIBER' | 'SPONSORED')}
-              >
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="SUBSCRIBER">Assinante</SelectItem>
-                  <SelectItem value="SPONSORED">Patrocinado</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="member-type-select">Tipo inicial</Label>
+              <Controller
+                name="type"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onValueChange={(v) => field.onChange(v as 'SUBSCRIBER' | 'SPONSORED')}
+                  >
+                    <SelectTrigger id="member-type-select" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="SUBSCRIBER">Assinante</SelectItem>
+                      <SelectItem value="SPONSORED">Patrocinado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
             {memberType === 'SUBSCRIBER' ? (
               <>
@@ -129,20 +248,28 @@ export function MemberCreatePage() {
                     type="number"
                     step="0.01"
                     min="0.01"
-                    {...form.register('monthlyFeeAmount')}
+                    aria-invalid={Boolean(errors.monthlyFeeAmount)}
+                    {...register('monthlyFeeAmount')}
                   />
-                  {form.formState.errors.monthlyFeeAmount && (
-                    <p className="text-sm text-destructive">
-                      {form.formState.errors.monthlyFeeAmount.message}
+                  {errors.monthlyFeeAmount && (
+                    <p className="text-sm text-destructive" role="alert">
+                      {errors.monthlyFeeAmount.message}
                     </p>
                   )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="member-billing-day">Dia de cobrança</Label>
-                  <Input id="member-billing-day" type="number" min={1} max={28} {...form.register('billingDay')} />
-                  {form.formState.errors.billingDay && (
-                    <p className="text-sm text-destructive">
-                      {form.formState.errors.billingDay.message}
+                  <Input
+                    id="member-billing-day"
+                    type="number"
+                    min={1}
+                    max={28}
+                    aria-invalid={Boolean(errors.billingDay)}
+                    {...register('billingDay')}
+                  />
+                  {errors.billingDay && (
+                    <p className="text-sm text-destructive" role="alert">
+                      {errors.billingDay.message}
                     </p>
                   )}
                 </div>
@@ -157,19 +284,30 @@ export function MemberCreatePage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="member-granted-by">ID do usuário concedente</Label>
-                  <Input id="member-granted-by" type="number" min={1} {...form.register('grantedByUserId')} />
-                  {form.formState.errors.grantedByUserId && (
-                    <p className="text-sm text-destructive">
-                      {form.formState.errors.grantedByUserId.message}
+                  <Input
+                    id="member-granted-by"
+                    type="number"
+                    min={1}
+                    aria-invalid={Boolean(errors.grantedByUserId)}
+                    {...register('grantedByUserId')}
+                  />
+                  {errors.grantedByUserId && (
+                    <p className="text-sm text-destructive" role="alert">
+                      {errors.grantedByUserId.message}
                     </p>
                   )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="member-sponsored-start">Início do patrocínio</Label>
-                  <Input id="member-sponsored-start" type="date" {...form.register('startAt')} />
-                  {form.formState.errors.startAt && (
-                    <p className="text-sm text-destructive">
-                      {form.formState.errors.startAt.message}
+                  <Input
+                    id="member-sponsored-start"
+                    type="date"
+                    aria-invalid={Boolean(errors.startAt)}
+                    {...register('startAt')}
+                  />
+                  {errors.startAt && (
+                    <p className="text-sm text-destructive" role="alert">
+                      {errors.startAt.message}
                     </p>
                   )}
                 </div>

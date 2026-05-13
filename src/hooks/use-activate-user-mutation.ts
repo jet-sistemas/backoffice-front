@@ -12,16 +12,17 @@ export function useActivateUserMutation() {
     mutationFn: (id: number) => userApi.activateUser(id),
     onSuccess: (_, userId) => {
       void queryClient.invalidateQueries({ queryKey: ['users'] })
+      void queryClient.invalidateQueries({ queryKey: ['members'] })
       void queryClient.invalidateQueries({ queryKey: ['user', userId] })
       void queryClient.invalidateQueries({ queryKey: ['benefits'] })
       void queryClient.invalidateQueries({ queryKey: ['sponsor-options'] })
-      toast.success('Patrocinador ativado.')
+      toast.success('Conta reativada.')
     },
     onError: (error) => {
       const fallback =
         error instanceof AxiosError && error.response?.status === 400
-          ? 'Não foi possível ativar este utilizador.'
-          : 'Não foi possível ativar o patrocinador. Tente novamente.'
+          ? 'Não foi possível reativar esta conta.'
+          : 'Não foi possível reativar a conta. Tente novamente.'
       toast.error(getApiErrorMessage(error, fallback))
     },
   })
