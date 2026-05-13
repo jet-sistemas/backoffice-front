@@ -2,11 +2,11 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { MemberDetailPage } from '@/pages/member/member-detail-page'
 
-export const Route = createFileRoute('/admin/associados/$memberId')({
+export const Route = createFileRoute('/admin/associados/$userId')({
   component: MemberDetailRoute,
 })
 
 function MemberDetailRoute() {
-  const { memberId } = Route.useParams()
-  return <MemberDetailPage memberId={memberId} />
+  const { userId } = Route.useParams()
+  return <MemberDetailPage userId={userId} />
 }

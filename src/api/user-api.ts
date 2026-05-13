@@ -1,6 +1,10 @@
 import { api } from "@/lib/axios";
 import { sponsorTierFromApi, sponsorTierToApi } from "@/lib/sponsor-tier";
 import type {
+  EnvelopeMemberDTO,
+  SubscriberMemberPatchDTO,
+} from "@/types/member";
+import type {
   EnvelopeUserWithSponsorDTO,
   PaginatedUsersResponse,
   UserListParams,
@@ -148,5 +152,12 @@ export const userApi = {
 
   activateUser(id: number) {
     return api.patch(`/v1/admin/user/${id}/activate`);
+  },
+
+  patchSubscriberUser(userId: number, body: SubscriberMemberPatchDTO) {
+    return api.patch<EnvelopeMemberDTO>(
+      `/v1/admin/user/${userId}/subscriber`,
+      body,
+    );
   },
 };

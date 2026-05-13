@@ -16,11 +16,16 @@ const PAGE_SIZE = 10
 export function MemberListPage() {
   const [page, setPage] = useState(1)
   const [type, setType] = useState<string>('ALL')
+  const [activeFilter, setActiveFilter] = useState<string>('ALL')
   const [search, setSearch] = useState('')
   const debouncedSearch = useDebouncedValue(search, 400)
 
+  const isActive =
+    activeFilter === 'ACTIVE' ? true : activeFilter === 'INACTIVE' ? false : undefined
+
   const { data, isLoading } = useMemberListQuery({
     type: type !== 'ALL' ? (type as MemberTypeEnum) : undefined,
+    isActive,
     search: debouncedSearch.trim() !== '' ? debouncedSearch : undefined,
     page,
     size: PAGE_SIZE,
@@ -43,7 +48,7 @@ export function MemberListPage() {
         </Button>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-[220px_1fr]">
+      <div className="grid gap-3 sm:grid-cols-[220px_220px_1fr]">
         <Select value={type} onValueChange={(v) => { setType(v); setPage(1) }}>
           <SelectTrigger>
             <SelectValue placeholder="Tipo de membro" />
@@ -52,6 +57,16 @@ export function MemberListPage() {
             <SelectItem value="ALL">Todos os tipos</SelectItem>
             <SelectItem value="SUBSCRIBER">Assinante</SelectItem>
             <SelectItem value="SPONSORED">Patrocinado</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={activeFilter} onValueChange={(v) => { setActiveFilter(v); setPage(1) }}>
+          <SelectTrigger>
+            <SelectValue placeholder="Situação" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">Ativos e inativos</SelectItem>
+            <SelectItem value="ACTIVE">Somente ativos</SelectItem>
+            <SelectItem value="INACTIVE">Somente inativos</SelectItem>
           </SelectContent>
         </Select>
         <div className="relative">
@@ -73,14 +88,15 @@ export function MemberListPage() {
               <TableHead>E-mail</TableHead>
               <TableHead>WhatsApp</TableHead>
               <TableHead>Tipo</TableHead>
+              <TableHead>Situação</TableHead>
               <TableHead className="text-right">Detalhe</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableRow><TableCell colSpan={5}>Carregando...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6}>Carregando...</TableCell></TableRow>
             ) : members.length === 0 ? (
-              <TableRow><TableCell colSpan={5}>Nenhum associado encontrado.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6}>Nenhum associado encontrado.</TableCell></TableRow>
             ) : (
               members.map((m) => (
                 <TableRow key={m.id}>
@@ -88,9 +104,10 @@ export function MemberListPage() {
                   <TableCell>{m.email}</TableCell>
                   <TableCell>{m.whatsapp}</TableCell>
                   <TableCell>{m.type === 'SUBSCRIBER' ? 'Assinante' : 'Patrocinado'}</TableCell>
+                  <TableCell>{m.active ? 'Ativo' : 'Inativo'}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" asChild>
-                      <Link to="/admin/associados/$memberId" params={{ memberId: String(m.id) }}>
+                      <Link to="/admin/associados/$userId" params={{ userId: String(m.userId) }}>
                         Ver
                       </Link>
                     </Button>

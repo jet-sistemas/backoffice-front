@@ -1,4 +1,5 @@
 import type { ApiEnvelopeBase, UserTypeEnum } from "./auth";
+import type { MemberCreateDTO, MemberDTO, MemberTypeEnum } from "./member";
 
 export type SponsorTierEnum = "OURO" | "PRATA" | "BRONZE";
 
@@ -37,6 +38,7 @@ export interface UserWithSponsorDTO {
   avatarUrl?: string;
   createdAt: string;
   sponsor?: SponsorDTO;
+  member?: MemberDTO;
 }
 
 export interface UserListParams {
@@ -47,6 +49,7 @@ export interface UserListParams {
   isActive?: boolean;
   /** Busca no servidor: nome da conta, nome público, documento ou código */
   search?: string;
+  memberType?: MemberTypeEnum;
   page: number;
   size: number;
 }
@@ -73,6 +76,7 @@ export interface UserWithSponsorCreateDTO {
     instagram?: string;
     whatsapp?: string;
   };
+  member?: MemberCreateDTO["member"];
 }
 
 export interface EnvelopeUserWithSponsorDTO extends ApiEnvelopeBase {

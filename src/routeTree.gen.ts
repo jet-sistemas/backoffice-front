@@ -18,7 +18,7 @@ import { Route as AdminBeneficiosIndexRouteImport } from './routes/admin/benefic
 import { Route as AdminAssociadosIndexRouteImport } from './routes/admin/associados/index'
 import { Route as AdminPatrocinadoresNovoRouteImport } from './routes/admin/patrocinadores/novo'
 import { Route as AdminAssociadosNovoRouteImport } from './routes/admin/associados/novo'
-import { Route as AdminAssociadosMemberIdRouteImport } from './routes/admin/associados/$memberId'
+import { Route as AdminAssociadosUserIdRouteImport } from './routes/admin/associados/$userId'
 import { Route as AdminPatrocinadoresUserIdEditarRouteImport } from './routes/admin/patrocinadores/$userId/editar'
 
 const LoginRoute = LoginRouteImport.update({
@@ -67,9 +67,9 @@ const AdminAssociadosNovoRoute = AdminAssociadosNovoRouteImport.update({
   path: '/associados/novo',
   getParentRoute: () => AdminRouteRoute,
 } as any)
-const AdminAssociadosMemberIdRoute = AdminAssociadosMemberIdRouteImport.update({
-  id: '/associados/$memberId',
-  path: '/associados/$memberId',
+const AdminAssociadosUserIdRoute = AdminAssociadosUserIdRouteImport.update({
+  id: '/associados/$userId',
+  path: '/associados/$userId',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminPatrocinadoresUserIdEditarRoute =
@@ -84,7 +84,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/admin/': typeof AdminIndexRoute
-  '/admin/associados/$memberId': typeof AdminAssociadosMemberIdRoute
+  '/admin/associados/$userId': typeof AdminAssociadosUserIdRoute
   '/admin/associados/novo': typeof AdminAssociadosNovoRoute
   '/admin/patrocinadores/novo': typeof AdminPatrocinadoresNovoRoute
   '/admin/associados/': typeof AdminAssociadosIndexRoute
@@ -96,7 +96,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/admin': typeof AdminIndexRoute
-  '/admin/associados/$memberId': typeof AdminAssociadosMemberIdRoute
+  '/admin/associados/$userId': typeof AdminAssociadosUserIdRoute
   '/admin/associados/novo': typeof AdminAssociadosNovoRoute
   '/admin/patrocinadores/novo': typeof AdminPatrocinadoresNovoRoute
   '/admin/associados': typeof AdminAssociadosIndexRoute
@@ -110,7 +110,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/admin/': typeof AdminIndexRoute
-  '/admin/associados/$memberId': typeof AdminAssociadosMemberIdRoute
+  '/admin/associados/$userId': typeof AdminAssociadosUserIdRoute
   '/admin/associados/novo': typeof AdminAssociadosNovoRoute
   '/admin/patrocinadores/novo': typeof AdminPatrocinadoresNovoRoute
   '/admin/associados/': typeof AdminAssociadosIndexRoute
@@ -125,7 +125,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/login'
     | '/admin/'
-    | '/admin/associados/$memberId'
+    | '/admin/associados/$userId'
     | '/admin/associados/novo'
     | '/admin/patrocinadores/novo'
     | '/admin/associados/'
@@ -137,7 +137,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/admin'
-    | '/admin/associados/$memberId'
+    | '/admin/associados/$userId'
     | '/admin/associados/novo'
     | '/admin/patrocinadores/novo'
     | '/admin/associados'
@@ -150,7 +150,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/login'
     | '/admin/'
-    | '/admin/associados/$memberId'
+    | '/admin/associados/$userId'
     | '/admin/associados/novo'
     | '/admin/patrocinadores/novo'
     | '/admin/associados/'
@@ -230,11 +230,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAssociadosNovoRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/admin/associados/$memberId': {
-      id: '/admin/associados/$memberId'
-      path: '/associados/$memberId'
-      fullPath: '/admin/associados/$memberId'
-      preLoaderRoute: typeof AdminAssociadosMemberIdRouteImport
+    '/admin/associados/$userId': {
+      id: '/admin/associados/$userId'
+      path: '/associados/$userId'
+      fullPath: '/admin/associados/$userId'
+      preLoaderRoute: typeof AdminAssociadosUserIdRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/patrocinadores/$userId/editar': {
@@ -249,7 +249,7 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
-  AdminAssociadosMemberIdRoute: typeof AdminAssociadosMemberIdRoute
+  AdminAssociadosUserIdRoute: typeof AdminAssociadosUserIdRoute
   AdminAssociadosNovoRoute: typeof AdminAssociadosNovoRoute
   AdminPatrocinadoresNovoRoute: typeof AdminPatrocinadoresNovoRoute
   AdminAssociadosIndexRoute: typeof AdminAssociadosIndexRoute
@@ -260,7 +260,7 @@ interface AdminRouteRouteChildren {
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
-  AdminAssociadosMemberIdRoute: AdminAssociadosMemberIdRoute,
+  AdminAssociadosUserIdRoute: AdminAssociadosUserIdRoute,
   AdminAssociadosNovoRoute: AdminAssociadosNovoRoute,
   AdminPatrocinadoresNovoRoute: AdminPatrocinadoresNovoRoute,
   AdminAssociadosIndexRoute: AdminAssociadosIndexRoute,

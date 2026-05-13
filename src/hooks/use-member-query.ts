@@ -1,17 +1,20 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { memberApi } from '@/api/member-api'
+import { userApi } from '@/api/user-api'
 import { getApiErrorMessage } from '@/lib/api-error'
+import type { MemberDTO } from '@/types/member'
 
-export function useMemberQuery(memberId: number | null) {
+export function useMemberQuery(userId: number | null) {
   return useQuery({
-    queryKey: ['member', memberId],
-    enabled: memberId != null,
+    queryKey: ['member-user', userId],
+    enabled: userId != null && userId > 0,
     queryFn: async () => {
-      if (memberId == null) return null
       try {
-        const response = await memberApi.getMemberById(memberId)
-        return response.data.data ?? null
+        if (userId == null) return null
+        const response = await userApi.getUserById(userId)
+        const m = response.data.data?.member
+        if (m == null) throw new Error('Associado não encontrado.')
+        return m as MemberDTO
       } catch (error) {
         throw new Error(getApiErrorMessage(error))
       }

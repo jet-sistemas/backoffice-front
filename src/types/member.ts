@@ -2,6 +2,29 @@ import type { ApiEnvelopeBase } from './auth'
 
 export type MemberTypeEnum = 'SUBSCRIBER' | 'SPONSORED'
 
+export type MemberStatusEnum = 'ACTIVE' | 'DUE_SOON' | 'OVERDUE' | 'INACTIVE'
+
+export interface SubscriberMemberDTO {
+  id: number
+  monthlyFeeAmount: number
+  billingDay: number
+  status: MemberStatusEnum
+  nextDueDate: string
+  lastPaidAt?: string | null
+  createdAt?: string | null
+}
+
+export interface SponsoredMemberDTO {
+  memberId: number
+  grantedByUserId: number
+  startAt: string
+  endAt?: string | null
+  reason?: string | null
+  active: boolean
+  createdAt?: string | null
+  updatedAt?: string | null
+}
+
 export interface MemberDTO {
   id: number
   userId: number
@@ -13,6 +36,21 @@ export interface MemberDTO {
   type: MemberTypeEnum
   active: boolean
   createdAt: string
+  subscriber?: SubscriberMemberDTO | null
+  sponsored?: SponsoredMemberDTO | null
+}
+
+export interface SubscriberDataCreateDTO {
+  monthlyFeeAmount: number
+  billingDay: number
+  nextDueDate?: string
+}
+
+export interface SponsoredDataCreateDTO {
+  grantedByUserId: number
+  startAt: string
+  endAt?: string
+  reason?: string
 }
 
 export interface MemberCreateDTO {
@@ -27,7 +65,16 @@ export interface MemberCreateDTO {
     fullname: string
     whatsapp: string
     type: MemberTypeEnum
+    subscriber?: SubscriberDataCreateDTO
+    sponsored?: SponsoredDataCreateDTO
   }
+}
+
+export interface SubscriberMemberPatchDTO {
+  monthlyFeeAmount?: number
+  billingDay?: number
+  nextDueDate?: string
+  status?: MemberStatusEnum
 }
 
 export interface MemberListParams {
