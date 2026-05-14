@@ -5,7 +5,6 @@ import { Link } from '@tanstack/react-router'
 import { AlertCircle, ArrowLeft, Loader2 } from 'lucide-react'
 import { z } from 'zod'
 
-import { DatePicker } from '@/components/date-picker'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -18,17 +17,13 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { usePatchSubscriberMemberMutation } from '@/hooks/use-patch-subscriber-member-mutation'
 import { useUpdateMemberAccountMutation } from '@/hooks/use-update-member-account-mutation'
 import { useUpdateMemberProfileMutation } from '@/hooks/use-update-member-profile-mutation'
 import { useUserWithMemberQuery } from '@/hooks/use-user-with-member-query'
+import {
+  SubscriberBillingCard,
+  SubscriberBillingHistory,
+} from '@/pages/member/subscriber-billing-widgets'
 import { cn, formatCPF, formatDatePtBR, formatPhone } from '@/lib/utils'
 import {
   memberAccountEditSchema,
@@ -36,24 +31,7 @@ import {
   type MemberAccountEditFormData,
   type MemberProfileEditFormData,
 } from '@/schemas/member-edit-schema'
-import type {
-  MemberStatusEnum,
-  MemberTypeEnum,
-  SubscriberMemberDTO,
-} from '@/types/member'
-
-const STATUS_VARIANT: Record<
-  MemberStatusEnum,
-  { className: string; label: string }
-> = {
-  ACTIVE: { className: 'bg-emerald-600 text-white hover:bg-emerald-600/90', label: 'Ativa' },
-  DUE_SOON: { className: 'bg-amber-500 text-amber-950 hover:bg-amber-500/90', label: 'A vencer' },
-  OVERDUE: { className: 'bg-red-600 text-white hover:bg-red-600/90', label: 'Em atraso' },
-  INACTIVE: {
-    className: 'bg-neutral-200 text-neutral-600 hover:bg-neutral-200/90',
-    label: 'Inativa',
-  },
-}
+import type { MemberTypeEnum } from '@/types/member'
 
 const MEMBER_TYPE_LABELS: Record<MemberTypeEnum, string> = {
   SUBSCRIBER: 'Assinante',
@@ -69,208 +47,6 @@ const ACCOUNT_DEFAULTS: MemberAccountEditFormData = {
 const PROFILE_DEFAULTS: MemberProfileEditFormData = {
   fullname: '',
   whatsapp: '',
-}
-
-const subscriberPatchSchema = z.object({
-  monthlyFeeAmount: z.coerce.number().positive('Valor deve ser maior que zero'),
-  billingDay: z.coerce.number().min(1).max(28, 'Use um dia entre 1 e 28'),
-  nextDueDate: z.string().min(1, 'Data obrigatória'),
-  status: z.enum(['ACTIVE', 'DUE_SOON', 'OVERDUE', 'INACTIVE']),
-})
-
-type SubscriberPatchForm = z.infer<typeof subscriberPatchSchema>
-
-function formatBrl(value: number) {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value)
-}
-
-function SubscriberBillingCard({
-  subscriber,
-  userId,
-}: {
-  subscriber: SubscriberMemberDTO
-  userId: number
-}) {
-  const { mutate: patchSubscriber, isPending: isPatching } =
-    usePatchSubscriberMemberMutation()
-
-  const billingDefaults: SubscriberPatchForm = {
-    monthlyFeeAmount: subscriber.monthlyFeeAmount,
-    billingDay: subscriber.billingDay,
-    nextDueDate: subscriber.nextDueDate?.slice(0, 10) ?? '',
-    status: subscriber.status,
-  }
-
-  const form = useForm<SubscriberPatchForm>({
-    resolver: zodResolver(subscriberPatchSchema),
-    values: billingDefaults,
-  })
-
-  const onPatchSubscriber = form.handleSubmit((values) => {
-    patchSubscriber({
-      userId,
-      body: {
-        monthlyFeeAmount: values.monthlyFeeAmount,
-        billingDay: values.billingDay,
-        nextDueDate: values.nextDueDate,
-        status: values.status,
-      },
-    })
-  })
-
-  function resetBillingFromSubscriber() {
-    form.reset(billingDefaults)
-  }
-
-  const statusInfo = STATUS_VARIANT[subscriber.status]
-  const nextDueValue = form.watch('nextDueDate')
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-serif">Mensalidade (assinante)</CardTitle>
-        <CardDescription>
-          Configurações de cobrança e status da mensalidade do associado.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4 text-sm">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">
-              Valor atual
-            </p>
-            <p className="font-medium">{formatBrl(subscriber.monthlyFeeAmount)}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">
-              Dia de cobrança
-            </p>
-            <p className="font-medium">{subscriber.billingDay}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">
-              Status da mensalidade
-            </p>
-            <Badge variant="default" className={statusInfo.className}>
-              {statusInfo.label}
-            </Badge>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">
-              Próximo vencimento
-            </p>
-            <p className="font-medium">
-              {formatDatePtBR(subscriber.nextDueDate) || '—'}
-            </p>
-          </div>
-        </div>
-
-        <form className="space-y-4 border-t pt-4" onSubmit={onPatchSubscriber}>
-          <p className="font-medium text-foreground">Ajustar mensalidade</p>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="sub-monthly">Valor (R$)</Label>
-              <Input
-                id="sub-monthly"
-                type="number"
-                step="0.01"
-                min="0.01"
-                aria-invalid={Boolean(form.formState.errors.monthlyFeeAmount)}
-                {...form.register('monthlyFeeAmount')}
-              />
-              {form.formState.errors.monthlyFeeAmount && (
-                <p className="text-sm text-destructive" role="alert">
-                  {form.formState.errors.monthlyFeeAmount.message}
-                </p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="sub-billing-day">Dia de cobrança</Label>
-              <Input
-                id="sub-billing-day"
-                type="number"
-                min={1}
-                max={28}
-                aria-invalid={Boolean(form.formState.errors.billingDay)}
-                {...form.register('billingDay')}
-              />
-              {form.formState.errors.billingDay && (
-                <p className="text-sm text-destructive" role="alert">
-                  {form.formState.errors.billingDay.message}
-                </p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="sub-next-due">Próximo vencimento</Label>
-              <DatePicker
-                id="sub-next-due"
-                value={nextDueValue}
-                onChange={(v) =>
-                  form.setValue('nextDueDate', v ?? '', {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  })
-                }
-                aria-invalid={Boolean(form.formState.errors.nextDueDate)}
-              />
-              {form.formState.errors.nextDueDate && (
-                <p className="text-sm text-destructive" role="alert">
-                  {form.formState.errors.nextDueDate.message}
-                </p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="sub-status">Status</Label>
-              <Select
-                value={form.watch('status')}
-                onValueChange={(v) =>
-                  form.setValue('status', v as SubscriberPatchForm['status'], {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  })
-                }
-              >
-                <SelectTrigger id="sub-status" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {(Object.keys(STATUS_VARIANT) as MemberStatusEnum[]).map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {STATUS_VARIANT[s].label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full sm:w-auto"
-              onClick={resetBillingFromSubscriber}
-              disabled={isPatching}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" className="w-full sm:w-auto" disabled={isPatching}>
-              {isPatching ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" aria-hidden />
-                  Salvando…
-                </>
-              ) : (
-                'Salvar alterações'
-              )}
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
-  )
 }
 
 interface MemberDetailPageProps {
@@ -643,10 +419,13 @@ export function MemberDetailPage({ userId }: MemberDetailPageProps) {
           </Card>
 
           {data.member.subscriber != null && (
-            <SubscriberBillingCard
-              subscriber={data.member.subscriber}
-              userId={validId}
-            />
+            <>
+              <SubscriberBillingCard
+                subscriber={data.member.subscriber}
+                userId={validId}
+              />
+              <SubscriberBillingHistory userId={validId} />
+            </>
           )}
 
           {data.member.sponsored != null && (

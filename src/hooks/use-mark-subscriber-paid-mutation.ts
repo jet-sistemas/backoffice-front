@@ -1,11 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-import { userApi } from '@/api/user-api'
+import { billingApi } from '@/api/billing-api'
 import { getApiErrorMessage } from '@/lib/api-error'
-import type { SubscriberMemberPatchDTO } from '@/types/member'
+import type { SubscriberMarkPaidBodyDTO } from '@/types/billing'
 
-export function usePatchSubscriberMemberMutation() {
+export function useMarkSubscriberPaidMutation() {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -14,8 +14,8 @@ export function usePatchSubscriberMemberMutation() {
       body,
     }: {
       userId: number
-      body: SubscriberMemberPatchDTO
-    }) => userApi.patchSubscriberUser(userId, body),
+      body?: SubscriberMarkPaidBodyDTO
+    }) => billingApi.markSubscriberPaid(userId, body),
     onSuccess: async (_response, { userId }) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['member-user', userId] }),
@@ -26,12 +26,10 @@ export function usePatchSubscriberMemberMutation() {
         queryClient.invalidateQueries({ queryKey: ['subscriber-billing-list'] }),
         queryClient.invalidateQueries({ queryKey: ['subscriber-events', userId] }),
       ])
-      toast.success('Dados da mensalidade atualizados.')
+      toast.success('Pagamento registrado.')
     },
     onError: (error) => {
-      toast.error(
-        getApiErrorMessage(error, 'Não foi possível atualizar a mensalidade.'),
-      )
+      toast.error(getApiErrorMessage(error, 'Não foi possível registrar o pagamento.'))
     },
   })
 }

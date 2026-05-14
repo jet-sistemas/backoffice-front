@@ -9,6 +9,29 @@ import { useUserWithMemberQuery } from '@/hooks/use-user-with-member-query'
 
 import { MemberDetailPage } from './member-detail-page'
 
+vi.mock('@/hooks/use-mark-subscriber-paid-mutation', () => ({
+  useMarkSubscriberPaidMutation: () => ({
+    mutate: vi.fn(),
+    isPending: false,
+  }),
+}))
+
+vi.mock('@/hooks/use-subscriber-payment-events-query', () => ({
+  useSubscriberPaymentEventsQuery: () => ({
+    data: {
+      events: [],
+      totalElements: 0,
+      totalPages: 0,
+      pageSize: 10,
+      currentPage: 1,
+    },
+    isLoading: false,
+    isFetching: false,
+    isError: false,
+    error: null,
+  }),
+}))
+
 vi.mock('@/hooks/use-patch-subscriber-member-mutation', () => ({
   usePatchSubscriberMemberMutation: () => ({
     mutate: vi.fn(),
@@ -102,6 +125,7 @@ describe('MemberDetailPage', () => {
 
     expect(screen.getByText('Editar associado')).toBeInTheDocument()
     expect(screen.getByText('Mensalidade (assinante)')).toBeInTheDocument()
+    expect(screen.getByText('Histórico da mensalidade')).toBeInTheDocument()
     expect(screen.getByText('Patrocínio')).toBeInTheDocument()
     expect(screen.getByText('Conta Patrocinador')).toBeInTheDocument()
     expect(screen.getByText('patrocinador@exemplo.com')).toBeInTheDocument()

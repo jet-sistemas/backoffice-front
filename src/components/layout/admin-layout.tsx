@@ -1,5 +1,13 @@
 import { Outlet, Link, useRouterState } from "@tanstack/react-router";
-import { Bell, Building2, ChevronUp, Gift, LogOut, Users } from "lucide-react";
+import {
+  Bell,
+  Building2,
+  ChevronUp,
+  Gift,
+  LogOut,
+  Users,
+  Wallet,
+} from "lucide-react";
 
 import { useAuth } from "@/contexts/auth-context";
 import {
@@ -41,6 +49,11 @@ const navItems = [
     label: "Benefícios",
     href: "/admin/beneficios",
     icon: Gift,
+  },
+  {
+    label: "Mensalidades",
+    href: "/admin/mensalidades",
+    icon: Wallet,
   },
 ];
 
