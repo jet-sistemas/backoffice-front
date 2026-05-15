@@ -408,7 +408,7 @@ export function SubscriberBillingListPage() {
                           </Button>
                           <Button
                             type="button"
-                            variant="secondary"
+                            variant="success"
                             size="sm"
                             onClick={() => openMarkPaid(row)}
                             disabled={

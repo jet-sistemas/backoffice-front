@@ -192,7 +192,7 @@ export function SubscriberBillingCard({
             <p className="font-medium text-foreground">Pagamento manual</p>
             <Button
               type="button"
-              variant="secondary"
+              variant="success"
               className="w-full sm:w-auto"
               onClick={() => setPaidOpen(true)}
               disabled={isMarkingPaid || isPatching}
