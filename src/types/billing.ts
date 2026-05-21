@@ -31,6 +31,8 @@ export interface SubscriberBillingRowDTO {
   status: MemberStatusEnum
   nextDueDate: string
   lastPaidAt?: string | null
+  canMarkPayment?: boolean
+  paymentMarkBlockedReason?: string | null
 }
 
 export interface SubscriberBillingListResultDTO {

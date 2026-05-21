@@ -12,6 +12,8 @@ export interface SubscriberMemberDTO {
   nextDueDate: string
   lastPaidAt?: string | null
   createdAt?: string | null
+  canMarkPayment?: boolean
+  paymentMarkBlockedReason?: string | null
 }
 
 export interface SponsoredGrantUserDTO {

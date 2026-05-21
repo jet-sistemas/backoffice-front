@@ -64,6 +64,7 @@ const baseData: SubscriberBillingListResultDTO = {
       status: 'OVERDUE',
       nextDueDate: '2026-01-01',
       lastPaidAt: null,
+      canMarkPayment: true,
     },
   ],
   totalElements: 1,
@@ -113,7 +114,7 @@ describe('SubscriberBillingListPage', () => {
       </QueryClientProvider>,
     )
 
-    await user.click(screen.getByRole('button', { name: /Pago/i }))
+    await user.click(screen.getByRole('button', { name: 'Pago' }))
     expect(screen.getByRole('heading', { name: 'Registrar pagamento' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Confirmar' }))
@@ -121,5 +122,37 @@ describe('SubscriberBillingListPage', () => {
       { userId: 7 },
       expect.any(Object),
     )
+  })
+
+  it('mostra Pago neste mês quando pagamento do ciclo já registrado', () => {
+    listQueryMock.mockReturnValue({
+      data: {
+        ...baseData,
+        rows: [
+          {
+            ...baseData.rows[0],
+            status: 'ACTIVE',
+            nextDueDate: '2026-06-28',
+            canMarkPayment: false,
+            paymentMarkBlockedReason: 'Pagamento deste ciclo já registrado.',
+          },
+        ],
+      },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    })
+
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={client}>
+        <SubscriberBillingListPage />
+      </QueryClientProvider>,
+    )
+
+    expect(screen.getByRole('button', { name: /Pago neste mês/i })).toBeDisabled()
+    expect(screen.queryByRole('button', { name: 'Pago' })).not.toBeInTheDocument()
   })
 })

@@ -132,6 +132,57 @@ describe('MemberDetailPage', () => {
     expect(screen.getAllByRole('button', { name: 'Cancelar' })).toHaveLength(3)
   })
 
+  it('mostra Pago neste mês quando ciclo já quitado', () => {
+    vi.mocked(useUserWithMemberQuery).mockReturnValue({
+      data: {
+        id: 10,
+        email: 'a@a.com',
+        name: 'Conta do Fulano',
+        document: '98765432109',
+        code: 'ABCDE',
+        type: 'MEMBER',
+        accountActive: true,
+        createdAt: '2026-01-01T00:00:00Z',
+        member: {
+          id: 1,
+          userId: 10,
+          email: 'a@a.com',
+          code: 'ABCDE',
+          document: '98765432109',
+          fullname: 'Fulano',
+          whatsapp: '11999990000',
+          type: 'SUBSCRIBER',
+          active: true,
+          createdAt: '2026-01-01T00:00:00Z',
+          subscriber: {
+            id: 99,
+            monthlyFeeAmount: 150.5,
+            billingDay: 10,
+            status: 'ACTIVE',
+            nextDueDate: '2026-06-28',
+            canMarkPayment: false,
+            paymentMarkBlockedReason: 'Pagamento deste ciclo já registrado.',
+          },
+          sponsored: null,
+        },
+      },
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof useUserWithMemberQuery>)
+
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={client}>
+        <MemberDetailPage userId="10" />
+      </QueryClientProvider>,
+    )
+
+    expect(screen.getByRole('button', { name: /Pago neste mês/i })).toBeDisabled()
+    expect(screen.queryByRole('button', { name: 'Marcar como pago' })).not.toBeInTheDocument()
+  })
+
   it('mostra erro quando query falha', () => {
     vi.mocked(useUserWithMemberQuery).mockReturnValue({
       data: undefined,

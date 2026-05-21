@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2 } from 'lucide-react'
+import { CheckCircle2, Loader2 } from 'lucide-react'
 import { z } from 'zod'
 
 import { DatePicker } from '@/components/date-picker'
@@ -34,6 +34,12 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import {
   Table,
   TableBody,
   TableCell,
@@ -44,6 +50,7 @@ import {
 import { useMarkSubscriberPaidMutation } from '@/hooks/use-mark-subscriber-paid-mutation'
 import { usePatchSubscriberMemberMutation } from '@/hooks/use-patch-subscriber-member-mutation'
 import { useSubscriberPaymentEventsQuery } from '@/hooks/use-subscriber-payment-events-query'
+import { isPaidCycleAlreadyRegisteredReason } from '@/lib/subscriber-payment-mark'
 import { formatDatePtBR, formatDateTimePtBR } from '@/lib/utils'
 import type { SubscriberPaymentEventTypeEnum } from '@/types/billing'
 import type { MemberStatusEnum, SubscriberMemberDTO } from '@/types/member'
@@ -126,6 +133,46 @@ export function SubscriberBillingCard({
   const statusInfo = BILLING_STATUS_BADGE[subscriber.status]
   const nextDueValue = form.watch('nextDueDate')
 
+  const paidCycleUi =
+    subscriber.canMarkPayment === false &&
+    subscriber.status === 'ACTIVE' &&
+    isPaidCycleAlreadyRegisteredReason(subscriber.paymentMarkBlockedReason)
+
+  const paymentBlocked =
+    subscriber.status === 'INACTIVE' ||
+    subscriber.canMarkPayment === false ||
+    isMarkingPaid ||
+    isPatching
+
+  const markPaidTooltipReason =
+    subscriber.canMarkPayment === false &&
+    subscriber.paymentMarkBlockedReason &&
+    !paidCycleUi
+      ? subscriber.paymentMarkBlockedReason
+      : undefined
+
+  const markPaidPrimaryButton = paidCycleUi ? (
+    <Button
+      type="button"
+      variant="outline"
+      className="w-full gap-2 sm:w-auto"
+      disabled
+    >
+      <CheckCircle2 className="size-4 shrink-0" aria-hidden />
+      Pago neste mês
+    </Button>
+  ) : (
+    <Button
+      type="button"
+      variant="success"
+      className="w-full sm:w-auto"
+      onClick={() => setPaidOpen(true)}
+      disabled={paymentBlocked}
+    >
+      Marcar como pago
+    </Button>
+  )
+
   function confirmMarkPaid() {
     markPaid(
       { userId },
@@ -190,15 +237,24 @@ export function SubscriberBillingCard({
 
           <div className="flex flex-col gap-2 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="font-medium text-foreground">Pagamento manual</p>
-            <Button
-              type="button"
-              variant="success"
-              className="w-full sm:w-auto"
-              onClick={() => setPaidOpen(true)}
-              disabled={isMarkingPaid || isPatching}
-            >
-              Marcar como pago
-            </Button>
+            <div className="flex w-full justify-end sm:w-auto">
+              {markPaidTooltipReason ? (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="inline-flex w-full justify-end sm:w-auto">
+                        {markPaidPrimaryButton}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{markPaidTooltipReason}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                markPaidPrimaryButton
+              )}
+            </div>
           </div>
 
           <form className="space-y-4 border-t pt-4" onSubmit={onPatchSubscriber}>
@@ -313,6 +369,12 @@ export function SubscriberBillingCard({
               define o status como Ativa e registra o pagamento no histórico.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          {subscriber.status === 'OVERDUE' ? (
+            <p className="px-6 text-sm text-muted-foreground">
+              Se o atraso for de competência anterior ao mês atual, o primeiro registro só confirma o recebimento;
+              o segundo atualiza o próximo vencimento.
+            </p>
+          ) : null}
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isMarkingPaid}>Cancelar</AlertDialogCancel>
             <Button type="button" disabled={isMarkingPaid} onClick={confirmMarkPaid}>

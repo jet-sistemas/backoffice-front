@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import {
   AlertCircle,
+  CheckCircle2,
   Loader2,
   RefreshCw,
   Search,
@@ -25,6 +26,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -42,6 +49,7 @@ import {
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { useMarkSubscriberPaidMutation } from '@/hooks/use-mark-subscriber-paid-mutation'
 import { useSubscriberBillingListQuery } from '@/hooks/use-subscriber-billing-list-query'
+import { isPaidCycleAlreadyRegisteredReason } from '@/lib/subscriber-payment-mark'
 import { BILLING_STATUS_BADGE } from '@/pages/member/subscriber-billing-widgets'
 import { formatDocument, formatDatePtBR, formatDateTimePtBR } from '@/lib/utils'
 import type { SubscriberBillingRowDTO } from '@/types/billing'
@@ -73,6 +81,72 @@ function formatBrl(value: number) {
     style: 'currency',
     currency: 'BRL',
   }).format(value)
+}
+
+function SubscriberBillingPaidButton({
+  row,
+  markPaidPending,
+  onOpenMarkPaid,
+}: {
+  row: SubscriberBillingRowDTO
+  markPaidPending: boolean
+  onOpenMarkPaid: (row: SubscriberBillingRowDTO) => void
+}) {
+  const paidCycleUi =
+    row.canMarkPayment === false &&
+    row.status === 'ACTIVE' &&
+    isPaidCycleAlreadyRegisteredReason(row.paymentMarkBlockedReason)
+
+  const blocked =
+    row.status === 'INACTIVE' ||
+    row.canMarkPayment === false ||
+    markPaidPending
+
+  const tooltipReason =
+    row.canMarkPayment === false &&
+    row.paymentMarkBlockedReason &&
+    !paidCycleUi
+      ? row.paymentMarkBlockedReason
+      : undefined
+
+  if (paidCycleUi) {
+    return (
+      <Button type="button" variant="outline" size="sm" disabled>
+        <CheckCircle2 className="size-4" aria-hidden />
+        Pago neste mês
+      </Button>
+    )
+  }
+
+  const btn = (
+    <Button
+      type="button"
+      variant="success"
+      size="sm"
+      onClick={() => onOpenMarkPaid(row)}
+      disabled={blocked}
+    >
+      <Wallet className="size-4" aria-hidden />
+      Pago
+    </Button>
+  )
+
+  if (tooltipReason) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="inline-flex">{btn}</span>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{tooltipReason}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    )
+  }
+
+  return btn
 }
 
 export function SubscriberBillingListPage() {
@@ -115,6 +189,7 @@ export function SubscriberBillingListPage() {
   const markPaidMutation = useMarkSubscriberPaidMutation()
 
   const openMarkPaid = (row: SubscriberBillingRowDTO) => {
+    if (row.canMarkPayment === false) return
     setRowForPaid(row)
     setPaidDialogOpen(true)
   }
@@ -406,18 +481,11 @@ export function SubscriberBillingListPage() {
                               Ver
                             </Link>
                           </Button>
-                          <Button
-                            type="button"
-                            variant="success"
-                            size="sm"
-                            onClick={() => openMarkPaid(row)}
-                            disabled={
-                              markPaidMutation.isPending || row.status === 'INACTIVE'
-                            }
-                          >
-                            <Wallet className="size-4" />
-                            Pago
-                          </Button>
+                          <SubscriberBillingPaidButton
+                            row={row}
+                            markPaidPending={markPaidMutation.isPending}
+                            onOpenMarkPaid={openMarkPaid}
+                          />
                         </div>
                       </TableCell>
                     </TableRow>
@@ -452,6 +520,13 @@ export function SubscriberBillingListPage() {
                 <>
                   Confirma pagamento para <strong>{rowForPaid.fullname}</strong>? Vencimento
                   avança e status volta para Ativa.
+                  {rowForPaid.status === 'OVERDUE' ? (
+                    <>
+                      {' '}
+                      Se o atraso for de competência anterior ao mês atual, o primeiro registro só confirma o recebimento;
+                      o segundo atualiza o próximo vencimento.
+                    </>
+                  ) : null}
                 </>
               ) : (
                 'Confirma o registro de pagamento?'
