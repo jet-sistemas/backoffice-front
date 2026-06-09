@@ -1,9 +1,12 @@
 import ReactDOM from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
-import { StrictMode } from 'react'
+import { StrictMode, Suspense, lazy } from 'react'
 import { routeTree } from './routeTree.gen'
+
+const QueryDevtoolsLazy = import.meta.env.DEV
+  ? lazy(() => import('@/devtools/query-react-devtools'))
+  : () => null
 
 import './styles/fonts.css'
 import './index.css'
@@ -32,7 +35,11 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
-      <ReactQueryDevtools initialIsOpen={false} />
+      {import.meta.env.DEV ? (
+        <Suspense fallback={null}>
+          <QueryDevtoolsLazy initialIsOpen={false} />
+        </Suspense>
+      ) : null}
     </QueryClientProvider>
   </StrictMode>,
 )

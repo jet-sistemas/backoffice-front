@@ -1,12 +1,18 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, lazyRouteComponent } from '@tanstack/react-router'
 
-import { SponsorEditPage } from "@/pages/sponsor/sponsor-edit-page";
+import { RoutePendingFallback } from '@/components/route-pending-fallback'
 
-export const Route = createFileRoute("/admin/patrocinadores/$userId/editar")({
+const SponsorEditPageLazy = lazyRouteComponent(
+  () => import('@/pages/sponsor/sponsor-edit-page'),
+  'SponsorEditPage',
+)
+
+export const Route = createFileRoute('/admin/patrocinadores/$userId/editar')({
+  pendingComponent: RoutePendingFallback,
   component: SponsorEditRoute,
-});
+})
 
 function SponsorEditRoute() {
-  const { userId } = Route.useParams();
-  return <SponsorEditPage userId={userId} />;
+  const { userId } = Route.useParams()
+  return <SponsorEditPageLazy userId={userId} />
 }

@@ -2,11 +2,11 @@ import { useQuery } from '@tanstack/react-query'
 
 import { userApi } from '@/api/user-api'
 import { getApiErrorMessage } from '@/lib/api-error'
-import { isUserWithSponsor, type UserWithSponsorDTO } from '@/types/user'
+import { isUserWithMember, type UserWithMemberDTO } from '@/types/user'
 
-export function useUserWithSponsorQuery(userId: number | null) {
-  return useQuery<UserWithSponsorDTO>({
-    queryKey: ['user', userId],
+export function useUserWithMemberQuery(userId: number | null) {
+  return useQuery<UserWithMemberDTO>({
+    queryKey: ['user-with-member', userId],
     enabled: userId != null && userId > 0,
     queryFn: async () => {
       try {
@@ -15,8 +15,8 @@ export function useUserWithSponsorQuery(userId: number | null) {
         if (data == null) {
           throw new Error('Usuário não encontrado.')
         }
-        if (!isUserWithSponsor(data)) {
-          throw new Error('Usuário não é um patrocinador.')
+        if (!isUserWithMember(data) || data.member == null) {
+          throw new Error('Usuário não é um associado.')
         }
         return data
       } catch (error) {

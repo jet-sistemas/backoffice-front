@@ -14,8 +14,12 @@ import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminPatrocinadoresIndexRouteImport } from './routes/admin/patrocinadores/index'
+import { Route as AdminMensalidadesIndexRouteImport } from './routes/admin/mensalidades/index'
 import { Route as AdminBeneficiosIndexRouteImport } from './routes/admin/beneficios/index'
+import { Route as AdminAssociadosIndexRouteImport } from './routes/admin/associados/index'
 import { Route as AdminPatrocinadoresNovoRouteImport } from './routes/admin/patrocinadores/novo'
+import { Route as AdminAssociadosNovoRouteImport } from './routes/admin/associados/novo'
+import { Route as AdminAssociadosUserIdRouteImport } from './routes/admin/associados/$userId'
 import { Route as AdminPatrocinadoresUserIdEditarRouteImport } from './routes/admin/patrocinadores/$userId/editar'
 
 const LoginRoute = LoginRouteImport.update({
@@ -44,14 +48,34 @@ const AdminPatrocinadoresIndexRoute =
     path: '/patrocinadores/',
     getParentRoute: () => AdminRouteRoute,
   } as any)
+const AdminMensalidadesIndexRoute = AdminMensalidadesIndexRouteImport.update({
+  id: '/mensalidades/',
+  path: '/mensalidades/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminBeneficiosIndexRoute = AdminBeneficiosIndexRouteImport.update({
   id: '/beneficios/',
   path: '/beneficios/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminAssociadosIndexRoute = AdminAssociadosIndexRouteImport.update({
+  id: '/associados/',
+  path: '/associados/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminPatrocinadoresNovoRoute = AdminPatrocinadoresNovoRouteImport.update({
   id: '/patrocinadores/novo',
   path: '/patrocinadores/novo',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminAssociadosNovoRoute = AdminAssociadosNovoRouteImport.update({
+  id: '/associados/novo',
+  path: '/associados/novo',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminAssociadosUserIdRoute = AdminAssociadosUserIdRouteImport.update({
+  id: '/associados/$userId',
+  path: '/associados/$userId',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminPatrocinadoresUserIdEditarRoute =
@@ -66,8 +90,12 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/associados/$userId': typeof AdminAssociadosUserIdRoute
+  '/admin/associados/novo': typeof AdminAssociadosNovoRoute
   '/admin/patrocinadores/novo': typeof AdminPatrocinadoresNovoRoute
+  '/admin/associados/': typeof AdminAssociadosIndexRoute
   '/admin/beneficios/': typeof AdminBeneficiosIndexRoute
+  '/admin/mensalidades/': typeof AdminMensalidadesIndexRoute
   '/admin/patrocinadores/': typeof AdminPatrocinadoresIndexRoute
   '/admin/patrocinadores/$userId/editar': typeof AdminPatrocinadoresUserIdEditarRoute
 }
@@ -75,8 +103,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/admin': typeof AdminIndexRoute
+  '/admin/associados/$userId': typeof AdminAssociadosUserIdRoute
+  '/admin/associados/novo': typeof AdminAssociadosNovoRoute
   '/admin/patrocinadores/novo': typeof AdminPatrocinadoresNovoRoute
+  '/admin/associados': typeof AdminAssociadosIndexRoute
   '/admin/beneficios': typeof AdminBeneficiosIndexRoute
+  '/admin/mensalidades': typeof AdminMensalidadesIndexRoute
   '/admin/patrocinadores': typeof AdminPatrocinadoresIndexRoute
   '/admin/patrocinadores/$userId/editar': typeof AdminPatrocinadoresUserIdEditarRoute
 }
@@ -86,8 +118,12 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/associados/$userId': typeof AdminAssociadosUserIdRoute
+  '/admin/associados/novo': typeof AdminAssociadosNovoRoute
   '/admin/patrocinadores/novo': typeof AdminPatrocinadoresNovoRoute
+  '/admin/associados/': typeof AdminAssociadosIndexRoute
   '/admin/beneficios/': typeof AdminBeneficiosIndexRoute
+  '/admin/mensalidades/': typeof AdminMensalidadesIndexRoute
   '/admin/patrocinadores/': typeof AdminPatrocinadoresIndexRoute
   '/admin/patrocinadores/$userId/editar': typeof AdminPatrocinadoresUserIdEditarRoute
 }
@@ -98,8 +134,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/login'
     | '/admin/'
+    | '/admin/associados/$userId'
+    | '/admin/associados/novo'
     | '/admin/patrocinadores/novo'
+    | '/admin/associados/'
     | '/admin/beneficios/'
+    | '/admin/mensalidades/'
     | '/admin/patrocinadores/'
     | '/admin/patrocinadores/$userId/editar'
   fileRoutesByTo: FileRoutesByTo
@@ -107,8 +147,12 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/admin'
+    | '/admin/associados/$userId'
+    | '/admin/associados/novo'
     | '/admin/patrocinadores/novo'
+    | '/admin/associados'
     | '/admin/beneficios'
+    | '/admin/mensalidades'
     | '/admin/patrocinadores'
     | '/admin/patrocinadores/$userId/editar'
   id:
@@ -117,8 +161,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/login'
     | '/admin/'
+    | '/admin/associados/$userId'
+    | '/admin/associados/novo'
     | '/admin/patrocinadores/novo'
+    | '/admin/associados/'
     | '/admin/beneficios/'
+    | '/admin/mensalidades/'
     | '/admin/patrocinadores/'
     | '/admin/patrocinadores/$userId/editar'
   fileRoutesById: FileRoutesById
@@ -166,6 +214,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPatrocinadoresIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/mensalidades/': {
+      id: '/admin/mensalidades/'
+      path: '/mensalidades'
+      fullPath: '/admin/mensalidades/'
+      preLoaderRoute: typeof AdminMensalidadesIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/beneficios/': {
       id: '/admin/beneficios/'
       path: '/beneficios'
@@ -173,11 +228,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBeneficiosIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/associados/': {
+      id: '/admin/associados/'
+      path: '/associados'
+      fullPath: '/admin/associados/'
+      preLoaderRoute: typeof AdminAssociadosIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/patrocinadores/novo': {
       id: '/admin/patrocinadores/novo'
       path: '/patrocinadores/novo'
       fullPath: '/admin/patrocinadores/novo'
       preLoaderRoute: typeof AdminPatrocinadoresNovoRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/associados/novo': {
+      id: '/admin/associados/novo'
+      path: '/associados/novo'
+      fullPath: '/admin/associados/novo'
+      preLoaderRoute: typeof AdminAssociadosNovoRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/associados/$userId': {
+      id: '/admin/associados/$userId'
+      path: '/associados/$userId'
+      fullPath: '/admin/associados/$userId'
+      preLoaderRoute: typeof AdminAssociadosUserIdRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/patrocinadores/$userId/editar': {
@@ -192,16 +268,24 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminAssociadosUserIdRoute: typeof AdminAssociadosUserIdRoute
+  AdminAssociadosNovoRoute: typeof AdminAssociadosNovoRoute
   AdminPatrocinadoresNovoRoute: typeof AdminPatrocinadoresNovoRoute
+  AdminAssociadosIndexRoute: typeof AdminAssociadosIndexRoute
   AdminBeneficiosIndexRoute: typeof AdminBeneficiosIndexRoute
+  AdminMensalidadesIndexRoute: typeof AdminMensalidadesIndexRoute
   AdminPatrocinadoresIndexRoute: typeof AdminPatrocinadoresIndexRoute
   AdminPatrocinadoresUserIdEditarRoute: typeof AdminPatrocinadoresUserIdEditarRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
+  AdminAssociadosUserIdRoute: AdminAssociadosUserIdRoute,
+  AdminAssociadosNovoRoute: AdminAssociadosNovoRoute,
   AdminPatrocinadoresNovoRoute: AdminPatrocinadoresNovoRoute,
+  AdminAssociadosIndexRoute: AdminAssociadosIndexRoute,
   AdminBeneficiosIndexRoute: AdminBeneficiosIndexRoute,
+  AdminMensalidadesIndexRoute: AdminMensalidadesIndexRoute,
   AdminPatrocinadoresIndexRoute: AdminPatrocinadoresIndexRoute,
   AdminPatrocinadoresUserIdEditarRoute: AdminPatrocinadoresUserIdEditarRoute,
 }
