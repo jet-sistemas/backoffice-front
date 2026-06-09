@@ -33,6 +33,7 @@ export interface SubscriberBillingRowDTO {
   lastPaidAt?: string | null
   canMarkPayment?: boolean
   paymentMarkBlockedReason?: string | null
+  paymentMarkBlockedCode?: string | null
 }
 
 export interface SubscriberBillingListResultDTO {

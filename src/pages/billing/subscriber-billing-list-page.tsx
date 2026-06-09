@@ -49,7 +49,7 @@ import {
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { useMarkSubscriberPaidMutation } from '@/hooks/use-mark-subscriber-paid-mutation'
 import { useSubscriberBillingListQuery } from '@/hooks/use-subscriber-billing-list-query'
-import { isPaidCycleAlreadyRegisteredReason } from '@/lib/subscriber-payment-mark'
+import { isPaidCycleAlreadyRegistered } from '@/lib/subscriber-payment-mark'
 import { BILLING_STATUS_BADGE } from '@/pages/member/subscriber-billing-widgets'
 import { formatDocument, formatDatePtBR, formatDateTimePtBR } from '@/lib/utils'
 import type { SubscriberBillingRowDTO } from '@/types/billing'
@@ -95,7 +95,7 @@ function SubscriberBillingPaidButton({
   const paidCycleUi =
     row.canMarkPayment === false &&
     row.status === 'ACTIVE' &&
-    isPaidCycleAlreadyRegisteredReason(row.paymentMarkBlockedReason)
+    isPaidCycleAlreadyRegistered(row)
 
   const blocked =
     row.status === 'INACTIVE' ||

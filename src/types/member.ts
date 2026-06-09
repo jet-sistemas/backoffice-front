@@ -14,6 +14,7 @@ export interface SubscriberMemberDTO {
   createdAt?: string | null
   canMarkPayment?: boolean
   paymentMarkBlockedReason?: string | null
+  paymentMarkBlockedCode?: string | null
 }
 
 export interface SponsoredGrantUserDTO {

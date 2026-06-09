@@ -1,6 +1,10 @@
-/** Alinhado à mensagem backend SUBSCRIBER_PAYMENT_ALREADY_REGISTERED. */
-export function isPaidCycleAlreadyRegisteredReason(
-  reason: string | null | undefined,
+export interface PaymentMarkBlockFields {
+  paymentMarkBlockedCode?: string | null
+}
+
+/** Alinhado ao código backend PaymentMarkBlockReasonEnum.ALREADY_REGISTERED. */
+export function isPaidCycleAlreadyRegistered(
+  fields: PaymentMarkBlockFields,
 ): boolean {
-  return Boolean(reason?.includes('já registrado'))
+  return fields.paymentMarkBlockedCode === 'ALREADY_REGISTERED'
 }

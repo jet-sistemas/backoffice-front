@@ -135,6 +135,7 @@ describe('SubscriberBillingListPage', () => {
             nextDueDate: '2026-06-28',
             canMarkPayment: false,
             paymentMarkBlockedReason: 'Pagamento deste ciclo já registrado.',
+            paymentMarkBlockedCode: 'ALREADY_REGISTERED',
           },
         ],
       },

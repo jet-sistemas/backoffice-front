@@ -50,7 +50,7 @@ import {
 import { useMarkSubscriberPaidMutation } from '@/hooks/use-mark-subscriber-paid-mutation'
 import { usePatchSubscriberMemberMutation } from '@/hooks/use-patch-subscriber-member-mutation'
 import { useSubscriberPaymentEventsQuery } from '@/hooks/use-subscriber-payment-events-query'
-import { isPaidCycleAlreadyRegisteredReason } from '@/lib/subscriber-payment-mark'
+import { isPaidCycleAlreadyRegistered } from '@/lib/subscriber-payment-mark'
 import { formatDatePtBR, formatDateTimePtBR } from '@/lib/utils'
 import type { SubscriberPaymentEventTypeEnum } from '@/types/billing'
 import type { MemberStatusEnum, SubscriberMemberDTO } from '@/types/member'
@@ -136,7 +136,7 @@ export function SubscriberBillingCard({
   const paidCycleUi =
     subscriber.canMarkPayment === false &&
     subscriber.status === 'ACTIVE' &&
-    isPaidCycleAlreadyRegisteredReason(subscriber.paymentMarkBlockedReason)
+    isPaidCycleAlreadyRegistered(subscriber)
 
   const paymentBlocked =
     subscriber.status === 'INACTIVE' ||
@@ -189,7 +189,7 @@ export function SubscriberBillingCard({
           <CardTitle className="font-serif">Mensalidade (assinante)</CardTitle>
           <CardDescription>
             Configurações de cobrança e status da mensalidade do associado. O status
-            Ativa, A vencer e Em atraso é recalculado diariamente pelo sistema conforme
+            Ativa, A vencer e Em atraso é recalculado periodicamente pelo sistema conforme
             o vencimento; Inativa permanece sob controle manual.
           </CardDescription>
         </CardHeader>
