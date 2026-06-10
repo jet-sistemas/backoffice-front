@@ -1,7 +1,11 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, lazyRouteComponent } from '@tanstack/react-router'
 
-import { BenefitListPage } from '@/pages/benefit/benefit-list-page'
+import { RoutePendingFallback } from '@/components/route-pending-fallback'
 
 export const Route = createFileRoute('/admin/beneficios/')({
-  component: BenefitListPage,
+  pendingComponent: RoutePendingFallback,
+  component: lazyRouteComponent(
+    () => import('@/pages/benefit/benefit-list-page'),
+    'BenefitListPage',
+  ),
 })

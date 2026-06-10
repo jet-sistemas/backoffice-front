@@ -1,7 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, lazyRouteComponent } from '@tanstack/react-router'
 
-import { SponsorListPage } from "@/pages/sponsor/sponsor-list-page";
+import { RoutePendingFallback } from '@/components/route-pending-fallback'
 
-export const Route = createFileRoute("/admin/patrocinadores/")({
-  component: SponsorListPage,
-});
+export const Route = createFileRoute('/admin/patrocinadores/')({
+  pendingComponent: RoutePendingFallback,
+  component: lazyRouteComponent(
+    () => import('@/pages/sponsor/sponsor-list-page'),
+    'SponsorListPage',
+  ),
+})

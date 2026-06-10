@@ -74,3 +74,42 @@ export function formatDate(dateString: string): string {
     return dateString;
   }
 }
+
+export function formatDatePtBR(
+  date: string | Date | null | undefined,
+): string {
+  if (!date) return "";
+  try {
+    const d =
+      typeof date === "string"
+        ? date.length === 10
+          ? new Date(`${date}T00:00:00`)
+          : new Date(date)
+        : date;
+    if (Number.isNaN(d.getTime())) return typeof date === "string" ? date : "";
+    return new Intl.DateTimeFormat("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(d);
+  } catch {
+    return typeof date === "string" ? date : "";
+  }
+}
+
+export function formatDateTimePtBR(iso: string | null | undefined): string {
+  if (!iso) return "";
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return new Intl.DateTimeFormat("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(d);
+  } catch {
+    return iso;
+  }
+}

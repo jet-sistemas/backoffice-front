@@ -12,14 +12,17 @@ export function useDeactivateUserMutation() {
     mutationFn: (id: number) => userApi.deactivateUser(id),
     onSuccess: (_, userId) => {
       void queryClient.invalidateQueries({ queryKey: ['users'] })
+      void queryClient.invalidateQueries({ queryKey: ['members'] })
       void queryClient.invalidateQueries({ queryKey: ['user', userId] })
-      toast.success('Patrocinador desativado.')
+      void queryClient.invalidateQueries({ queryKey: ['benefits'] })
+      void queryClient.invalidateQueries({ queryKey: ['sponsor-options'] })
+      toast.success('Conta desativada.')
     },
     onError: (error) => {
       const fallback =
         error instanceof AxiosError && error.response?.status === 400
-          ? 'Não foi possível desativar este utilizador.'
-          : 'Não foi possível desativar o patrocinador. Tente novamente.'
+          ? 'Não foi possível desativar esta conta.'
+          : 'Não foi possível desativar a conta. Tente novamente.'
       toast.error(getApiErrorMessage(error, fallback))
     },
   })

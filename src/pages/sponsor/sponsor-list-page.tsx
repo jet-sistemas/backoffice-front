@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AlertCircle,
   Building2,
   Eye,
   EyeClosed,
+  Loader2,
   Pencil,
   Plus,
   RefreshCw,
@@ -24,14 +25,16 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useActivateUserMutation } from "@/hooks/use-activate-user-mutation";
 import { useDeactivateUserMutation } from "@/hooks/use-deactivate-user-mutation";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useUserListQuery } from "@/hooks/use-user-list-query";
 import { resolveR2PublicUrl } from "@/lib/r2-public-url";
-import { formatDocument, uniqueById } from "@/lib/utils";
-import type {
-  EntityTypeEnum,
-  SponsorPersonaEnum,
-  SponsorTierEnum,
-  UserWithSponsorDTO,
+import { cn, formatDocument, uniqueById } from "@/lib/utils";
+import {
+  isUserWithSponsor,
+  type EntityTypeEnum,
+  type SponsorPersonaEnum,
+  type SponsorTierEnum,
+  type UserWithSponsorDTO,
 } from "@/types/user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +55,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  tableRowInactiveClassName,
 } from "@/components/ui/table";
 
 const TIER_LABELS: Record<SponsorTierEnum, string> = {
@@ -84,6 +88,7 @@ const PERSONA_LABELS: Record<SponsorPersonaEnum, string> = {
 };
 
 const PAGE_SIZE = 10;
+const SEARCH_DEBOUNCE_MS = 500;
 
 export function SponsorListPage() {
   const [page, setPage] = useState(1);
@@ -92,6 +97,13 @@ export function SponsorListPage() {
   const [personaFilter, setPersonaFilter] = useState<string>("ALL");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebouncedValue(searchTerm, SEARCH_DEBOUNCE_MS);
+  const searchQuery =
+    debouncedSearch.trim() !== "" ? debouncedSearch.trim() : undefined;
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const [userToDeactivate, setUserToDeactivate] =
     useState<UserWithSponsorDTO | null>(null);
@@ -104,7 +116,8 @@ export function SponsorListPage() {
   const toggleMutationPending =
     deactivateMutation.isPending || activateMutation.isPending;
 
-  const { data, isLoading, isError, error, refetch } = useUserListQuery({
+  const { data, isLoading, isFetching, isError, error, refetch } =
+    useUserListQuery({
     type: "SPONSOR",
     tier: tierFilter !== "ALL" ? (tierFilter as SponsorTierEnum) : undefined,
     entityType:
@@ -116,23 +129,21 @@ export function SponsorListPage() {
         ? (personaFilter as SponsorPersonaEnum)
         : undefined,
     isActive: statusFilter !== "ALL" ? statusFilter === "ACTIVE" : undefined,
+    search: searchQuery,
     page,
     size: PAGE_SIZE,
   });
 
-  const sponsors = uniqueById(data?.data ?? []);
+  const sponsors = uniqueById(
+    (data?.data ?? []).filter(isUserWithSponsor),
+  ) as UserWithSponsorDTO[];
   const totalPages = data?.totalPages ?? 0;
   const totalElements = data?.totalElements ?? 0;
 
-  const filteredSponsors = searchTerm
-    ? sponsors.filter(
-        (s) =>
-          s.sponsor?.publicName
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          s.name.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
-    : sponsors;
+  const searchSettling =
+    searchTerm.trim() !== debouncedSearch.trim();
+  const listFetchBusy = isLoading || isFetching;
+  const listUiStale = listFetchBusy || searchSettling;
 
   const closeDeactivateDialog = () => {
     setDeactivateDialogOpen(false);
@@ -177,7 +188,8 @@ export function SponsorListPage() {
     personaFilter !== "ALL" ||
     statusFilter !== "ALL";
 
-  const hasActiveClientSearch = searchTerm.trim().length > 0;
+  const hasActiveSearch =
+    debouncedSearch.trim().length > 0 || searchTerm.trim().length > 0;
 
   const clearAllFilters = () => {
     setSearchTerm("");
@@ -220,26 +232,49 @@ export function SponsorListPage() {
               Filtrar e buscar
             </h2>
             <p className="max-w-2xl text-xs text-muted-foreground">
-              Os menus refinam a lista no servidor. O campo de texto oculta
-              linhas apenas entre os resultados já carregados nesta página.
+              Filtros refinam no servidor. O texto de busca é enviado à API após
+              uma breve pausa na digitação; a paginação reflete o resultado da
+              consulta.
             </p>
           </div>
-          {(hasActiveServerFilters || hasActiveClientSearch) && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="shrink-0 self-start text-muted-foreground"
-              onClick={clearAllFilters}
-            >
-              Limpar tudo
-            </Button>
-          )}
+          <div className="flex shrink-0 flex-col items-end gap-2 self-start sm:flex-row sm:items-center">
+            {listUiStale && (
+              <p
+                className="flex items-center gap-2 text-xs text-muted-foreground"
+                role="status"
+                aria-live="polite"
+              >
+                <Loader2
+                  className="size-4 shrink-0 animate-spin text-muted-foreground"
+                  aria-hidden
+                />
+                {listFetchBusy ? "Atualizando lista…" : "Aguardando busca…"}
+              </p>
+            )}
+            {(hasActiveServerFilters || hasActiveSearch) && !listFetchBusy && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-red-600 hover:bg-red-600 hover:text-white dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-white"
+                onClick={clearAllFilters}
+              >
+                Limpar tudo
+                <Trash2 aria-hidden className="size-4" />
+              </Button>
+            )}
+          </div>
         </div>
 
-        <div className="mt-4 space-y-4">
+        <div
+          className={cn(
+            "mt-4 space-y-4 transition-opacity duration-200",
+            listFetchBusy && "pointer-events-none opacity-50",
+          )}
+          aria-busy={listFetchBusy ? true : undefined}
+        >
           <div className="max-w-xl space-y-2">
-            <Label htmlFor="sponsor-search">Busca rápida na tabela</Label>
+            <Label htmlFor="sponsor-search">Buscar patrocinadores</Label>
             <div className="relative">
               <Search
                 className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
@@ -247,15 +282,17 @@ export function SponsorListPage() {
               />
               <Input
                 id="sponsor-search"
-                placeholder="Nome de exibição ou nome da conta…"
+                placeholder="Nome público, nome da conta, documento ou código…"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9"
-                aria-describedby="sponsor-search-hint"
+                disabled={listFetchBusy}
+                aria-busy={listFetchBusy ? true : undefined}
               />
             </div>
-            <p id="sponsor-search-hint" className="text-xs text-muted-foreground">
-              Corresponde ao nome público ou ao nome de usuário da linha.
+            <p className="text-xs text-muted-foreground">
+              Aguarde um instante após digitar para a lista atualizar no
+              servidor.
             </p>
           </div>
 
@@ -270,6 +307,7 @@ export function SponsorListPage() {
                 setTierFilter(v);
                 setPage(1);
               }}
+              disabled={listFetchBusy}
             >
               <SelectTrigger id="sponsor-filter-tier" className="w-full">
                 <SelectValue placeholder="Selecione o tier" />
@@ -292,6 +330,7 @@ export function SponsorListPage() {
                 if (v !== "PERSON") setPersonaFilter("ALL");
                 setPage(1);
               }}
+              disabled={listFetchBusy}
             >
               <SelectTrigger id="sponsor-filter-entity" className="w-full">
                 <SelectValue placeholder="Selecione o tipo" />
@@ -318,6 +357,7 @@ export function SponsorListPage() {
                   setPersonaFilter(v);
                   setPage(1);
                 }}
+                disabled={listFetchBusy}
               >
                 <SelectTrigger id="sponsor-filter-persona" className="w-full">
                   <SelectValue placeholder="Selecione o perfil" />
@@ -344,6 +384,7 @@ export function SponsorListPage() {
                 setStatusFilter(v);
                 setPage(1);
               }}
+              disabled={listFetchBusy}
             >
               <SelectTrigger id="sponsor-filter-status" className="w-full">
                 <SelectValue placeholder="Selecione a situação" />
@@ -370,14 +411,18 @@ export function SponsorListPage() {
               {error?.message ?? "Tente novamente mais tarde."}
             </p>
           </div>
-          <Button variant="outline" onClick={() => refetch()}>
+          <Button
+            variant="outline"
+            disabled={listUiStale}
+            onClick={() => refetch()}
+          >
             <RefreshCw />
             Tentar novamente
           </Button>
         </div>
       )}
 
-      {!isLoading && !isError && filteredSponsors.length === 0 && (
+      {!isLoading && !isError && sponsors.length === 0 && (
         <div className="flex flex-col items-center gap-4 py-16 text-center">
           <div className="flex size-16 items-center justify-center rounded-full bg-muted">
             <Building2 className="size-8 text-muted-foreground" />
@@ -385,7 +430,7 @@ export function SponsorListPage() {
           <div>
             <p className="font-medium">Nenhum patrocinador encontrado</p>
             <p className="text-sm text-muted-foreground">
-              {searchTerm ||
+              {searchQuery ||
               tierFilter !== "ALL" ||
               entityTypeFilter !== "ALL" ||
               personaFilter !== "ALL" ||
@@ -397,9 +442,15 @@ export function SponsorListPage() {
         </div>
       )}
 
-      {!isLoading && !isError && filteredSponsors.length > 0 && (
+      {!isLoading && !isError && sponsors.length > 0 && (
         <>
-          <div className="rounded-lg border">
+          <div
+            className={cn(
+              "rounded-lg border bg-card transition-opacity duration-200",
+              listUiStale && "pointer-events-none opacity-50",
+            )}
+            aria-busy={listUiStale ? true : undefined}
+          >
             <Table>
               <TableHeader>
                 <TableRow>
@@ -417,38 +468,75 @@ export function SponsorListPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredSponsors.map((user) => {
+                {sponsors.map((user) => {
                   const logoSrc = resolveR2PublicUrl(user.sponsor?.logoUrl);
+                  const inactive = !user.accountActive;
                   return (
-                    <TableRow key={user.id}>
+                    <TableRow
+                      key={user.id}
+                      className={cn(inactive && tableRowInactiveClassName)}
+                    >
                       <TableCell>
                         <div className="flex items-center gap-3">
                           {logoSrc ? (
                             <img
                               src={logoSrc}
                               alt={user.sponsor?.publicName ?? user.name}
-                              className="size-8 rounded-md object-cover"
+                              className={cn(
+                                "size-8 rounded-md object-cover",
+                                inactive && "opacity-80",
+                              )}
                             />
                           ) : (
-                            <div className="flex size-8 items-center justify-center rounded-md bg-muted">
-                              <Building2 className="size-4 text-muted-foreground" />
+                            <div
+                              className={cn(
+                                "flex size-8 items-center justify-center rounded-md bg-blue-50",
+                                inactive && "bg-neutral-200",
+                              )}
+                            >
+                              <Building2
+                                className={cn(
+                                  "size-4 text-blue-400",
+                                  inactive && "text-neutral-500",
+                                )}
+                              />
                             </div>
                           )}
                           <div className="min-w-0">
-                            <p className="truncate font-medium">
+                            <p
+                              className={cn(
+                                "truncate font-medium",
+                                inactive && "font-thin text-neutral-600",
+                              )}
+                            >
                               {user.sponsor?.publicName ?? user.name}
                             </p>
-                            <p className="truncate text-xs text-muted-foreground">
+                            <p
+                              className={cn(
+                                "truncate text-xs text-muted-foreground",
+                                inactive && "text-neutral-400",
+                              )}
+                            >
                               {user.email}
                             </p>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="hidden sm:table-cell">
+                      <TableCell
+                        className={cn(
+                          "hidden sm:table-cell",
+                          inactive && "text-neutral-500",
+                        )}
+                      >
                         {formatDocument(user.document)}
                       </TableCell>
                       <TableCell className="hidden sm:table-cell">
-                        <span className="text-sm text-muted-foreground">
+                        <span
+                          className={cn(
+                            "text-sm text-muted-foreground",
+                            inactive && "text-neutral-400",
+                          )}
+                        >
                           {user.sponsor?.entityType != null
                             ? ENTITY_LABELS[user.sponsor.entityType]
                             : "—"}
@@ -458,34 +546,61 @@ export function SponsorListPage() {
                         {user.sponsor?.tier && (
                           <Badge
                             variant={TIER_BADGE_VARIANT[user.sponsor.tier]}
+                            className={cn(inactive && "opacity-90 bg-neutral-200 text-neutral-500")}
                           >
                             {TIER_LABELS[user.sponsor.tier]}
                           </Badge>
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant={user.accountActive ? "default" : "outline"}
-                          className={
-                            user.accountActive
-                              ? "bg-emerald-600 text-white hover:bg-emerald-600/90"
-                              : ""
-                          }
-                        >
-                          {user.accountActive ? "Ativo" : "Inativo"}
-                        </Badge>
+                        {user.accountActive ? (
+                          <Badge
+                            variant="default"
+                            className="bg-emerald-600 text-white hover:bg-emerald-600/90"
+                          >
+                            Ativo
+                          </Badge>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-full border border-neutral-300 bg-neutral-50 px-2 py-0.5 text-[11px] font-bold text-neutral-500">
+                            {/* <span
+                              className="size-1.5 shrink-0 rounded-full bg-neutral-400"
+                              aria-hidden
+                            /> */}
+                            Inativo
+                          </span>
+                        )}
                       </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
+                      <TableCell
+                        className={cn(
+                          "hidden md:table-cell",
+                          inactive && "text-neutral-500",
+                        )}
+                      >
+                        <code
+                          className={cn(
+                            "rounded bg-blue-50 px-1.5 py-0.5 text-xs",
+                            !inactive && "font-bold",
+                            inactive && "bg-neutral-100 text-neutral-500",
+                          )}
+                        >
                           {user.code}
                         </code>
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
+                        <div
+                          className={cn(
+                            "flex justify-end gap-1",
+                            inactive && "opacity-80",
+                          )}
+                        >
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="size-9"
+                            className={cn(
+                              "size-9",
+                              inactive &&
+                                "border border-neutral-200 bg-neutral-50 hover:bg-neutral-100/80",
+                            )}
                             asChild
                           >
                             <Link
@@ -544,11 +659,12 @@ export function SponsorListPage() {
           <ListPaginationBar
             page={page}
             totalPages={totalPages}
+            pageSize={PAGE_SIZE}
+            totalElements={totalElements}
+            entityPlural="patrocinadores"
             onPageChange={setPage}
-          >
-            {totalElements} patrocinador{totalElements !== 1 ? "es" : ""}{" "}
-            encontrado{totalElements !== 1 ? "s" : ""}
-          </ListPaginationBar>
+            disabled={listUiStale}
+          />
         </>
       )}
 
@@ -637,7 +753,7 @@ export function SponsorListPage() {
 function SponsorTableSkeleton() {
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border">
+      <div className="rounded-lg border bg-card">
         <Table>
           <TableHeader>
             <TableRow>

@@ -1,35 +1,44 @@
 import { api } from "@/lib/axios";
 import { sponsorTierFromApi, sponsorTierToApi } from "@/lib/sponsor-tier";
 import type {
-  EnvelopeUserWithSponsorDTO,
+  EnvelopeMemberDTO,
+  SubscriberMemberPatchDTO,
+} from "@/types/member";
+import type {
+  EnvelopeUserDetailDTO,
   PaginatedUsersResponse,
+  UserDetailDTO,
   UserListParams,
   UserWithSponsorCreateDTO,
   UserWithSponsorDTO,
   UserWithSponsorUpdateDTO,
 } from "@/types/user";
 
-interface UserWithSponsorDTOFromApi extends Omit<
-  UserWithSponsorDTO,
-  "sponsor"
-> {
-  sponsor?: UserWithSponsorDTO["sponsor"] & {
+type UserDetailFromApi = UserDetailDTO & {
+  sponsor?: (UserWithSponsorDTO["sponsor"] & {
     active?: boolean;
     isActive?: boolean;
-  };
+  }) | null;
+};
+
+function onlyDigits(value: string | undefined | null): string | undefined {
+  if (value == null) return undefined;
+  const digits = value.replace(/\D/g, "");
+  return digits.length > 0 ? digits : undefined;
 }
 
-function mapUserWithSponsorFromApi(
-  user: UserWithSponsorDTOFromApi,
-): UserWithSponsorDTO {
-  if (!user.sponsor) return user;
-  const tier = sponsorTierFromApi(user.sponsor.tier as unknown as string);
-  const isActive = user.sponsor.isActive ?? user.sponsor.active ?? true;
-
+function mapUserDetailFromApi(user: UserDetailFromApi): UserDetailDTO {
+  if (user.type !== "SPONSOR" && user.type !== "SPONSOR_MEMBER") {
+    return user as UserDetailDTO;
+  }
+  const sponsor = user.sponsor;
+  if (sponsor == null) return user as UserDetailDTO;
+  const tier = sponsorTierFromApi(sponsor.tier as unknown as string);
+  const isActive = sponsor.isActive ?? sponsor.active ?? true;
   return {
-    ...user,
+    ...(user as UserWithSponsorDTO),
     sponsor: {
-      ...user.sponsor,
+      ...sponsor,
       ...(tier != null ? { tier } : {}),
       isActive,
     },
@@ -38,9 +47,14 @@ function mapUserWithSponsorFromApi(
 
 export const userApi = {
   getUsers(params: UserListParams) {
+    const trimmedSearch = params.search?.trim();
     const apiParams = {
       ...params,
       tier: params.tier != null ? sponsorTierToApi(params.tier) : undefined,
+      search:
+        trimmedSearch != null && trimmedSearch !== ""
+          ? trimmedSearch
+          : undefined,
     };
     return api
       .get<PaginatedUsersResponse>("/v1/admin/user", { params: apiParams })
@@ -48,7 +62,7 @@ export const userApi = {
         const envelope = res.data;
         const data =
           envelope.data?.map((u) =>
-            mapUserWithSponsorFromApi(u as UserWithSponsorDTOFromApi),
+            mapUserDetailFromApi(u as UserDetailFromApi),
           ) ?? [];
         return { ...res, data: { ...envelope, data } };
       });
@@ -66,7 +80,7 @@ export const userApi = {
             },
           };
     return api
-      .post<EnvelopeUserWithSponsorDTO>("/v1/admin/user", payload)
+      .post<EnvelopeUserDetailDTO>("/v1/admin/user", payload)
       .then((res) => {
         const envelope = res.data;
         const u = envelope.data;
@@ -75,7 +89,7 @@ export const userApi = {
           ...res,
           data: {
             ...envelope,
-            data: mapUserWithSponsorFromApi(u as UserWithSponsorDTOFromApi),
+            data: mapUserDetailFromApi(u as UserDetailFromApi),
           },
         };
       });
@@ -83,7 +97,7 @@ export const userApi = {
 
   getUserById(id: number) {
     return api
-      .get<EnvelopeUserWithSponsorDTO>(`/v1/admin/user/${id}`)
+      .get<EnvelopeUserDetailDTO>(`/v1/admin/user/${id}`)
       .then((res) => {
         const envelope = res.data;
         const u = envelope.data;
@@ -92,7 +106,7 @@ export const userApi = {
           ...res,
           data: {
             ...envelope,
-            data: mapUserWithSponsorFromApi(u as UserWithSponsorDTOFromApi),
+            data: mapUserDetailFromApi(u as UserDetailFromApi),
           },
         };
       });
@@ -110,19 +124,28 @@ export const userApi = {
             logoUrl: s.logoUrl,
             site: s.site,
             instagram: s.instagram,
-            whatsapp: s.whatsapp,
+            whatsapp: onlyDigits(s.whatsapp),
             isActive: s.isActive,
             ...(s.tier != null ? { tier: sponsorTierToApi(s.tier) } : {}),
+          };
+    const m = data.member;
+    const memberBody =
+      m == null
+        ? undefined
+        : {
+            fullname: m.fullname,
+            whatsapp: onlyDigits(m.whatsapp),
           };
     const payload = {
       email: data.email,
       name: data.name,
-      document: data.document,
+      document: onlyDigits(data.document),
       avatarUrl: data.avatarUrl,
       sponsor: sponsorBody,
+      member: memberBody,
     };
     return api
-      .put<EnvelopeUserWithSponsorDTO>(`/v1/admin/user/${id}`, payload)
+      .put<EnvelopeUserDetailDTO>(`/v1/admin/user/${id}`, payload)
       .then((res) => {
         const envelope = res.data;
         const u = envelope.data;
@@ -131,7 +154,7 @@ export const userApi = {
           ...res,
           data: {
             ...envelope,
-            data: mapUserWithSponsorFromApi(u as UserWithSponsorDTOFromApi),
+            data: mapUserDetailFromApi(u as UserDetailFromApi),
           },
         };
       });
@@ -143,5 +166,12 @@ export const userApi = {
 
   activateUser(id: number) {
     return api.patch(`/v1/admin/user/${id}/activate`);
+  },
+
+  patchSubscriberUser(userId: number, body: SubscriberMemberPatchDTO) {
+    return api.patch<EnvelopeMemberDTO>(
+      `/v1/admin/user/${userId}/subscriber`,
+      body,
+    );
   },
 };
