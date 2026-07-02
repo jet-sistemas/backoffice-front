@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useAuth } from '@/contexts/auth-context'
 import { useCreateMemberMutation } from '@/hooks/use-create-member-mutation'
 import { formatCPF, formatPhone } from '@/lib/utils'
 import { memberCreateSchema, type MemberCreateFormData } from '@/schemas/member-create-schema'
@@ -23,7 +22,6 @@ function todayISO() {
 
 export function MemberCreatePage() {
   const { mutate, isPending } = useCreateMemberMutation()
-  const { user } = useAuth()
   const {
     register,
     handleSubmit,
@@ -74,7 +72,6 @@ export function MemberCreatePage() {
           : {
               ...baseMember,
               sponsored: {
-                grantedByUserId: user!.id,
                 startAt: todayISO(),
               },
             },
