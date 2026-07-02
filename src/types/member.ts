@@ -59,7 +59,6 @@ export interface SubscriberDataCreateDTO {
 }
 
 export interface SponsoredDataCreateDTO {
-  grantedByUserId: number
   startAt: string
   endAt?: string
   reason?: string
