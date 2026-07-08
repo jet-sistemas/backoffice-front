@@ -9,10 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PatrocinadorRouteImport } from './routes/patrocinador'
+import { Route as MembroRouteImport } from './routes/membro'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AlterarSenhaObrigatoriaRouteImport } from './routes/alterar-senha-obrigatoria'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as ValidarContaTokenRouteImport } from './routes/validar-conta/$token'
 import { Route as AdminPatrocinadoresIndexRouteImport } from './routes/admin/patrocinadores/index'
 import { Route as AdminMensalidadesIndexRouteImport } from './routes/admin/mensalidades/index'
 import { Route as AdminBeneficiosIndexRouteImport } from './routes/admin/beneficios/index'
@@ -22,9 +26,24 @@ import { Route as AdminAssociadosNovoRouteImport } from './routes/admin/associad
 import { Route as AdminAssociadosUserIdRouteImport } from './routes/admin/associados/$userId'
 import { Route as AdminPatrocinadoresUserIdEditarRouteImport } from './routes/admin/patrocinadores/$userId/editar'
 
+const PatrocinadorRoute = PatrocinadorRouteImport.update({
+  id: '/patrocinador',
+  path: '/patrocinador',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MembroRoute = MembroRouteImport.update({
+  id: '/membro',
+  path: '/membro',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlterarSenhaObrigatoriaRoute = AlterarSenhaObrigatoriaRouteImport.update({
+  id: '/alterar-senha-obrigatoria',
+  path: '/alterar-senha-obrigatoria',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRouteRoute = AdminRouteRouteImport.update({
@@ -41,6 +60,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRouteRoute,
+} as any)
+const ValidarContaTokenRoute = ValidarContaTokenRouteImport.update({
+  id: '/validar-conta/$token',
+  path: '/validar-conta/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminPatrocinadoresIndexRoute =
   AdminPatrocinadoresIndexRouteImport.update({
@@ -88,7 +112,11 @@ const AdminPatrocinadoresUserIdEditarRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
+  '/alterar-senha-obrigatoria': typeof AlterarSenhaObrigatoriaRoute
   '/login': typeof LoginRoute
+  '/membro': typeof MembroRoute
+  '/patrocinador': typeof PatrocinadorRoute
+  '/validar-conta/$token': typeof ValidarContaTokenRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/associados/$userId': typeof AdminAssociadosUserIdRoute
   '/admin/associados/novo': typeof AdminAssociadosNovoRoute
@@ -101,7 +129,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/alterar-senha-obrigatoria': typeof AlterarSenhaObrigatoriaRoute
   '/login': typeof LoginRoute
+  '/membro': typeof MembroRoute
+  '/patrocinador': typeof PatrocinadorRoute
+  '/validar-conta/$token': typeof ValidarContaTokenRoute
   '/admin': typeof AdminIndexRoute
   '/admin/associados/$userId': typeof AdminAssociadosUserIdRoute
   '/admin/associados/novo': typeof AdminAssociadosNovoRoute
@@ -116,7 +148,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
+  '/alterar-senha-obrigatoria': typeof AlterarSenhaObrigatoriaRoute
   '/login': typeof LoginRoute
+  '/membro': typeof MembroRoute
+  '/patrocinador': typeof PatrocinadorRoute
+  '/validar-conta/$token': typeof ValidarContaTokenRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/associados/$userId': typeof AdminAssociadosUserIdRoute
   '/admin/associados/novo': typeof AdminAssociadosNovoRoute
@@ -132,7 +168,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/alterar-senha-obrigatoria'
     | '/login'
+    | '/membro'
+    | '/patrocinador'
+    | '/validar-conta/$token'
     | '/admin/'
     | '/admin/associados/$userId'
     | '/admin/associados/novo'
@@ -145,7 +185,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/alterar-senha-obrigatoria'
     | '/login'
+    | '/membro'
+    | '/patrocinador'
+    | '/validar-conta/$token'
     | '/admin'
     | '/admin/associados/$userId'
     | '/admin/associados/novo'
@@ -159,7 +203,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/alterar-senha-obrigatoria'
     | '/login'
+    | '/membro'
+    | '/patrocinador'
+    | '/validar-conta/$token'
     | '/admin/'
     | '/admin/associados/$userId'
     | '/admin/associados/novo'
@@ -174,16 +222,41 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
+  AlterarSenhaObrigatoriaRoute: typeof AlterarSenhaObrigatoriaRoute
   LoginRoute: typeof LoginRoute
+  MembroRoute: typeof MembroRoute
+  PatrocinadorRoute: typeof PatrocinadorRoute
+  ValidarContaTokenRoute: typeof ValidarContaTokenRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/patrocinador': {
+      id: '/patrocinador'
+      path: '/patrocinador'
+      fullPath: '/patrocinador'
+      preLoaderRoute: typeof PatrocinadorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/membro': {
+      id: '/membro'
+      path: '/membro'
+      fullPath: '/membro'
+      preLoaderRoute: typeof MembroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/alterar-senha-obrigatoria': {
+      id: '/alterar-senha-obrigatoria'
+      path: '/alterar-senha-obrigatoria'
+      fullPath: '/alterar-senha-obrigatoria'
+      preLoaderRoute: typeof AlterarSenhaObrigatoriaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -206,6 +279,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/validar-conta/$token': {
+      id: '/validar-conta/$token'
+      path: '/validar-conta/$token'
+      fullPath: '/validar-conta/$token'
+      preLoaderRoute: typeof ValidarContaTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/patrocinadores/': {
       id: '/admin/patrocinadores/'
@@ -297,7 +377,11 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
+  AlterarSenhaObrigatoriaRoute: AlterarSenhaObrigatoriaRoute,
   LoginRoute: LoginRoute,
+  MembroRoute: MembroRoute,
+  PatrocinadorRoute: PatrocinadorRoute,
+  ValidarContaTokenRoute: ValidarContaTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

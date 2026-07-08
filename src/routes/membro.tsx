@@ -1,20 +1,21 @@
 import { createFileRoute, Navigate, redirect } from '@tanstack/react-router'
-import { AdminLayout } from '@/components/layout/admin-layout'
 import { RoutePendingFallback } from '@/components/route-pending-fallback'
 import { useAuth } from '@/contexts/auth-context'
+import { TOKEN_KEY } from '@/lib/auth-session'
 import { resolvePostLoginPath } from '@/lib/post-login-path'
+import { MemberPortalPage } from '@/pages/member/member-portal-page'
 
-export const Route = createFileRoute('/admin')({
+export const Route = createFileRoute('/membro')({
   beforeLoad: () => {
-    const token = localStorage.getItem('@jet:token')
+    const token = localStorage.getItem(TOKEN_KEY)
     if (!token) {
       throw redirect({ to: '/login' })
     }
   },
-  component: AdminRouteGate,
+  component: MemberPortalGate,
 })
 
-function AdminRouteGate() {
+function MemberPortalGate() {
   const { user, isLoadingUser } = useAuth()
 
   if (isLoadingUser) {
@@ -25,9 +26,9 @@ function AdminRouteGate() {
     return <Navigate to="/alterar-senha-obrigatoria" replace />
   }
 
-  if (user && user.type !== 'ADM') {
+  if (user && user.type !== 'MEMBER') {
     return <Navigate to={resolvePostLoginPath(user.type)} replace />
   }
 
-  return <AdminLayout />
+  return <MemberPortalPage />
 }

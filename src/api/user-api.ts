@@ -1,5 +1,6 @@
 import { api } from "@/lib/axios";
 import { sponsorTierFromApi, sponsorTierToApi } from "@/lib/sponsor-tier";
+import type { EnvelopeResendAccountValidationDTO } from "@/types/account-validation";
 import type {
   EnvelopeMemberDTO,
   SubscriberMemberPatchDTO,
@@ -15,6 +16,7 @@ import type {
 } from "@/types/user";
 
 type UserDetailFromApi = UserDetailDTO & {
+  isAccountActive?: boolean;
   sponsor?: (UserWithSponsorDTO["sponsor"] & {
     active?: boolean;
     isActive?: boolean;
@@ -28,15 +30,17 @@ function onlyDigits(value: string | undefined | null): string | undefined {
 }
 
 function mapUserDetailFromApi(user: UserDetailFromApi): UserDetailDTO {
+  const accountActive = user.accountActive ?? user.isAccountActive ?? false;
+  const base = { ...user, accountActive };
   if (user.type !== "SPONSOR" && user.type !== "SPONSOR_MEMBER") {
-    return user as UserDetailDTO;
+    return base as UserDetailDTO;
   }
   const sponsor = user.sponsor;
-  if (sponsor == null) return user as UserDetailDTO;
+  if (sponsor == null) return base as UserDetailDTO;
   const tier = sponsorTierFromApi(sponsor.tier as unknown as string);
   const isActive = sponsor.isActive ?? sponsor.active ?? true;
   return {
-    ...(user as UserWithSponsorDTO),
+    ...(base as UserWithSponsorDTO),
     sponsor: {
       ...sponsor,
       ...(tier != null ? { tier } : {}),
@@ -172,6 +176,12 @@ export const userApi = {
     return api.patch<EnvelopeMemberDTO>(
       `/v1/admin/user/${userId}/subscriber`,
       body,
+    );
+  },
+
+  resendAccountValidation(userId: number) {
+    return api.post<EnvelopeResendAccountValidationDTO>(
+      `/v1/admin/user/${userId}/resend-account-validation`,
     );
   },
 };
