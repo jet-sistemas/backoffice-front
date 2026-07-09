@@ -19,7 +19,8 @@ interface AuthContextData {
   isLoadingUser: boolean
   signIn: (token: string) => void
   signOut: () => void
-  refreshUser: () => Promise<void>
+  refreshUser: () => Promise<UserResponse | null>
+  updateUser: (user: UserResponse) => void
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData)
@@ -69,13 +70,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshUser = useCallback(async () => {
     if (!token) {
       setUser(null)
-      return
+      return null
     }
     const res = await authApi.getMe()
-    if (res.data.data) {
-      setUser(res.data.data)
+    const next = res.data.data ?? null
+    if (next) {
+      setUser(next)
     }
+    return next
   }, [token])
+
+  const updateUser = useCallback((next: UserResponse) => {
+    setUser(next)
+  }, [])
 
   const signIn = useCallback((newToken: string) => {
     localStorage.setItem(TOKEN_KEY, newToken)
@@ -98,8 +105,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signIn,
       signOut,
       refreshUser,
+      updateUser,
     }),
-    [token, user, isLoadingUser, signIn, signOut, refreshUser],
+    [token, user, isLoadingUser, signIn, signOut, refreshUser, updateUser],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

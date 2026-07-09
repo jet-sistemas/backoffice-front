@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { PASSWORD_CRITERIA } from '@/lib/password-criteria'
+
 export const accountValidationSchema = z.object({
   code: z
     .string()
@@ -10,16 +12,18 @@ export const accountValidationSchema = z.object({
 
 export type AccountValidationFormData = z.infer<typeof accountValidationSchema>
 
+const newPasswordSchema = PASSWORD_CRITERIA.reduce(
+  (schema, criterion) =>
+    schema.refine((value) => criterion.test(value), {
+      message: criterion.label,
+    }),
+  z.string().min(1, 'Nova senha é obrigatória'),
+)
+
 export const changePasswordSchema = z
   .object({
     currentPassword: z.string().min(1, 'Senha atual é obrigatória'),
-    newPassword: z
-      .string()
-      .min(8, 'Mínimo 8 caracteres')
-      .regex(/[A-Z]/, 'Precisa de letra maiúscula')
-      .regex(/[a-z]/, 'Precisa de letra minúscula')
-      .regex(/\d/, 'Precisa de número')
-      .regex(/[!@#$%&*\-_+=?]/, 'Precisa de caractere especial'),
+    newPassword: newPasswordSchema,
     confirmPassword: z.string().min(1, 'Confirmação é obrigatória'),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {

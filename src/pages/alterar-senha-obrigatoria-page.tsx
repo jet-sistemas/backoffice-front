@@ -2,9 +2,11 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
 import { Loader2 } from 'lucide-react'
+import { flushSync } from 'react-dom'
 
+import { PasswordCriteriaList } from '@/components/password-criteria-list'
+import { PasswordInput } from '@/components/password-input'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/contexts/auth-context'
 import { useChangePasswordMutation } from '@/hooks/use-change-password-mutation'
@@ -15,24 +17,40 @@ import {
 } from '@/schemas/account-validation-schema'
 
 export function AlterarSenhaObrigatoriaPage() {
-  const { user, refreshUser } = useAuth()
+  const { updateUser } = useAuth()
   const navigate = useNavigate()
   const { mutate, isPending } = useChangePasswordMutation()
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<ChangePasswordFormData>({
     resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    },
   })
+
+  const newPassword = watch('newPassword')
 
   function onSubmit(data: ChangePasswordFormData) {
     mutate(data, {
-      onSuccess: async () => {
-        await refreshUser()
+      onSuccess: (response) => {
+        const nextUser = response.data.data
+        if (!nextUser) {
+          return
+        }
+
+        flushSync(() => {
+          updateUser(nextUser)
+        })
+
         navigate({
-          to: resolvePostLoginPath(user?.type),
+          to: resolvePostLoginPath(nextUser.type),
           replace: true,
         })
       },
@@ -47,17 +65,11 @@ export function AlterarSenhaObrigatoriaPage() {
           Por segurança, defina uma nova senha antes de continuar.
         </p>
 
-        <ul className="mt-4 list-disc space-y-1 pl-5 text-xs text-muted-foreground">
-          <li>Mínimo 8 caracteres</li>
-          <li>Letra maiúscula, minúscula, número e caractere especial</li>
-        </ul>
-
         <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="currentPassword">Senha atual</Label>
-            <Input
+            <PasswordInput
               id="currentPassword"
-              type="password"
               autoComplete="current-password"
               aria-invalid={!!errors.currentPassword}
               {...register('currentPassword')}
@@ -71,13 +83,13 @@ export function AlterarSenhaObrigatoriaPage() {
 
           <div className="space-y-2">
             <Label htmlFor="newPassword">Nova senha</Label>
-            <Input
+            <PasswordInput
               id="newPassword"
-              type="password"
               autoComplete="new-password"
               aria-invalid={!!errors.newPassword}
               {...register('newPassword')}
             />
+            <PasswordCriteriaList password={newPassword ?? ''} />
             {errors.newPassword && (
               <p className="text-sm text-destructive">
                 {errors.newPassword.message}
@@ -87,9 +99,8 @@ export function AlterarSenhaObrigatoriaPage() {
 
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">Confirmar nova senha</Label>
-            <Input
+            <PasswordInput
               id="confirmPassword"
-              type="password"
               autoComplete="new-password"
               aria-invalid={!!errors.confirmPassword}
               {...register('confirmPassword')}
