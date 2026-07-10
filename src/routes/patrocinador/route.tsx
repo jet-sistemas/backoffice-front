@@ -1,9 +1,10 @@
 import { createFileRoute, Navigate, redirect } from '@tanstack/react-router'
+
+import { SponsorLayout } from '@/components/layout/sponsor-layout'
 import { RoutePendingFallback } from '@/components/route-pending-fallback'
 import { useAuth } from '@/contexts/auth-context'
 import { TOKEN_KEY } from '@/lib/auth-session'
 import { resolvePostLoginPath } from '@/lib/post-login-path'
-import { SponsorPortalPage } from '@/pages/sponsor/sponsor-portal-page'
 
 export const Route = createFileRoute('/patrocinador')({
   beforeLoad: () => {
@@ -12,10 +13,10 @@ export const Route = createFileRoute('/patrocinador')({
       throw redirect({ to: '/login' })
     }
   },
-  component: SponsorPortalGate,
+  component: SponsorRouteGate,
 })
 
-function SponsorPortalGate() {
+function SponsorRouteGate() {
   const { user, isLoadingUser } = useAuth()
 
   if (isLoadingUser) {
@@ -30,5 +31,5 @@ function SponsorPortalGate() {
     return <Navigate to={resolvePostLoginPath(user.type)} replace />
   }
 
-  return <SponsorPortalPage />
+  return <SponsorLayout />
 }

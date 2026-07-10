@@ -12,8 +12,8 @@ describe('resolvePostLoginPath', () => {
   })
 
   it('routes SPONSOR and SPONSOR_MEMBER to the sponsor portal', () => {
-    expect(resolvePostLoginPath('SPONSOR')).toBe('/patrocinador')
-    expect(resolvePostLoginPath('SPONSOR_MEMBER')).toBe('/patrocinador')
+    expect(resolvePostLoginPath('SPONSOR')).toBe('/patrocinador/check-in')
+    expect(resolvePostLoginPath('SPONSOR_MEMBER')).toBe('/patrocinador/check-in')
   })
 
   it('falls back to login for unknown/undefined types', () => {
@@ -39,6 +39,6 @@ describe('resolvePostAuthPath', () => {
   it('delegates to resolvePostLoginPath when password change is not pending', () => {
     expect(
       resolvePostAuthPath({ type: 'SPONSOR', mustChangePassword: false }),
-    ).toBe('/patrocinador')
+    ).toBe('/patrocinador/check-in')
   })
 })
