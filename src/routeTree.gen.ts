@@ -9,18 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as MembroRouteImport } from './routes/membro'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AlterarSenhaObrigatoriaRouteImport } from './routes/alterar-senha-obrigatoria'
 import { Route as PatrocinadorRouteRouteImport } from './routes/patrocinador/route'
+import { Route as MembroRouteRouteImport } from './routes/membro/route'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PatrocinadorIndexRouteImport } from './routes/patrocinador/index'
+import { Route as MembroIndexRouteImport } from './routes/membro/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ValidarContaTokenRouteImport } from './routes/validar-conta/$token'
 import { Route as PatrocinadorHistoricoRouteImport } from './routes/patrocinador/historico'
 import { Route as PatrocinadorCheckInRouteImport } from './routes/patrocinador/check-in'
 import { Route as PatrocinadorBeneficiosRouteImport } from './routes/patrocinador/beneficios'
+import { Route as MembroHistoricoRouteImport } from './routes/membro/historico'
+import { Route as MembroCarteirinhaRouteImport } from './routes/membro/carteirinha'
 import { Route as AdminPatrocinadoresIndexRouteImport } from './routes/admin/patrocinadores/index'
 import { Route as AdminMensalidadesIndexRouteImport } from './routes/admin/mensalidades/index'
 import { Route as AdminBeneficiosIndexRouteImport } from './routes/admin/beneficios/index'
@@ -30,11 +33,6 @@ import { Route as AdminAssociadosNovoRouteImport } from './routes/admin/associad
 import { Route as AdminAssociadosUserIdRouteImport } from './routes/admin/associados/$userId'
 import { Route as AdminPatrocinadoresUserIdEditarRouteImport } from './routes/admin/patrocinadores/$userId/editar'
 
-const MembroRoute = MembroRouteImport.update({
-  id: '/membro',
-  path: '/membro',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -48,6 +46,11 @@ const AlterarSenhaObrigatoriaRoute = AlterarSenhaObrigatoriaRouteImport.update({
 const PatrocinadorRouteRoute = PatrocinadorRouteRouteImport.update({
   id: '/patrocinador',
   path: '/patrocinador',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MembroRouteRoute = MembroRouteRouteImport.update({
+  id: '/membro',
+  path: '/membro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRouteRoute = AdminRouteRouteImport.update({
@@ -64,6 +67,11 @@ const PatrocinadorIndexRoute = PatrocinadorIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => PatrocinadorRouteRoute,
+} as any)
+const MembroIndexRoute = MembroIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MembroRouteRoute,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
@@ -89,6 +97,16 @@ const PatrocinadorBeneficiosRoute = PatrocinadorBeneficiosRouteImport.update({
   id: '/beneficios',
   path: '/beneficios',
   getParentRoute: () => PatrocinadorRouteRoute,
+} as any)
+const MembroHistoricoRoute = MembroHistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
+  getParentRoute: () => MembroRouteRoute,
+} as any)
+const MembroCarteirinhaRoute = MembroCarteirinhaRouteImport.update({
+  id: '/carteirinha',
+  path: '/carteirinha',
+  getParentRoute: () => MembroRouteRoute,
 } as any)
 const AdminPatrocinadoresIndexRoute =
   AdminPatrocinadoresIndexRouteImport.update({
@@ -136,15 +154,18 @@ const AdminPatrocinadoresUserIdEditarRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
+  '/membro': typeof MembroRouteRouteWithChildren
   '/patrocinador': typeof PatrocinadorRouteRouteWithChildren
   '/alterar-senha-obrigatoria': typeof AlterarSenhaObrigatoriaRoute
   '/login': typeof LoginRoute
-  '/membro': typeof MembroRoute
+  '/membro/carteirinha': typeof MembroCarteirinhaRoute
+  '/membro/historico': typeof MembroHistoricoRoute
   '/patrocinador/beneficios': typeof PatrocinadorBeneficiosRoute
   '/patrocinador/check-in': typeof PatrocinadorCheckInRoute
   '/patrocinador/historico': typeof PatrocinadorHistoricoRoute
   '/validar-conta/$token': typeof ValidarContaTokenRoute
   '/admin/': typeof AdminIndexRoute
+  '/membro/': typeof MembroIndexRoute
   '/patrocinador/': typeof PatrocinadorIndexRoute
   '/admin/associados/$userId': typeof AdminAssociadosUserIdRoute
   '/admin/associados/novo': typeof AdminAssociadosNovoRoute
@@ -159,12 +180,14 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/alterar-senha-obrigatoria': typeof AlterarSenhaObrigatoriaRoute
   '/login': typeof LoginRoute
-  '/membro': typeof MembroRoute
+  '/membro/carteirinha': typeof MembroCarteirinhaRoute
+  '/membro/historico': typeof MembroHistoricoRoute
   '/patrocinador/beneficios': typeof PatrocinadorBeneficiosRoute
   '/patrocinador/check-in': typeof PatrocinadorCheckInRoute
   '/patrocinador/historico': typeof PatrocinadorHistoricoRoute
   '/validar-conta/$token': typeof ValidarContaTokenRoute
   '/admin': typeof AdminIndexRoute
+  '/membro': typeof MembroIndexRoute
   '/patrocinador': typeof PatrocinadorIndexRoute
   '/admin/associados/$userId': typeof AdminAssociadosUserIdRoute
   '/admin/associados/novo': typeof AdminAssociadosNovoRoute
@@ -179,15 +202,18 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
+  '/membro': typeof MembroRouteRouteWithChildren
   '/patrocinador': typeof PatrocinadorRouteRouteWithChildren
   '/alterar-senha-obrigatoria': typeof AlterarSenhaObrigatoriaRoute
   '/login': typeof LoginRoute
-  '/membro': typeof MembroRoute
+  '/membro/carteirinha': typeof MembroCarteirinhaRoute
+  '/membro/historico': typeof MembroHistoricoRoute
   '/patrocinador/beneficios': typeof PatrocinadorBeneficiosRoute
   '/patrocinador/check-in': typeof PatrocinadorCheckInRoute
   '/patrocinador/historico': typeof PatrocinadorHistoricoRoute
   '/validar-conta/$token': typeof ValidarContaTokenRoute
   '/admin/': typeof AdminIndexRoute
+  '/membro/': typeof MembroIndexRoute
   '/patrocinador/': typeof PatrocinadorIndexRoute
   '/admin/associados/$userId': typeof AdminAssociadosUserIdRoute
   '/admin/associados/novo': typeof AdminAssociadosNovoRoute
@@ -203,15 +229,18 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/membro'
     | '/patrocinador'
     | '/alterar-senha-obrigatoria'
     | '/login'
-    | '/membro'
+    | '/membro/carteirinha'
+    | '/membro/historico'
     | '/patrocinador/beneficios'
     | '/patrocinador/check-in'
     | '/patrocinador/historico'
     | '/validar-conta/$token'
     | '/admin/'
+    | '/membro/'
     | '/patrocinador/'
     | '/admin/associados/$userId'
     | '/admin/associados/novo'
@@ -226,12 +255,14 @@ export interface FileRouteTypes {
     | '/'
     | '/alterar-senha-obrigatoria'
     | '/login'
-    | '/membro'
+    | '/membro/carteirinha'
+    | '/membro/historico'
     | '/patrocinador/beneficios'
     | '/patrocinador/check-in'
     | '/patrocinador/historico'
     | '/validar-conta/$token'
     | '/admin'
+    | '/membro'
     | '/patrocinador'
     | '/admin/associados/$userId'
     | '/admin/associados/novo'
@@ -245,15 +276,18 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/membro'
     | '/patrocinador'
     | '/alterar-senha-obrigatoria'
     | '/login'
-    | '/membro'
+    | '/membro/carteirinha'
+    | '/membro/historico'
     | '/patrocinador/beneficios'
     | '/patrocinador/check-in'
     | '/patrocinador/historico'
     | '/validar-conta/$token'
     | '/admin/'
+    | '/membro/'
     | '/patrocinador/'
     | '/admin/associados/$userId'
     | '/admin/associados/novo'
@@ -268,22 +302,15 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
+  MembroRouteRoute: typeof MembroRouteRouteWithChildren
   PatrocinadorRouteRoute: typeof PatrocinadorRouteRouteWithChildren
   AlterarSenhaObrigatoriaRoute: typeof AlterarSenhaObrigatoriaRoute
   LoginRoute: typeof LoginRoute
-  MembroRoute: typeof MembroRoute
   ValidarContaTokenRoute: typeof ValidarContaTokenRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/membro': {
-      id: '/membro'
-      path: '/membro'
-      fullPath: '/membro'
-      preLoaderRoute: typeof MembroRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -303,6 +330,13 @@ declare module '@tanstack/react-router' {
       path: '/patrocinador'
       fullPath: '/patrocinador'
       preLoaderRoute: typeof PatrocinadorRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/membro': {
+      id: '/membro'
+      path: '/membro'
+      fullPath: '/membro'
+      preLoaderRoute: typeof MembroRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -325,6 +359,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/patrocinador/'
       preLoaderRoute: typeof PatrocinadorIndexRouteImport
       parentRoute: typeof PatrocinadorRouteRoute
+    }
+    '/membro/': {
+      id: '/membro/'
+      path: '/'
+      fullPath: '/membro/'
+      preLoaderRoute: typeof MembroIndexRouteImport
+      parentRoute: typeof MembroRouteRoute
     }
     '/admin/': {
       id: '/admin/'
@@ -360,6 +401,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/patrocinador/beneficios'
       preLoaderRoute: typeof PatrocinadorBeneficiosRouteImport
       parentRoute: typeof PatrocinadorRouteRoute
+    }
+    '/membro/historico': {
+      id: '/membro/historico'
+      path: '/historico'
+      fullPath: '/membro/historico'
+      preLoaderRoute: typeof MembroHistoricoRouteImport
+      parentRoute: typeof MembroRouteRoute
+    }
+    '/membro/carteirinha': {
+      id: '/membro/carteirinha'
+      path: '/carteirinha'
+      fullPath: '/membro/carteirinha'
+      preLoaderRoute: typeof MembroCarteirinhaRouteImport
+      parentRoute: typeof MembroRouteRoute
     }
     '/admin/patrocinadores/': {
       id: '/admin/patrocinadores/'
@@ -448,6 +503,22 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
   AdminRouteRouteChildren,
 )
 
+interface MembroRouteRouteChildren {
+  MembroCarteirinhaRoute: typeof MembroCarteirinhaRoute
+  MembroHistoricoRoute: typeof MembroHistoricoRoute
+  MembroIndexRoute: typeof MembroIndexRoute
+}
+
+const MembroRouteRouteChildren: MembroRouteRouteChildren = {
+  MembroCarteirinhaRoute: MembroCarteirinhaRoute,
+  MembroHistoricoRoute: MembroHistoricoRoute,
+  MembroIndexRoute: MembroIndexRoute,
+}
+
+const MembroRouteRouteWithChildren = MembroRouteRoute._addFileChildren(
+  MembroRouteRouteChildren,
+)
+
 interface PatrocinadorRouteRouteChildren {
   PatrocinadorBeneficiosRoute: typeof PatrocinadorBeneficiosRoute
   PatrocinadorCheckInRoute: typeof PatrocinadorCheckInRoute
@@ -468,10 +539,10 @@ const PatrocinadorRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
+  MembroRouteRoute: MembroRouteRouteWithChildren,
   PatrocinadorRouteRoute: PatrocinadorRouteRouteWithChildren,
   AlterarSenhaObrigatoriaRoute: AlterarSenhaObrigatoriaRoute,
   LoginRoute: LoginRoute,
-  MembroRoute: MembroRoute,
   ValidarContaTokenRoute: ValidarContaTokenRoute,
 }
 export const routeTree = rootRouteImport

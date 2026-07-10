@@ -8,7 +8,7 @@ describe('resolvePostLoginPath', () => {
   })
 
   it('routes MEMBER to the member portal', () => {
-    expect(resolvePostLoginPath('MEMBER')).toBe('/membro')
+    expect(resolvePostLoginPath('MEMBER')).toBe('/membro/carteirinha')
   })
 
   it('routes SPONSOR and SPONSOR_MEMBER to the sponsor portal', () => {

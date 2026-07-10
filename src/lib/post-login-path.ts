@@ -2,7 +2,7 @@ import type { UserResponse, UserTypeEnum } from '@/types/auth'
 
 export function resolvePostLoginPath(type: UserTypeEnum | undefined): string {
   if (type === 'ADM') return '/admin/patrocinadores'
-  if (type === 'MEMBER') return '/membro'
+  if (type === 'MEMBER') return '/membro/carteirinha'
   if (type === 'SPONSOR' || type === 'SPONSOR_MEMBER') return '/patrocinador/check-in'
   return '/login'
 }

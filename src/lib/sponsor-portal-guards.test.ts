@@ -13,6 +13,6 @@ describe('sponsor portal guards (smoke)', () => {
   })
 
   it('MEMBER não usa portal patrocinador', () => {
-    expect(resolvePostLoginPath('MEMBER')).toBe('/membro')
+    expect(resolvePostLoginPath('MEMBER')).toBe('/membro/carteirinha')
   })
 })

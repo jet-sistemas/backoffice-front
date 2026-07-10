@@ -1,9 +1,10 @@
 import { createFileRoute, Navigate, redirect } from '@tanstack/react-router'
+
+import { MemberLayout } from '@/components/layout/member-layout'
 import { RoutePendingFallback } from '@/components/route-pending-fallback'
 import { useAuth } from '@/contexts/auth-context'
 import { TOKEN_KEY } from '@/lib/auth-session'
 import { resolvePostLoginPath } from '@/lib/post-login-path'
-import { MemberPortalPage } from '@/pages/member/member-portal-page'
 
 export const Route = createFileRoute('/membro')({
   beforeLoad: () => {
@@ -12,10 +13,10 @@ export const Route = createFileRoute('/membro')({
       throw redirect({ to: '/login' })
     }
   },
-  component: MemberPortalGate,
+  component: MemberRouteGate,
 })
 
-function MemberPortalGate() {
+function MemberRouteGate() {
   const { user, isLoadingUser } = useAuth()
 
   if (isLoadingUser) {
@@ -30,5 +31,5 @@ function MemberPortalGate() {
     return <Navigate to={resolvePostLoginPath(user.type)} replace />
   }
 
-  return <MemberPortalPage />
+  return <MemberLayout />
 }
