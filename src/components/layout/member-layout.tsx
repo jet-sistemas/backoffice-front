@@ -1,5 +1,5 @@
 import { Link, Outlet, useRouterState } from '@tanstack/react-router'
-import { CreditCard, History, LogOut } from 'lucide-react'
+import { CreditCard, Gift, History, LogOut } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/contexts/auth-context'
@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 const NAV = [
   { to: '/membro/carteirinha', label: 'Carteirinha', icon: CreditCard },
   { to: '/membro/historico', label: 'Histórico', icon: History },
+  { to: '/membro/beneficios', label: 'Benefícios', icon: Gift },
 ] as const
 
 export function MemberLayout() {

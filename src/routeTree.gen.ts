@@ -24,8 +24,10 @@ import { Route as PatrocinadorCheckInRouteImport } from './routes/patrocinador/c
 import { Route as PatrocinadorBeneficiosRouteImport } from './routes/patrocinador/beneficios'
 import { Route as MembroHistoricoRouteImport } from './routes/membro/historico'
 import { Route as MembroCarteirinhaRouteImport } from './routes/membro/carteirinha'
+import { Route as MembroBeneficiosRouteImport } from './routes/membro/beneficios'
 import { Route as AdminPatrocinadoresIndexRouteImport } from './routes/admin/patrocinadores/index'
 import { Route as AdminMensalidadesIndexRouteImport } from './routes/admin/mensalidades/index'
+import { Route as AdminCheckInsIndexRouteImport } from './routes/admin/check-ins/index'
 import { Route as AdminBeneficiosIndexRouteImport } from './routes/admin/beneficios/index'
 import { Route as AdminAssociadosIndexRouteImport } from './routes/admin/associados/index'
 import { Route as AdminPatrocinadoresNovoRouteImport } from './routes/admin/patrocinadores/novo'
@@ -108,6 +110,11 @@ const MembroCarteirinhaRoute = MembroCarteirinhaRouteImport.update({
   path: '/carteirinha',
   getParentRoute: () => MembroRouteRoute,
 } as any)
+const MembroBeneficiosRoute = MembroBeneficiosRouteImport.update({
+  id: '/beneficios',
+  path: '/beneficios',
+  getParentRoute: () => MembroRouteRoute,
+} as any)
 const AdminPatrocinadoresIndexRoute =
   AdminPatrocinadoresIndexRouteImport.update({
     id: '/patrocinadores/',
@@ -117,6 +124,11 @@ const AdminPatrocinadoresIndexRoute =
 const AdminMensalidadesIndexRoute = AdminMensalidadesIndexRouteImport.update({
   id: '/mensalidades/',
   path: '/mensalidades/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminCheckInsIndexRoute = AdminCheckInsIndexRouteImport.update({
+  id: '/check-ins/',
+  path: '/check-ins/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminBeneficiosIndexRoute = AdminBeneficiosIndexRouteImport.update({
@@ -158,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/patrocinador': typeof PatrocinadorRouteRouteWithChildren
   '/alterar-senha-obrigatoria': typeof AlterarSenhaObrigatoriaRoute
   '/login': typeof LoginRoute
+  '/membro/beneficios': typeof MembroBeneficiosRoute
   '/membro/carteirinha': typeof MembroCarteirinhaRoute
   '/membro/historico': typeof MembroHistoricoRoute
   '/patrocinador/beneficios': typeof PatrocinadorBeneficiosRoute
@@ -172,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/admin/patrocinadores/novo': typeof AdminPatrocinadoresNovoRoute
   '/admin/associados/': typeof AdminAssociadosIndexRoute
   '/admin/beneficios/': typeof AdminBeneficiosIndexRoute
+  '/admin/check-ins/': typeof AdminCheckInsIndexRoute
   '/admin/mensalidades/': typeof AdminMensalidadesIndexRoute
   '/admin/patrocinadores/': typeof AdminPatrocinadoresIndexRoute
   '/admin/patrocinadores/$userId/editar': typeof AdminPatrocinadoresUserIdEditarRoute
@@ -180,6 +194,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/alterar-senha-obrigatoria': typeof AlterarSenhaObrigatoriaRoute
   '/login': typeof LoginRoute
+  '/membro/beneficios': typeof MembroBeneficiosRoute
   '/membro/carteirinha': typeof MembroCarteirinhaRoute
   '/membro/historico': typeof MembroHistoricoRoute
   '/patrocinador/beneficios': typeof PatrocinadorBeneficiosRoute
@@ -194,6 +209,7 @@ export interface FileRoutesByTo {
   '/admin/patrocinadores/novo': typeof AdminPatrocinadoresNovoRoute
   '/admin/associados': typeof AdminAssociadosIndexRoute
   '/admin/beneficios': typeof AdminBeneficiosIndexRoute
+  '/admin/check-ins': typeof AdminCheckInsIndexRoute
   '/admin/mensalidades': typeof AdminMensalidadesIndexRoute
   '/admin/patrocinadores': typeof AdminPatrocinadoresIndexRoute
   '/admin/patrocinadores/$userId/editar': typeof AdminPatrocinadoresUserIdEditarRoute
@@ -206,6 +222,7 @@ export interface FileRoutesById {
   '/patrocinador': typeof PatrocinadorRouteRouteWithChildren
   '/alterar-senha-obrigatoria': typeof AlterarSenhaObrigatoriaRoute
   '/login': typeof LoginRoute
+  '/membro/beneficios': typeof MembroBeneficiosRoute
   '/membro/carteirinha': typeof MembroCarteirinhaRoute
   '/membro/historico': typeof MembroHistoricoRoute
   '/patrocinador/beneficios': typeof PatrocinadorBeneficiosRoute
@@ -220,6 +237,7 @@ export interface FileRoutesById {
   '/admin/patrocinadores/novo': typeof AdminPatrocinadoresNovoRoute
   '/admin/associados/': typeof AdminAssociadosIndexRoute
   '/admin/beneficios/': typeof AdminBeneficiosIndexRoute
+  '/admin/check-ins/': typeof AdminCheckInsIndexRoute
   '/admin/mensalidades/': typeof AdminMensalidadesIndexRoute
   '/admin/patrocinadores/': typeof AdminPatrocinadoresIndexRoute
   '/admin/patrocinadores/$userId/editar': typeof AdminPatrocinadoresUserIdEditarRoute
@@ -233,6 +251,7 @@ export interface FileRouteTypes {
     | '/patrocinador'
     | '/alterar-senha-obrigatoria'
     | '/login'
+    | '/membro/beneficios'
     | '/membro/carteirinha'
     | '/membro/historico'
     | '/patrocinador/beneficios'
@@ -247,6 +266,7 @@ export interface FileRouteTypes {
     | '/admin/patrocinadores/novo'
     | '/admin/associados/'
     | '/admin/beneficios/'
+    | '/admin/check-ins/'
     | '/admin/mensalidades/'
     | '/admin/patrocinadores/'
     | '/admin/patrocinadores/$userId/editar'
@@ -255,6 +275,7 @@ export interface FileRouteTypes {
     | '/'
     | '/alterar-senha-obrigatoria'
     | '/login'
+    | '/membro/beneficios'
     | '/membro/carteirinha'
     | '/membro/historico'
     | '/patrocinador/beneficios'
@@ -269,6 +290,7 @@ export interface FileRouteTypes {
     | '/admin/patrocinadores/novo'
     | '/admin/associados'
     | '/admin/beneficios'
+    | '/admin/check-ins'
     | '/admin/mensalidades'
     | '/admin/patrocinadores'
     | '/admin/patrocinadores/$userId/editar'
@@ -280,6 +302,7 @@ export interface FileRouteTypes {
     | '/patrocinador'
     | '/alterar-senha-obrigatoria'
     | '/login'
+    | '/membro/beneficios'
     | '/membro/carteirinha'
     | '/membro/historico'
     | '/patrocinador/beneficios'
@@ -294,6 +317,7 @@ export interface FileRouteTypes {
     | '/admin/patrocinadores/novo'
     | '/admin/associados/'
     | '/admin/beneficios/'
+    | '/admin/check-ins/'
     | '/admin/mensalidades/'
     | '/admin/patrocinadores/'
     | '/admin/patrocinadores/$userId/editar'
@@ -416,6 +440,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MembroCarteirinhaRouteImport
       parentRoute: typeof MembroRouteRoute
     }
+    '/membro/beneficios': {
+      id: '/membro/beneficios'
+      path: '/beneficios'
+      fullPath: '/membro/beneficios'
+      preLoaderRoute: typeof MembroBeneficiosRouteImport
+      parentRoute: typeof MembroRouteRoute
+    }
     '/admin/patrocinadores/': {
       id: '/admin/patrocinadores/'
       path: '/patrocinadores'
@@ -428,6 +459,13 @@ declare module '@tanstack/react-router' {
       path: '/mensalidades'
       fullPath: '/admin/mensalidades/'
       preLoaderRoute: typeof AdminMensalidadesIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/check-ins/': {
+      id: '/admin/check-ins/'
+      path: '/check-ins'
+      fullPath: '/admin/check-ins/'
+      preLoaderRoute: typeof AdminCheckInsIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/beneficios/': {
@@ -482,6 +520,7 @@ interface AdminRouteRouteChildren {
   AdminPatrocinadoresNovoRoute: typeof AdminPatrocinadoresNovoRoute
   AdminAssociadosIndexRoute: typeof AdminAssociadosIndexRoute
   AdminBeneficiosIndexRoute: typeof AdminBeneficiosIndexRoute
+  AdminCheckInsIndexRoute: typeof AdminCheckInsIndexRoute
   AdminMensalidadesIndexRoute: typeof AdminMensalidadesIndexRoute
   AdminPatrocinadoresIndexRoute: typeof AdminPatrocinadoresIndexRoute
   AdminPatrocinadoresUserIdEditarRoute: typeof AdminPatrocinadoresUserIdEditarRoute
@@ -494,6 +533,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminPatrocinadoresNovoRoute: AdminPatrocinadoresNovoRoute,
   AdminAssociadosIndexRoute: AdminAssociadosIndexRoute,
   AdminBeneficiosIndexRoute: AdminBeneficiosIndexRoute,
+  AdminCheckInsIndexRoute: AdminCheckInsIndexRoute,
   AdminMensalidadesIndexRoute: AdminMensalidadesIndexRoute,
   AdminPatrocinadoresIndexRoute: AdminPatrocinadoresIndexRoute,
   AdminPatrocinadoresUserIdEditarRoute: AdminPatrocinadoresUserIdEditarRoute,
@@ -504,12 +544,14 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
 )
 
 interface MembroRouteRouteChildren {
+  MembroBeneficiosRoute: typeof MembroBeneficiosRoute
   MembroCarteirinhaRoute: typeof MembroCarteirinhaRoute
   MembroHistoricoRoute: typeof MembroHistoricoRoute
   MembroIndexRoute: typeof MembroIndexRoute
 }
 
 const MembroRouteRouteChildren: MembroRouteRouteChildren = {
+  MembroBeneficiosRoute: MembroBeneficiosRoute,
   MembroCarteirinhaRoute: MembroCarteirinhaRoute,
   MembroHistoricoRoute: MembroHistoricoRoute,
   MembroIndexRoute: MembroIndexRoute,

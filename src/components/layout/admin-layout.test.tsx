@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { MemberLayout } from '@/components/layout/member-layout'
+import { AdminLayout } from '@/components/layout/admin-layout'
 
 vi.mock('@tanstack/react-router', async () => {
   const actual = await vi.importActual<typeof import('@tanstack/react-router')>(
@@ -10,7 +10,7 @@ vi.mock('@tanstack/react-router', async () => {
   return {
     ...actual,
     Outlet: () => <div data-testid="outlet" />,
-    useRouterState: () => '/membro/carteirinha',
+    useRouterState: () => ({ location: { pathname: '/admin/check-ins' } }),
     Link: ({
       to,
       children,
@@ -28,26 +28,18 @@ vi.mock('@tanstack/react-router', async () => {
 
 vi.mock('@/contexts/auth-context', () => ({
   useAuth: () => ({
-    user: { name: 'Maria', email: 'maria@test.com' },
+    user: { name: 'Admin', email: 'admin@test.com' },
     signOut: vi.fn(),
   }),
 }))
 
-describe('MemberLayout', () => {
-  it('mostra links Carteirinha, Histórico e Benefícios', () => {
-    render(<MemberLayout />)
+describe('AdminLayout', () => {
+  it('mostra item Check-ins no menu', () => {
+    render(<AdminLayout />)
 
-    expect(screen.getByRole('link', { name: /Carteirinha/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /Check-ins/i })).toHaveAttribute(
       'href',
-      '/membro/carteirinha',
-    )
-    expect(screen.getByRole('link', { name: /Histórico/i })).toHaveAttribute(
-      'href',
-      '/membro/historico',
-    )
-    expect(screen.getByRole('link', { name: /Benefícios/i })).toHaveAttribute(
-      'href',
-      '/membro/beneficios',
+      '/admin/check-ins',
     )
   })
 })

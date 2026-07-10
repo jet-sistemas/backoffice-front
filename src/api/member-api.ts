@@ -1,6 +1,10 @@
 import { api } from '@/lib/axios'
 import type { EnvelopeMemberCard } from '@/types/member-card'
 import type {
+  MemberBenefitListParams,
+  PaginatedMemberBenefitsResponse,
+} from '@/types/member-benefit'
+import type {
   EnvelopeMemberCheckinSponsorOptions,
   MemberCheckinListParams,
   PaginatedMemberCheckinsResponse,
@@ -9,6 +13,16 @@ import type {
 export const memberApi = {
   getMemberCard() {
     return api.get<EnvelopeMemberCard>('/v1/member/me/card')
+  },
+
+  getMemberBenefits(params: MemberBenefitListParams) {
+    return api.get<PaginatedMemberBenefitsResponse>('/v1/member/benefits', {
+      params: {
+        page: params.page,
+        size: params.size,
+        ...(params.sponsorId != null ? { sponsorId: params.sponsorId } : {}),
+      },
+    })
   },
 
   getMemberCheckins(params: MemberCheckinListParams) {
