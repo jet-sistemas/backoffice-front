@@ -3,10 +3,10 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { AlertCircle, History, Loader2, RefreshCw, Trash2 } from 'lucide-react'
 
+import { DatePicker } from '@/components/date-picker'
 import { ListPaginationBar } from '@/components/list-pagination-bar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -191,28 +191,28 @@ export function MemberCheckinHistoryPage() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="startDate">De</Label>
-            <Input
+            <DatePicker
               id="startDate"
-              type="date"
-              value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value)
+              value={startDate || undefined}
+              onChange={(v) => {
+                setStartDate(v ?? '')
                 setPage(1)
               }}
               disabled={listFetchBusy}
+              placeholder="Selecione uma data"
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="endDate">Até</Label>
-            <Input
+            <DatePicker
               id="endDate"
-              type="date"
-              value={endDate}
-              onChange={(e) => {
-                setEndDate(e.target.value)
+              value={endDate || undefined}
+              onChange={(v) => {
+                setEndDate(v ?? '')
                 setPage(1)
               }}
               disabled={listFetchBusy}
+              placeholder="Selecione uma data"
             />
           </div>
         </div>
