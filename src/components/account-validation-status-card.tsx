@@ -1,4 +1,4 @@
-import { CheckCircle2, Clock3, Loader2, Mail, TriangleAlert } from 'lucide-react'
+import { CheckCircle2, Clock3, KeyRound, Loader2, Mail, TriangleAlert } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -30,6 +30,14 @@ const STATUS_META: Record<
     badgeClassName: 'border-transparent bg-amber-300 text-amber-950 hover:bg-amber-300',
     icon: TriangleAlert,
   },
+  PASSWORD_CHANGE_PENDING: {
+    label: 'Troca de senha pendente',
+    description:
+      'Conta validada, mas o usuário ainda não concluiu a troca de senha. Reenvie uma nova senha temporária se necessário.',
+    containerClassName: 'border-orange-300/80 bg-orange-50 text-orange-950',
+    badgeClassName: 'border-transparent bg-orange-200 text-orange-950 hover:bg-orange-200',
+    icon: KeyRound,
+  },
   VALIDATED: {
     label: 'Conta validada',
     description: 'Usuário concluiu a validação da conta.',
@@ -43,12 +51,14 @@ interface AccountValidationStatusCardProps {
   userId: number
   status?: AccountValidationStatusEnum
   canResendInvite?: boolean
+  canResendTemporaryPassword?: boolean
 }
 
 export function AccountValidationStatusCard({
   userId,
   status,
   canResendInvite,
+  canResendTemporaryPassword,
 }: AccountValidationStatusCardProps) {
   const { mutate, isPending } = useResendAccountValidationMutation()
 
@@ -58,6 +68,8 @@ export function AccountValidationStatusCard({
 
   const meta = STATUS_META[status]
   const Icon = meta.icon
+  const showResendInvite = canResendInvite === true
+  const showResendTemporaryPassword = canResendTemporaryPassword === true
 
   return (
     <div className={cn('rounded-lg border p-4', meta.containerClassName)}>
@@ -72,7 +84,7 @@ export function AccountValidationStatusCard({
             <p className="mt-2 text-xs opacity-80">{meta.description}</p>
           </div>
         </div>
-        {canResendInvite && (
+        {(showResendInvite || showResendTemporaryPassword) && (
           <Button
             type="button"
             variant="outline"
@@ -83,10 +95,12 @@ export function AccountValidationStatusCard({
           >
             {isPending ? (
               <Loader2 className="animate-spin" />
+            ) : showResendTemporaryPassword ? (
+              <KeyRound className="h-4 w-4" />
             ) : (
               <Mail className="h-4 w-4" />
             )}
-            Reenviar convite
+            {showResendTemporaryPassword ? 'Reenviar senha temporária' : 'Reenviar convite'}
           </Button>
         )}
       </div>

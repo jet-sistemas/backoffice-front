@@ -8,8 +8,13 @@ export function useResendAccountValidationMutation() {
 
   return useMutation({
     mutationFn: (userId: number) => userApi.resendAccountValidation(userId),
-    onSuccess: () => {
-      toast.success('Convite reenviado com sucesso.')
+    onSuccess: (response) => {
+      const resendType = response.data.data?.resendType
+      const message =
+        resendType === 'TEMPORARY_PASSWORD'
+          ? 'Senha temporária reenviada com sucesso.'
+          : 'Convite reenviado com sucesso.'
+      toast.success(message)
       queryClient.invalidateQueries({ queryKey: ['users'] })
       queryClient.invalidateQueries({ queryKey: ['user'] })
     },
@@ -17,7 +22,7 @@ export function useResendAccountValidationMutation() {
       toast.error(
         getApiErrorMessage(
           error,
-          'Não foi possível reenviar o convite. Tente novamente.',
+          'Não foi possível reenviar as credenciais. Tente novamente.',
         ),
       )
     },

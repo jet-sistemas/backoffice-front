@@ -4,6 +4,7 @@ export type AccountValidationStatusEnum =
   | 'NOT_APPLICABLE'
   | 'PENDING'
   | 'INVITE_EXPIRED'
+  | 'PASSWORD_CHANGE_PENDING'
   | 'VALIDATED'
 
 export interface AccountValidationRequestDTO {
@@ -26,6 +27,7 @@ export interface ResendAccountValidationDTO {
   userId: number
   sent: boolean
   accountValidationStatus: AccountValidationStatusEnum
+  resendType?: 'INVITE' | 'TEMPORARY_PASSWORD'
 }
 
 export interface EnvelopeResendAccountValidationDTO extends ApiEnvelopeBase {

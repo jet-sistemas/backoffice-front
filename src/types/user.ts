@@ -42,6 +42,7 @@ export interface UserBaseDTO {
   mustChangePassword?: boolean;
   accountValidationStatus?: AccountValidationStatusEnum;
   canResendInvite?: boolean;
+  canResendTemporaryPassword?: boolean;
 }
 
 export interface UserWithSponsorDTO extends UserBaseDTO {

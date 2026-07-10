@@ -198,6 +198,7 @@ export function MemberDetailPage({ userId }: MemberDetailPageProps) {
             userId={data.id}
             status={data.accountValidationStatus}
             canResendInvite={data.canResendInvite}
+            canResendTemporaryPassword={data.canResendTemporaryPassword}
           />
           <Card className={showLoadingBanner ? 'opacity-80' : undefined}>
             <form onSubmit={accountForm.handleSubmit(onSubmitAccount)}>
