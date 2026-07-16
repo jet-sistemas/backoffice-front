@@ -1,4 +1,5 @@
 import type { ApiEnvelopeBase, UserTypeEnum } from "./auth";
+import type { AccountValidationStatusEnum } from "./account-validation";
 import type { MemberCreateDTO, MemberDTO, MemberTypeEnum } from "./member";
 
 export type SponsorTierEnum = "OURO" | "PRATA" | "BRONZE";
@@ -37,6 +38,11 @@ export interface UserBaseDTO {
   accountActive: boolean;
   avatarUrl?: string;
   createdAt: string;
+  emailVerifiedAt?: string | null;
+  mustChangePassword?: boolean;
+  accountValidationStatus?: AccountValidationStatusEnum;
+  canResendInvite?: boolean;
+  canResendTemporaryPassword?: boolean;
 }
 
 export interface UserWithSponsorDTO extends UserBaseDTO {

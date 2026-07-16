@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { Calendar as CalendarIcon } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -41,10 +42,11 @@ export function DatePicker({
   className,
   'aria-invalid': ariaInvalid,
 }: DatePickerProps) {
+  const [open, setOpen] = React.useState(false)
   const selected = fromISO(value)
 
   return (
-    <Popover>
+    <Popover modal open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           id={id}
@@ -62,12 +64,15 @@ export function DatePicker({
           {selected ? format(selected, 'dd/MM/yyyy', { locale: ptBR }) : placeholder}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-auto overflow-hidden p-0" align="start">
         <Calendar
           mode="single"
           selected={selected}
-          onSelect={(date) => onChange(toISO(date))}
-          autoFocus
+          defaultMonth={selected}
+          onSelect={(date) => {
+            onChange(toISO(date))
+            setOpen(false)
+          }}
         />
       </PopoverContent>
     </Popover>
