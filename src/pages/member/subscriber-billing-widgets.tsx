@@ -51,22 +51,12 @@ import { useMarkSubscriberPaidMutation } from '@/hooks/use-mark-subscriber-paid-
 import { usePatchSubscriberMemberMutation } from '@/hooks/use-patch-subscriber-member-mutation'
 import { useSubscriberPaymentEventsQuery } from '@/hooks/use-subscriber-payment-events-query'
 import { isPaidCycleAlreadyRegistered } from '@/lib/subscriber-payment-mark'
+import { BILLING_STATUS_BADGE } from '@/lib/billing-status-badge'
 import { formatDatePtBR, formatDateTimePtBR } from '@/lib/utils'
 import type { SubscriberPaymentEventTypeEnum } from '@/types/billing'
 import type { MemberStatusEnum, SubscriberMemberDTO } from '@/types/member'
 
-export const BILLING_STATUS_BADGE: Record<
-  MemberStatusEnum,
-  { className: string; label: string }
-> = {
-  ACTIVE: { className: 'bg-emerald-600 text-white hover:bg-emerald-600/90', label: 'Ativa' },
-  DUE_SOON: { className: 'bg-amber-500 text-amber-950 hover:bg-amber-500/90', label: 'A vencer' },
-  OVERDUE: { className: 'bg-red-600 text-white hover:bg-red-600/90', label: 'Em atraso' },
-  INACTIVE: {
-    className: 'bg-neutral-200 text-neutral-600 hover:bg-neutral-200/90',
-    label: 'Inativa',
-  },
-}
+export { BILLING_STATUS_BADGE }
 
 const EVENT_TYPE_LABEL: Record<SubscriberPaymentEventTypeEnum, string> = {
   STATUS_AUTO_UPDATED: 'Status automático',

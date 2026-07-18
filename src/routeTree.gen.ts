@@ -23,6 +23,7 @@ import { Route as PatrocinadorHistoricoRouteImport } from './routes/patrocinador
 import { Route as PatrocinadorCheckInRouteImport } from './routes/patrocinador/check-in'
 import { Route as PatrocinadorBeneficiosRouteImport } from './routes/patrocinador/beneficios'
 import { Route as MembroHistoricoRouteImport } from './routes/membro/historico'
+import { Route as MembroContaRouteImport } from './routes/membro/conta'
 import { Route as MembroCarteirinhaRouteImport } from './routes/membro/carteirinha'
 import { Route as MembroBeneficiosRouteImport } from './routes/membro/beneficios'
 import { Route as AdminPatrocinadoresIndexRouteImport } from './routes/admin/patrocinadores/index'
@@ -105,6 +106,11 @@ const MembroHistoricoRoute = MembroHistoricoRouteImport.update({
   path: '/historico',
   getParentRoute: () => MembroRouteRoute,
 } as any)
+const MembroContaRoute = MembroContaRouteImport.update({
+  id: '/conta',
+  path: '/conta',
+  getParentRoute: () => MembroRouteRoute,
+} as any)
 const MembroCarteirinhaRoute = MembroCarteirinhaRouteImport.update({
   id: '/carteirinha',
   path: '/carteirinha',
@@ -172,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/membro/beneficios': typeof MembroBeneficiosRoute
   '/membro/carteirinha': typeof MembroCarteirinhaRoute
+  '/membro/conta': typeof MembroContaRoute
   '/membro/historico': typeof MembroHistoricoRoute
   '/patrocinador/beneficios': typeof PatrocinadorBeneficiosRoute
   '/patrocinador/check-in': typeof PatrocinadorCheckInRoute
@@ -196,6 +203,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/membro/beneficios': typeof MembroBeneficiosRoute
   '/membro/carteirinha': typeof MembroCarteirinhaRoute
+  '/membro/conta': typeof MembroContaRoute
   '/membro/historico': typeof MembroHistoricoRoute
   '/patrocinador/beneficios': typeof PatrocinadorBeneficiosRoute
   '/patrocinador/check-in': typeof PatrocinadorCheckInRoute
@@ -224,6 +232,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/membro/beneficios': typeof MembroBeneficiosRoute
   '/membro/carteirinha': typeof MembroCarteirinhaRoute
+  '/membro/conta': typeof MembroContaRoute
   '/membro/historico': typeof MembroHistoricoRoute
   '/patrocinador/beneficios': typeof PatrocinadorBeneficiosRoute
   '/patrocinador/check-in': typeof PatrocinadorCheckInRoute
@@ -253,6 +262,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/membro/beneficios'
     | '/membro/carteirinha'
+    | '/membro/conta'
     | '/membro/historico'
     | '/patrocinador/beneficios'
     | '/patrocinador/check-in'
@@ -277,6 +287,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/membro/beneficios'
     | '/membro/carteirinha'
+    | '/membro/conta'
     | '/membro/historico'
     | '/patrocinador/beneficios'
     | '/patrocinador/check-in'
@@ -304,6 +315,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/membro/beneficios'
     | '/membro/carteirinha'
+    | '/membro/conta'
     | '/membro/historico'
     | '/patrocinador/beneficios'
     | '/patrocinador/check-in'
@@ -433,6 +445,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MembroHistoricoRouteImport
       parentRoute: typeof MembroRouteRoute
     }
+    '/membro/conta': {
+      id: '/membro/conta'
+      path: '/conta'
+      fullPath: '/membro/conta'
+      preLoaderRoute: typeof MembroContaRouteImport
+      parentRoute: typeof MembroRouteRoute
+    }
     '/membro/carteirinha': {
       id: '/membro/carteirinha'
       path: '/carteirinha'
@@ -546,6 +565,7 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
 interface MembroRouteRouteChildren {
   MembroBeneficiosRoute: typeof MembroBeneficiosRoute
   MembroCarteirinhaRoute: typeof MembroCarteirinhaRoute
+  MembroContaRoute: typeof MembroContaRoute
   MembroHistoricoRoute: typeof MembroHistoricoRoute
   MembroIndexRoute: typeof MembroIndexRoute
 }
@@ -553,6 +573,7 @@ interface MembroRouteRouteChildren {
 const MembroRouteRouteChildren: MembroRouteRouteChildren = {
   MembroBeneficiosRoute: MembroBeneficiosRoute,
   MembroCarteirinhaRoute: MembroCarteirinhaRoute,
+  MembroContaRoute: MembroContaRoute,
   MembroHistoricoRoute: MembroHistoricoRoute,
   MembroIndexRoute: MembroIndexRoute,
 }
