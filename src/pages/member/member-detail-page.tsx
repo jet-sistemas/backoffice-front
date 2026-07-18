@@ -5,6 +5,7 @@ import { Link } from '@tanstack/react-router'
 import { AlertCircle, ArrowLeft, Loader2 } from 'lucide-react'
 import { z } from 'zod'
 
+import { AccountValidationStatusCard } from '@/components/account-validation-status-card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -193,6 +194,12 @@ export function MemberDetailPage({ userId }: MemberDetailPageProps) {
 
       {!isError && data != null && data.member != null && (
         <div className="space-y-6" aria-busy={showLoadingBanner}>
+          <AccountValidationStatusCard
+            userId={data.id}
+            status={data.accountValidationStatus}
+            canResendInvite={data.canResendInvite}
+            canResendTemporaryPassword={data.canResendTemporaryPassword}
+          />
           <Card className={showLoadingBanner ? 'opacity-80' : undefined}>
             <form onSubmit={accountForm.handleSubmit(onSubmitAccount)}>
               <CardHeader>

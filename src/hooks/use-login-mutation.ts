@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { authApi } from '@/api/auth-api'
 import { useAuth } from '@/contexts/auth-context'
 import { getApiErrorMessage } from '@/lib/api-error'
+import { resolvePostAuthPath } from '@/lib/post-login-path'
 import type { AuthCreateDTO } from '@/types/auth'
 
 export function useLoginMutation() {
@@ -13,15 +14,27 @@ export function useLoginMutation() {
 
   return useMutation({
     mutationFn: (data: AuthCreateDTO) => authApi.login(data),
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       const accessToken = response.data.data?.accessToken
       if (!accessToken) {
         toast.error('Resposta inválida do servidor.')
         return
       }
       signIn(accessToken)
-      toast.success('Login realizado com sucesso.')
-      navigate({ to: '/admin/patrocinadores' })
+
+      try {
+        const me = await authApi.getMe()
+        const user = me.data.data
+        if (user?.mustChangePassword) {
+          toast.success('Login realizado. Troque sua senha para continuar.')
+        } else {
+          toast.success('Login realizado com sucesso.')
+        }
+        navigate({ to: resolvePostAuthPath(user), replace: true })
+      } catch {
+        toast.error('Não foi possível carregar os dados da sua conta.')
+        navigate({ to: '/login', replace: true })
+      }
     },
     onError: (error) => {
       const fallback =

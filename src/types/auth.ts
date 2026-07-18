@@ -3,6 +3,12 @@ export interface AuthCreateDTO {
   password: string
 }
 
+export interface ChangePasswordRequestDTO {
+  currentPassword: string
+  newPassword: string
+  confirmPassword: string
+}
+
 export type ApiStatus = 'OK' | 'ERROR'
 
 export interface ApiEnvelopeBase {
@@ -35,6 +41,8 @@ export interface AuthExtDTO {
   type: UserTypeEnum
   createdAt: string
   isAccountActive: boolean
+  mustChangePassword?: boolean
+  emailVerifiedAt?: string | null
 }
 
 export interface EnvelopeAuthExtDTO extends ApiEnvelopeBase {

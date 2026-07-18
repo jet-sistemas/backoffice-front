@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { AlertCircle, ArrowLeft, Loader2 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 
+import { AccountValidationStatusCard } from '@/components/account-validation-status-card'
 import { useUpdateUserWithSponsorMutation } from '@/hooks/use-update-user-with-sponsor-mutation'
 import { useUserWithSponsorQuery } from '@/hooks/use-user-with-sponsor-query'
 import { userWithSponsorToEditForm } from '@/lib/user-to-sponsor-edit-form'
@@ -217,7 +218,14 @@ export function SponsorEditPage({ userId }: SponsorEditPageProps) {
         </div>
       )}
 
-      {!isError && !wrongKind && (
+      {!isError && !wrongKind && data != null && (
+      <>
+      <AccountValidationStatusCard
+        userId={data.id}
+        status={data.accountValidationStatus}
+        canResendInvite={data.canResendInvite}
+        canResendTemporaryPassword={data.canResendTemporaryPassword}
+      />
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-6"
@@ -521,6 +529,7 @@ export function SponsorEditPage({ userId }: SponsorEditPageProps) {
           </CardFooter>
         </Card>
       </form>
+      </>
       )}
     </div>
   )

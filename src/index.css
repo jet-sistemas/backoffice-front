@@ -232,6 +232,12 @@
     @apply from-primary to-accent;
   }
 
+  .gradient-membership-text {
+    @apply bg-clip-text text-transparent;
+    @apply bg-linear-to-r;
+    @apply from-primary to-accent;
+  }
+
   .gradient-sponsors {
     @apply bg-linear-to-r;
     @apply from-jet-gold to-jet-bronze;

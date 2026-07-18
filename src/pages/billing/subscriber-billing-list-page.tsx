@@ -10,6 +10,7 @@ import {
   Wallet,
 } from 'lucide-react'
 
+import { DatePicker } from '@/components/date-picker'
 import { ListPaginationBar } from '@/components/list-pagination-bar'
 import {
   AlertDialog,
@@ -342,20 +343,20 @@ export function SubscriberBillingListPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:col-span-4">
             <div className="space-y-2">
               <Label htmlFor="due-from">Vencimento de</Label>
-              <Input
+              <DatePicker
                 id="due-from"
-                type="date"
-                value={dueFrom}
-                onChange={(e) => setDueFrom(e.target.value)}
+                value={dueFrom || undefined}
+                onChange={(v) => setDueFrom(v ?? '')}
+                placeholder="Selecione uma data"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="due-to">até</Label>
-              <Input
+              <DatePicker
                 id="due-to"
-                type="date"
-                value={dueTo}
-                onChange={(e) => setDueTo(e.target.value)}
+                value={dueTo || undefined}
+                onChange={(v) => setDueTo(v ?? '')}
+                placeholder="Selecione uma data"
               />
             </div>
           </div>

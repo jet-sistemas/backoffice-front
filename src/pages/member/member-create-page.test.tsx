@@ -53,4 +53,40 @@ describe('MemberCreatePage', () => {
       }),
     )
   })
+
+  it('envia bloco sponsored sem grantedByUserId ao criar patrocinado', async () => {
+    const user = userEvent.setup()
+    mutate.mockClear()
+
+    const client = new QueryClient()
+    render(
+      <QueryClientProvider client={client}>
+        <MemberCreatePage />
+      </QueryClientProvider>,
+    )
+
+    await user.type(screen.getByLabelText(/e-mail/i), 'patroc@test.com')
+    await user.type(screen.getByLabelText(/nome da conta/i), 'Conta P')
+    await user.type(screen.getByLabelText(/nome completo/i), 'Nome Patrocinado')
+    await user.type(screen.getByLabelText(/^documento/i), '98765432100')
+    await user.type(screen.getByLabelText(/código/i), 'PAT01')
+    await user.type(screen.getByLabelText(/whatsapp/i), '11977776666')
+    await user.click(screen.getByRole('combobox'))
+    await user.click(screen.getByRole('option', { name: /patrocinado/i }))
+
+    await user.click(screen.getByRole('button', { name: /criar associado/i }))
+
+    expect(mutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        member: expect.objectContaining({
+          type: 'SPONSORED',
+          sponsored: expect.objectContaining({
+            startAt: expect.any(String),
+          }),
+        }),
+      }),
+    )
+    const payload = mutate.mock.calls[0][0] as { member: { sponsored?: { grantedByUserId?: number } } }
+    expect(payload.member.sponsored?.grantedByUserId).toBeUndefined()
+  })
 })

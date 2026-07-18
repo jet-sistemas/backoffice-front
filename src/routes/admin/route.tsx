@@ -1,5 +1,8 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, Navigate, redirect } from '@tanstack/react-router'
 import { AdminLayout } from '@/components/layout/admin-layout'
+import { RoutePendingFallback } from '@/components/route-pending-fallback'
+import { useAuth } from '@/contexts/auth-context'
+import { resolvePostLoginPath } from '@/lib/post-login-path'
 
 export const Route = createFileRoute('/admin')({
   beforeLoad: () => {
@@ -8,5 +11,23 @@ export const Route = createFileRoute('/admin')({
       throw redirect({ to: '/login' })
     }
   },
-  component: AdminLayout,
+  component: AdminRouteGate,
 })
+
+function AdminRouteGate() {
+  const { user, isLoadingUser } = useAuth()
+
+  if (isLoadingUser) {
+    return <RoutePendingFallback />
+  }
+
+  if (user?.mustChangePassword) {
+    return <Navigate to="/alterar-senha-obrigatoria" replace />
+  }
+
+  if (user && user.type !== 'ADM') {
+    return <Navigate to={resolvePostLoginPath(user.type)} replace />
+  }
+
+  return <AdminLayout />
+}

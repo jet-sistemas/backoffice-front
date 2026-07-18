@@ -3,6 +3,7 @@ import {
   Bell,
   Building2,
   ChevronUp,
+  ClipboardList,
   Gift,
   LogOut,
   Users,
@@ -54,6 +55,11 @@ const navItems = [
     label: "Mensalidades",
     href: "/admin/mensalidades",
     icon: Wallet,
+  },
+  {
+    label: "Check-ins",
+    href: "/admin/check-ins",
+    icon: ClipboardList,
   },
 ];
 
